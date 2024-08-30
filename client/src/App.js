@@ -10,6 +10,7 @@ import Checkout from "./pages/manager/checkout";
 import Addemp from "./pages/manager/addEmp";
 import Editemp from "./pages/manager/editEmp";
 import EmpManagement from "./pages/manager/empManagement";
+import Workdate from "./pages/manager/workdate";
 import PrivateRoute from "./components/PrivateRoute";
 import { AuthProvider } from "./components/auth/authcontext";
 
@@ -28,6 +29,7 @@ function App() {
             <Route path="/empmanagement" element={<EmpManagement />} />
             <Route path="/addemp" element={<Addemp />} />
             <Route path="/editemp" element={<Editemp />} />
+            <Route path="/workdate" element={<Workdate />} />
 
             {/* เพิ่มเส้นทางที่ต้องการการเข้าสู่ระบบ */}
           </Route>

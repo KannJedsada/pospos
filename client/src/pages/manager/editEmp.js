@@ -1,35 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import Menubar from "../../components/menuBar";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
 import Swal from "sweetalert2";
 
-const Addemp = () => {
-  const [formData, setFormData] = useState({
-    id_card: "",
-    f_name: "",
-    l_name: "",
-    phone: "",
-    mail: "",
-    h_number: "",
-    road: "",
-    subdistrict: "",
-    district: "",
-    province: "",
-    provinceName: "",
-    districtName: "",
-    subdistrictName: "",
-    zipcode: "",
-    p_id: "",
-    salary: "",
-  });
-
-  const [errors, setErrors] = useState({
-    mail: "",
-    id_card: "",
-    phone: "",
-  });
-
+const Editemp = () => {
   // ตรวจสอบ email phonenumber and id card
   const validateField = (name, value) => {
     switch (name) {
@@ -61,41 +37,56 @@ const Addemp = () => {
     }
     return "";
   };
+  const location = useLocation();
+  const { id_card } = location.state || {};
+  const [formData, setFormData] = useState({
+    id_card: "",
+    f_name: "",
+    l_name: "",
+    phone: "",
+    mail: "",
+    h_number: "",
+    road: "",
+    subdistrict: "",
+    district: "",
+    province: "",
+    provinceName: "",
+    districtName: "",
+    subdistrictName: "",
+    zipcode: "",
+    p_id: "",
+    salary: "",
+  });
+
+  const [errors, setErrors] = useState({
+    mail: "",
+    id_card: "",
+    phone: "",
+  });
 
   const [provinces, setProvinces] = useState([]);
   const [amphures, setAmphures] = useState([]);
   const [tambons, setTambons] = useState([]);
-  const [positions, setPosition] = useState([]);
-
+  const [initialData, setInitialData] = useState(formData);
+  const [position, setPosition] = useState([]);
   const { authData } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  // fetch provinces and position
+  // Fetch provinces once on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProvince = async () => {
       try {
-        const [provincesRes, positionsRes] = await Promise.all([
-          axios.get(
-            "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json"
-          ),
-          axios.get("/pos"),
-        ]);
-
-        setProvinces(provincesRes.data);
-        const filteredPositions = positionsRes.data.data.filter(
-          (position) => position.dept_id !== 1 && position.dept_id !== 5
+        const response = await axios.get(
+          "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json"
         );
-        setPosition(filteredPositions);
-        // console.log(filteredPositions);
+        setProvinces(response.data);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        Swal.fire("Error", "Failed to fetch data", "error");
+        console.error("Error fetching province data:", error);
+        Swal.fire("Error", "Failed to fetch province data", "error");
       }
     };
-
-    fetchData();
+    fetchProvince();
   }, []);
-
-  // fetch Amphues
   useEffect(() => {
     const fetchAmphures = async () => {
       if (formData.province) {
@@ -165,7 +156,99 @@ const Addemp = () => {
     }
   }, [formData.subdistrict, tambons]);
 
-  // เมื่อมีการเปลี่ยนแปลง
+  // fetch emp data
+  useEffect(() => {
+    const fetchEmp = async () => {
+      try {
+        const response = await axios.get(`/emp/${id_card}`, {
+          headers: {
+            Authorization: `Bearer ${authData.token}`,
+          },
+        });
+        const employeeData = response.data.data;
+
+        const province = provinces.find(
+          (p) => p.name_th === employeeData.province
+        );
+        const provinceId = province ? province.id : null;
+
+        // Fetch amphures
+        const amphuresResponse = await axios.get(
+          `https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_amphure.json`
+        );
+        const filteredAmphures = amphuresResponse.data.filter(
+          (d) => d.province_id === provinceId
+        );
+        setAmphures(filteredAmphures);
+
+        const district = filteredAmphures.find(
+          (d) => d.name_th === employeeData.district
+        );
+        const districtId = district ? district.id : null;
+
+        // Fetch tambons
+        const tambonsResponse = await axios.get(
+          `https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_tambon.json`
+        );
+        const filteredTambons = tambonsResponse.data.filter(
+          (s) => s.amphure_id === districtId
+        );
+        setTambons(filteredTambons);
+
+        const subdistrict = filteredTambons.find(
+          (s) => s.name_th === employeeData.subdistrict
+        );
+        const subdistrictId = subdistrict ? subdistrict.id : null;
+
+        const newFormdata = {
+          id_card: employeeData.id_card,
+          f_name: employeeData.f_name,
+          l_name: employeeData.l_name,
+          phone: employeeData.emp_phone,
+          mail: employeeData.emp_mail,
+          h_number: employeeData.house_number,
+          road: employeeData.road,
+          subdistrict: subdistrictId,
+          district: districtId,
+          province: provinceId,
+          provinceName: employeeData.province,
+          districtName: employeeData.district,
+          subdistrictName: employeeData.subdistrict,
+          zipcode: employeeData.zipcode,
+          p_id: employeeData.p_id,
+          salary: employeeData.salary,
+        };
+        setFormData(newFormdata);
+        setInitialData(newFormdata);
+      } catch (error) {
+        console.error("Error fetching employee data:", error);
+        Swal.fire("Error", "Failed to fetch employee data", "error");
+      }
+    };
+
+    if (id_card && provinces.length > 0) {
+      fetchEmp();
+    }
+  }, [id_card, authData.token, provinces]);
+
+  // fetch position
+  useEffect(() => {
+    const fetchPos = async () => {
+      try {
+        const positionsRes = await axios.get("/pos");
+        const filteredPositions = positionsRes.data.data.filter(
+          (position) => position.dept_id !== 1 && position.dept_id !== 5
+        );
+        setPosition(filteredPositions);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        Swal.fire("Error", "Failed to fetch data", "error");
+      }
+    };
+
+    fetchPos();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     const errorMsg = validateField(name, value);
@@ -221,7 +304,6 @@ const Addemp = () => {
     setErrors({ ...errors, [name]: errorMsg });
   };
 
-  // เมื่อกด submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     const postData = {
@@ -230,46 +312,25 @@ const Addemp = () => {
       district: formData.districtName,
       subdistrict: formData.subdistrictName,
     };
-    console.log(postData);
     try {
-      await axios.post("/emp", postData, {
+      await axios.put(`/emp/${id_card}`, postData, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       Swal.fire({
-        title: "เพิ่มข้อมูลสำเร็จ",
+        title: "แก้ไขข้อมูลสำเร็จ",
         icon: "success",
         showConfirmButton: false,
         timer: 1000,
       });
-      handleReset();
+      navigate("/empmanagement");
     } catch (error) {
       console.error("There was an error adding the employee!", error);
       alert("Failed to add employee. Please try again.");
     }
   };
 
-  // reset data
   const handleReset = () => {
-    setFormData({
-      id_card: "",
-      f_name: "",
-      l_name: "",
-      phone: "",
-      mail: "",
-      h_number: "",
-      road: "",
-      subdistrict: "",
-      district: "",
-      province: "",
-      provinceName: "",
-      districtName: "",
-      subdistrictName: "",
-      zipcode: "",
-      p_id: "",
-      salary: "",
-    });
-    setAmphures([]);
-    setTambons([]);
+    setFormData(initialData);
   };
 
   return (
@@ -285,7 +346,7 @@ const Addemp = () => {
       <div className="flex justify-center min-h-screen">
         <div className="w-full max-w-xxl p-8 rounded-lg">
           <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
-            Add New Employee
+            Edit Employee
           </h2>
           <form onSubmit={handleSubmit}>
             <div className="flex justify-between mb-4">
@@ -482,8 +543,8 @@ const Addemp = () => {
                   required
                 >
                   <option value="">Select Position</option>
-                  {Array.isArray(positions) &&
-                    positions.map((pos) => (
+                  {Array.isArray(position) &&
+                    position.map((pos) => (
                       <option key={pos.id} value={pos.id}>
                         {pos.p_name}
                       </option>
@@ -528,4 +589,4 @@ const Addemp = () => {
   );
 };
 
-export default Addemp;
+export default Editemp;

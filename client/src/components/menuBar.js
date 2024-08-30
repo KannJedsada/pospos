@@ -20,6 +20,10 @@ const Menubar = () => {
       ? "Check out"
       : location.pathname === "/addemp"
       ? "Add Employee"
+      : location.pathname === "/editemp"
+      ? "Edit Employee"
+      : location.pathname === "/workdate"
+      ? "Work date"
       : "Default";
 
   const toggleDrawer = () => {
@@ -127,11 +131,11 @@ const Menubar = () => {
             </li>
             <li>
               <Link
-                to="/products/bathroom"
+                to="/workdate"
                 className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                 onClick={toggleDrawer}
               >
-                <span>Bathroom</span>
+                <span>Work date</span>
               </Link>
             </li>
             <li>

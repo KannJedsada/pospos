@@ -90,7 +90,7 @@ const EmpManagement = () => {
   // edit button
   const handleEdit = (id_card) => {
     navigate("/editemp", { state: { id_card } });
-    console.log("Edit employee with ID:", id_card);
+    // console.log("Edit employee with ID:", id_card);
   };
 
   // delete button

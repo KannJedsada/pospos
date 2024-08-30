@@ -7,6 +7,7 @@ const employeeRoutes = require("./routes/empRoute");
 const deptRoutes = require("./routes/deptRoute");
 const posRoutes = require("./routes/posRoute");
 const tsRoutes = require("./routes/timestampRoute");
+const workdateRoutes = require("./routes/workdateRoute");
 const loginRoutes = require("./routes/loginlogoutRoute");
 const socketHandler = require("./socket/socketHandler");
 
@@ -27,7 +28,7 @@ socketHandler(io);
 
 const corsOptions = {
   origin: "http://localhost:3000",
-  credentials: true, 
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
@@ -39,6 +40,7 @@ app.use("/api/emp", employeeRoutes);
 app.use("/api/dept", deptRoutes);
 app.use("/api/pos", posRoutes);
 app.use("/api/ts", tsRoutes);
+app.use("/api/ws", workdateRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
