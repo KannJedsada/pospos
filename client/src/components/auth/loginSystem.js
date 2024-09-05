@@ -23,6 +23,8 @@ const LoginSystem = () => {
       const dept = deptResponse.data.data.id;
       if (dept === 5) {
         navigate("/manager");
+      } else if (dept === 2) {
+        navigate("/kitchen");
       }
     } catch (error) {
       console.error("Login failed", error.response?.data || error.message);

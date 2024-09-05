@@ -15,6 +15,9 @@ import PrivateRoute from "./components/PrivateRoute";
 import Addworkdate from "./pages/manager/addworkdate";
 import Editworkdate from "./pages/manager/editworkdate";
 import Salary from "./pages/manager/salary";
+import Kitchen from "./pages/kitchen/kitchen";
+import MaterialPage from "./pages/kitchen/material";
+import Addmaterial from "./pages/kitchen/addmaterial";
 import { AuthProvider } from "./components/auth/authcontext";
 
 function App() {
@@ -36,6 +39,9 @@ function App() {
             <Route path="/addworkdate" element={<Addworkdate />} />
             <Route path="/editworkdate" element={<Editworkdate />} />
             <Route path="/salary" element={<Salary />} />
+            <Route path="/kitchen" element={<Kitchen />} />
+            <Route path="/material" element={<MaterialPage />} />
+            <Route path="/addmaterial" element={<Addmaterial />} />
             {/* เพิ่มเส้นทางที่ต้องการการเข้าสู่ระบบ */}
           </Route>
 

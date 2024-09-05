@@ -17,27 +17,6 @@ const authenticateToken = (req, res, next) => {
     req.user = user;
     next();
   });
-
-  // ตรวจสอบ QR code ที่สแกน
-  app.post("/scan-qr", authenticateToken, (req, res) => {
-    const { qrCodeData } = req.body;
-
-    // ตรวจสอบว่า qrCodeData ตรงกับ token ที่ผู้ใช้ล็อกอินหรือไม่
-    if (isValidQRCode(qrCodeData, req.user)) {
-      // QR code ใช้งานได้
-      res.sendStatus(200);
-    } else {
-      // QR code ไม่ถูกต้อง
-      res.sendStatus(403);
-    }
-  });
-
-  const isValidQRCode = (qrCodeData, user) => {
-    // ฟังก์ชันตรวจสอบ QR code ตามความต้องการ
-    // ตรวจสอบว่า qrCodeData ตรงกับ user หรือไม่
-    // เช่น การตรวจสอบ token หรือข้อมูลที่ฝังใน QR code
-    return true; // เปลี่ยนเป็นการตรวจสอบจริง
-  };
 };
 
 module.exports = authenticateToken;
