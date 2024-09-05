@@ -230,7 +230,7 @@ const Addemp = () => {
       district: formData.districtName,
       subdistrict: formData.subdistrictName,
     };
-    console.log(postData);
+    // console.log(postData);
     try {
       await axios.post("/emp", postData, {
         headers: { Authorization: `Bearer ${authData.token}` },

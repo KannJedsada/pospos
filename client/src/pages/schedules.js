@@ -15,22 +15,21 @@ const Schedules = () => {
 
   const fetchSchedules = useCallback(async () => {
     try {
-      // ดึงข้อมูลส่วนตัวจาก employees where id_card
       const response = await axios.get(`/emp/data/${authData.id_card}`, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
-      // ดึงวันทำงานจาก work_schedules
+
       const workdate = await axios.get(`/emp/workdate/${authData.id_card}`, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
-      // ดึงจำนวนมาสายจาก database เฉพาะเดือนนี้
+
       const countLateResponse = await axios.get(
         `/emp/countlate/${authData.id_card}`,
         {
           headers: { Authorization: `Bearer ${authData.token}` },
         }
       );
-      // ดึงจำนวนขาดงานจาก database เฉพาะเดือนนี้
+
       const countAbsentResponse = await axios.get(
         `/emp/countabsent/${authData.id_card}`,
         {
@@ -48,7 +47,6 @@ const Schedules = () => {
         dept_name,
         salary,
       } = response.data.data[0];
-      // set personal data
       setPersonalInfo({
         id_card,
         f_name,
@@ -60,7 +58,6 @@ const Schedules = () => {
         salary,
       });
 
-      //เรียงวันที่ และ format วันที่จาก database เป็นวันที่ภาษาไทย
       const filteredSchedules = workdate.data.data
         .filter((item) => {
           const itemDate = new Date(item.work_date);
@@ -81,7 +78,6 @@ const Schedules = () => {
         });
 
       setSchedules(filteredSchedules);
-      // แปลงค่าจากสตริงเป็นตัวเลข
       setCountLate(parseInt(countLateResponse.data.data[0].countlate));
       setCountAbsent(parseInt(countAbsentResponse.data.data[0].absent_count));
     } catch (error) {
@@ -96,7 +92,6 @@ const Schedules = () => {
     fetchSchedules();
 
     const handleWorkdateUpdate = () => {
-      console.log("Work date updated");
       fetchSchedules();
     };
 
@@ -139,10 +134,14 @@ const Schedules = () => {
           <strong>Salary:</strong> {personalInfo.salary}
         </p>
       </div>
-      <h2 className="text-2xl font-bold mb-4">QR Code สำหรับลงเวลางาน</h2>
-      <div className="flex items-center justify-center">
-        <QRCode value={authData.id_card} size={150} />
-      </div>
+      {authData.id_card && (
+        <>
+          <h2 className="text-2xl font-bold mb-4">QR Code สำหรับลงเวลางาน</h2>
+          <div className="flex items-center justify-center">
+            <QRCode value={authData.id_card} size={150} />
+          </div>
+        </>
+      )}
       <h2 className="text-2xl font-bold mb-2">Schedules</h2>
       <div className="mb-3">
         <p>

@@ -12,6 +12,9 @@ import Editemp from "./pages/manager/editEmp";
 import EmpManagement from "./pages/manager/empManagement";
 import Workdate from "./pages/manager/workdate";
 import PrivateRoute from "./components/PrivateRoute";
+import Addworkdate from "./pages/manager/addworkdate";
+import Editworkdate from "./pages/manager/editworkdate";
+import Salary from "./pages/manager/salary";
 import { AuthProvider } from "./components/auth/authcontext";
 
 function App() {
@@ -30,7 +33,9 @@ function App() {
             <Route path="/addemp" element={<Addemp />} />
             <Route path="/editemp" element={<Editemp />} />
             <Route path="/workdate" element={<Workdate />} />
-
+            <Route path="/addworkdate" element={<Addworkdate />} />
+            <Route path="/editworkdate" element={<Editworkdate />} />
+            <Route path="/salary" element={<Salary />} />
             {/* เพิ่มเส้นทางที่ต้องการการเข้าสู่ระบบ */}
           </Route>
 

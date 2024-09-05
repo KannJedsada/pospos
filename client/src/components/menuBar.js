@@ -140,11 +140,11 @@ const Menubar = () => {
             </li>
             <li>
               <Link
-                to="/products/kitchen-appliances"
+                to="/salary"
                 className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                 onClick={toggleDrawer}
               >
-                <span>Kitchen & Appliances</span>
+                <span>Salary</span>
               </Link>
             </li>
             <li>
