@@ -11,6 +11,7 @@ const tsRoutes = require("./routes/timestampRoute");
 const workdateRoutes = require("./routes/workdateRoute");
 const loginRoutes = require("./routes/loginlogoutRoute");
 const unitRoutes = require("./routes/unitRoute");
+const menuRoutes = require("./routes/menuRoute");
 const materilaRoutes = require("./routes/materailRoute");
 const socketHandler = require("./socket/socketHandler");
 
@@ -48,6 +49,7 @@ app.use("/api/ts", tsRoutes);
 app.use("/api/ws", workdateRoutes);
 app.use("/api/unit", unitRoutes);
 app.use("/api/material", materilaRoutes);
+app.use("/api/menu", menuRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

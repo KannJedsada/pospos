@@ -32,8 +32,43 @@ function MaterialPage() {
   };
 
   const handleEdit = (id) => {
-    console.log(id);
-    navigate(`/edit/${id}`); // assuming you want to pass the id to the edit route
+    navigate(`/editmaterial`, { state: { id } });
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const result = await Swal.fire({
+        icon: "warning",
+        title: "Are you sure?",
+        text: `Do you want to delete this material with ID: ${id}?`,
+        showCancelButton: true,
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel",
+        reverseButtons: true,
+      });
+
+      if (result.isConfirmed) {
+        await axios.delete(`/material/delete/${id}`, {
+          headers: {
+            Authorization: `Bearer ${authData.token}`,
+          },
+        });
+
+        Swal.fire({
+          icon: "success",
+          title: "Delete success",
+          showConfirmButton: false,
+          timer: 1000,
+        });
+
+        fetchMaterials(); // Refresh materials list
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        console.log("Deletion cancelled");
+      }
+    } catch (error) {
+      console.error("Error deleting material:", error);
+      Swal.fire("Error", "Failed to delete material", "error");
+    }
   };
 
   useEffect(() => {
@@ -42,7 +77,8 @@ function MaterialPage() {
 
   useEffect(() => {
     const filtered = materials.filter((material) =>
-      material.m_name.toLowerCase().includes(searchTerm.toLowerCase())
+      // Ensure m_name is a string before calling toLowerCase
+      (material.m_name || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredMaterials(filtered);
   }, [searchTerm, materials]);
@@ -51,7 +87,7 @@ function MaterialPage() {
     <div>
       <Menubar />
       <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-4">Materials</h1>
+        <h1 className="text-2xl font-semibold mb-4">Raw Materials</h1>
         <div className="mb-4 flex justify-between">
           <input
             type="text"
@@ -100,9 +136,15 @@ function MaterialPage() {
                         "N/A"
                       )}
                     </td>
-                    <td  className="px-4 py-2 border-b">
-                      <button onClick={() => handleEdit(material.id)}>
+                    <td className="px-4 py-2 border-b">
+                      <button
+                        className="mr-8"
+                        onClick={() => handleEdit(material.id)}
+                      >
                         edit
+                      </button>
+                      <button onClick={() => handleDelete(material.id)}>
+                        delete
                       </button>
                     </td>
                   </tr>

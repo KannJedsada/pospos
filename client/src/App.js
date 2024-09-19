@@ -18,6 +18,7 @@ import Salary from "./pages/manager/salary";
 import Kitchen from "./pages/kitchen/kitchen";
 import MaterialPage from "./pages/kitchen/material";
 import Addmaterial from "./pages/kitchen/addmaterial";
+import Editmaterial from "./pages/kitchen/editmaterial";
 import { AuthProvider } from "./components/auth/authcontext";
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
             <Route path="/kitchen" element={<Kitchen />} />
             <Route path="/material" element={<MaterialPage />} />
             <Route path="/addmaterial" element={<Addmaterial />} />
+            <Route path="/editmaterial" element={<Editmaterial />} />
             {/* เพิ่มเส้นทางที่ต้องการการเข้าสู่ระบบ */}
           </Route>
 

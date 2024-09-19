@@ -1,32 +1,94 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Menubar from "../../components/menuBar";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
+import Swal from "sweetalert2";
 
-function Addmaterial() {
+function Editmaterial() {
+  const { state } = useLocation();
+  const { id } = state || {};
   const { authData } = useContext(AuthContext);
   const [data, setData] = useState({
     m_name: "",
     unit: "",
-    m_img_url: "",
+    m_img: "",
     composite: false,
+    sub_materials: [],
   });
-
+  const [units, setUnits] = useState([]);
+  const [subMaterial, setSubMaterials] = useState([]);
+  const [material, setMaterial] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState({
     m_name: "",
     unit: "",
   });
 
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [units, setUnits] = useState([]);
-  const [material, setMaterial] = useState([]);
-  const [subMaterials, setSubMaterials] = useState([
-    { material_id: "", quantity_used: "", unit_id: "" },
-  ]);
+  const navigate = useNavigate();
 
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "m_name" && !value.trim()) {
+      error = "ชื่อวัสดุไม่สามารถเป็นค่าว่างได้";
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
+    }));
+  };
+
+  // Fetch material data
+  const fetchdata = async () => {
+    try {
+      const res = await axios.get(`/material/${id}`, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+        },
+      });
+      console.log(res.data.data);
+      // ตรวจสอบว่ามีข้อมูลใน res.data.data และเป็น array ที่ไม่ว่างเปล่า
+      if (res.data.data && res.data.data.length > 0) {
+        const item = res.data.data[0];
+
+        const materialData = {
+          m_name: item.m_name || "", // ใช้ค่าเริ่มต้นหากเป็น undefined
+          unit: item.unit || "",
+          m_img: item.m_img || "",
+          composite: item.is_composite || false,
+          // หาก composite เป็น true ให้แปลง sub_materials, ถ้าไม่ให้เป็น array ว่าง
+          sub_materials: item.is_composite
+            ? item.sub_materials.map((sub) => ({
+                material_id: sub.sub_material || "",
+                quantity_used: sub.quantity_used || 0,
+                unit_id: sub.u_id || "",
+              }))
+            : [],
+        };
+        console.log(materialData);
+        setData(materialData);
+        setSubMaterials(materialData.sub_materials);
+
+        if (materialData.m_img) {
+          setPreviewImage(
+            `http://localhost:5000/uploads/material/${materialData.m_img}`
+          );
+        }
+      } else {
+        // ข้อมูลไม่ถูกต้องหรือไม่พบ
+        throw new Error("No data found");
+      }
+    } catch (error) {
+      console.error("Error fetching material data:", error);
+      Swal.fire("Error", "Failed to fetch material data", "error");
+    }
+  };
+
+  // Fetch units and materials
   const fetchUnits = async () => {
     try {
       const res = await axios.get("/unit");
@@ -37,34 +99,22 @@ function Addmaterial() {
     }
   };
 
-  const fetchMaterial = async () => {
+  const fetchMaterials = async () => {
     try {
-      const res = await axios.get("/material", {
-        headers: { Authorization: `Bearer ${authData.token}` },
+      const res = await axios.get(`/material`, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+        },
       });
       setMaterial(res.data.data);
     } catch (error) {
-      console.error("Error fetching raw materials:", error);
-      setErrorMessage("Failed to fetch raw materials");
+      console.error("Error fetching materials:", error);
+      setErrorMessage("Failed to fetch materials");
     }
-  };
-
-  const validateField = (name, value) => {
-    let error = "";
-    if (name === "m_name" && !value.trim()) {
-      error = "ชื่อวัสดุไม่สามารถเป็นค่าว่างได้";
-    }
-    if (name === "unit" && !value.trim()) {
-      error = "หน่วยไม่สามารถเป็นค่าว่างได้";
-    }
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: error,
-    }));
   };
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
+    const { name, value, type, files, checked } = e.target;
     if (type === "file") {
       if (files && files[0]) {
         const file = files[0];
@@ -76,10 +126,12 @@ function Addmaterial() {
         reader.readAsDataURL(file);
       }
     } else if (name === "composite") {
-      // จัดการ checkbox ของ composite
       setData((prevData) => ({
         ...prevData,
-        [name]: !prevData.composite,
+        [name]: checked,
+        sub_materials: checked
+          ? prevData.sub_materials
+          : prevData.sub_materials,
       }));
     } else {
       setData((prevData) => ({
@@ -90,95 +142,79 @@ function Addmaterial() {
     }
   };
 
-  const handleSubMaterialChange = (index, event) => {
-    const { name, value } = event.target;
-    const newSubMaterials = [...subMaterials];
-    newSubMaterials[index][name] = value;
-    setSubMaterials(newSubMaterials);
+  const handleSubMaterialChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedSubMaterials = [...data.sub_materials];
+    updatedSubMaterials[index] = {
+      ...updatedSubMaterials[index],
+      [name]: value,
+    };
+    setData((prevData) => ({
+      ...prevData,
+      sub_materials: updatedSubMaterials,
+    }));
   };
 
   const addSubMaterial = () => {
-    setSubMaterials([
-      ...subMaterials,
-      { material_id: "", quantity_used: "", unit_id: "" },
-    ]);
+    setData((prevData) => ({
+      ...prevData,
+      sub_materials: [
+        ...prevData.sub_materials,
+        { material_id: "", quantity_used: "", unit_id: "" },
+      ],
+    }));
   };
 
   const removeSubMaterial = (index) => {
-    const newSubMaterials = subMaterials.filter((_, i) => i !== index);
-    setSubMaterials(newSubMaterials);
+    setData((prevData) => ({
+      ...prevData,
+      sub_materials: prevData.sub_materials.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newErrors = {};
-    Object.keys(data).forEach((key) => {
-      validateField(key, data[key]);
-    });
+    const formData = new FormData();
+    formData.append("m_name", data.m_name);
+    formData.append("unit", data.unit);
+    formData.append("composite", data.composite);
 
-    if (Object.values(newErrors).some((error) => error)) {
-      setErrors(newErrors);
-      return;
+    if (selectedFile) {
+      formData.append("m_img", selectedFile);
     }
 
+    formData.append("sub_materials", JSON.stringify(data.sub_materials));
+
     try {
-      const formData = new FormData();
-      formData.append("m_name", data.m_name);
-      formData.append("unit", data.unit);
-      formData.append("composite", data.composite);
-
-      if (selectedFile) {
-        formData.append("m_img", selectedFile);
-      }
-
-      if (data.composite) {
-        subMaterials.forEach((subMaterial, index) => {
-          formData.append(
-            `composition[${index}][material_id]`,
-            subMaterial.material_id
-          );
-          formData.append(
-            `composition[${index}][quantity_used]`,
-            subMaterial.quantity_used
-          );
-          formData.append(
-            `composition[${index}][unit_id]`,
-            subMaterial.unit_id
-          );
-        });
-      }
-
-      const response = await axios.post("/material/add", formData, {
+      await axios.put(`/material/edit/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           "Content-Type": "multipart/form-data",
         },
       });
 
-      setSuccessMessage("วัสดุถูกเพิ่มเรียบร้อยแล้ว");
-      setErrorMessage("");
-      setData({
-        m_name: "",
-        unit: "",
-        m_img_url: "",
-        composite: false,
-      });
-      setSelectedFile(null);
-      setPreviewImage("");
-      setSubMaterials([{ material_id: "", quantity_used: "", unit_id: "" }]);
+      Swal.fire("Success", "Material updated successfully", "success");
+      setTimeout(() => {
+        navigate("/material");
+      }, 1500);
     } catch (error) {
-      setErrorMessage("เกิดข้อผิดพลาดในการส่งข้อมูล");
-      console.error("Error submitting data:", error);
+      console.error("There was an error editing the raw material!", error);
+      Swal.fire(
+        "Error",
+        "Failed to edit raw material. Please try again.",
+        "error"
+      );
     }
   };
 
   useEffect(() => {
-    fetchUnits();
-    fetchMaterial();
-    console.log(data);
-    setData(data);
-  }, [data]);
+    if (id) {
+      fetchdata();
+      fetchUnits();
+      fetchMaterials();
+    }
+  }, [id]);
 
   return (
     <div>
@@ -191,7 +227,7 @@ function Addmaterial() {
           >
             Back
           </button>
-          <h1 className="text-2xl font-semibold mb-4">เพิ่มวัตถุดิบ</h1>
+          <h1 className="text-2xl font-semibold mb-4">แก้ไขวัตถุดิบ</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -220,7 +256,7 @@ function Addmaterial() {
               onChange={handleChange}
               className="px-4 py-2 border border-gray-300 rounded-md w-full"
             />
-            {previewImage ? (
+            {previewImage && (
               <div className="mt-4">
                 <img
                   src={previewImage}
@@ -228,16 +264,6 @@ function Addmaterial() {
                   className="w-32 h-32 object-cover"
                 />
               </div>
-            ) : (
-              data.m_img_url && (
-                <div className="mt-4">
-                  <img
-                    src={data.m_img_url}
-                    alt="Existing Material"
-                    className="w-32 h-32 object-cover"
-                  />
-                </div>
-              )
             )}
           </div>
           <div>
@@ -259,7 +285,6 @@ function Addmaterial() {
               <p className="text-red-500 text-sm mt-1">{errors.unit}</p>
             )}
           </div>
-
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -279,7 +304,7 @@ function Addmaterial() {
               <label className="block text-sm font-medium mb-1">
                 วัตถุดิบย่อย:
               </label>
-              {subMaterials.map((subMaterial, index) => (
+              {data.sub_materials.map((subMaterial, index) => (
                 <div key={index} className="flex items-center space-x-2 mb-2">
                   <select
                     name="material_id"
@@ -288,9 +313,9 @@ function Addmaterial() {
                     className="px-4 py-2 border border-gray-300 rounded-md w-1/2"
                   >
                     <option value="">เลือกวัตถุดิบย่อย</option>
-                    {material.map((material) => (
-                      <option key={material.id} value={material.id}>
-                        {material.m_name}
+                    {material.map((mat) => (
+                      <option key={mat.id} value={mat.id}>
+                        {mat.m_name}
                       </option>
                     ))}
                   </select>
@@ -333,7 +358,6 @@ function Addmaterial() {
               </button>
             </div>
           )}
-
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-md"
@@ -352,4 +376,4 @@ function Addmaterial() {
   );
 }
 
-export default Addmaterial;
+export default Editmaterial;
