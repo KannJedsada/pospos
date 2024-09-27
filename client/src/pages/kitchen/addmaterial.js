@@ -176,7 +176,6 @@ function Addmaterial() {
   useEffect(() => {
     fetchUnits();
     fetchMaterial();
-    console.log(data);
     setData(data);
   }, [data]);
 

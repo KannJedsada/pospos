@@ -1,4 +1,4 @@
-const material = require("../models/materialModel");
+const Material = require("../models/materialModel");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
@@ -16,7 +16,7 @@ const upload = multer({ storage });
 
 const get_material = async (req, res) => {
   try {
-    const materials = await material.get_material();
+    const materials = await Material.get_material();
     res.status(200).json({ data: materials });
   } catch (error) {
     console.error("Error fetching materials:", error);
@@ -39,7 +39,7 @@ const add_material = async (req, res) => {
       parsedComposition = composition; // ถ้าเป็น object หรือ array แล้วก็ใช้ได้เลย
     }
 
-    const result = await material.add_material({
+    const result = await Material.add_material({
       m_name: m_name,
       m_img: m_img,
       unit: unit,
@@ -54,13 +54,13 @@ const add_material = async (req, res) => {
   }
 };
 
-const edit_material = async (req, res) => {
+const edit_materials = async (req, res) => {
   try {
     const id = req.params.id;
-    const { m_name, unit } = req.body;
+    const { m_name, unit, sub_materials } = req.body;
 
     // Fetch the material to be edited
-    const materialToEdit = await material.get_by_id(id);
+    const materialToEdit = await Material.get_by_id(id);
     if (!materialToEdit) {
       return res.status(404).json({ message: "Material not found" });
     }
@@ -85,10 +85,11 @@ const edit_material = async (req, res) => {
     }
 
     // Update the material in the database
-    const updatedMaterial = await material.edit_material(id, {
+    const updatedMaterial = await Material.edit_material(id, {
       m_name,
       unit,
       m_img,
+      sub_materials, // ส่ง sub_materials
     });
 
     // Respond with the updated data
@@ -104,13 +105,13 @@ const delete_material = async (req, res) => {
     const id = req.params.id;
 
     // Fetch the material from the database to get the image file name
-    const materialToDelete = await material.get_by_id(id);
+    const materialToDelete = await Material.get_by_id(id);
     if (!materialToDelete) {
       return res.status(404).json({ message: "Material not found" });
     }
 
     // Delete the material record
-    await material.delete_material(id);
+    await Material.delete_material(id);
 
     // Delete the image file if it exists
     if (materialToDelete.m_img) {
@@ -138,7 +139,7 @@ const delete_material = async (req, res) => {
 const get_by_id = async (req, res) => {
   try {
     const id = req.params.id;
-    const material_id = await material.get_by_id(id);
+    const material_id = await Material.get_by_id(id);
     res.status(200).json({ data: material_id });
   } catch (error) {
     console.error("Error deleting material:", error);
@@ -149,7 +150,7 @@ const get_by_id = async (req, res) => {
 module.exports = {
   get_material,
   add_material,
-  edit_material,
+  edit_materials,
   delete_material,
   get_by_id,
   upload,

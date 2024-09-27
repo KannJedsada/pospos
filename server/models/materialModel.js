@@ -62,58 +62,94 @@ class Material {
   }
 
   static async edit_material(id, data) {
-    try {
-      const { m_name, m_img, unit, composition } = data;
+    const { m_name, m_img, unit, sub_materials } = data;
+    // Update material details
+    const resMaterial = await pool.query(
+      `UPDATE materials
+        SET 
+          m_name = COALESCE($1, m_name),
+          m_img = COALESCE($2, m_img),
+          unit = COALESCE($3, unit)
+        WHERE id = $4
+        RETURNING *`,
+      [m_name, m_img, unit, id]
+    );
+    const updatedMaterial = resMaterial.rows[0];
 
-      // อัปเดตวัสดุ
-      const resMaterial = await pool.query(
-        `UPDATE materials
-           SET 
-              m_name = COALESCE($1, m_name),
-              m_img = COALESCE($2, m_img),
-              unit = COALESCE($3, unit)
-           WHERE id = $4
-           RETURNING *`,
-        [m_name, m_img, unit, id]
+    // Retrieve existing compositions for the material
+    const resExistingCompositions = await pool.query(
+      `SELECT material_id FROM material_composition WHERE composite_material_id = $1`,
+      [id]
+    );
+    const existingCompositions = resExistingCompositions.rows.map(
+      (row) => row.material_id
+    );
+    if (updatedMaterial.is_composite == true) {
+    }
+    // Create a Set of material_id from the new composition data
+    const newCompositionIds = new Set(
+      sub_materials ? sub_materials.map((comp) => comp.material_id) : []
+    );
+
+    // Identify removed compositions (those in the database but not in the new composition)
+    const removedCompositions = existingCompositions.filter(
+      (materialId) => !newCompositionIds.has(materialId)
+    );
+
+    // Remove compositions that no longer exist in the updated composition list
+    if (removedCompositions.length > 0) {
+      await pool.query(
+        `DELETE FROM material_composition WHERE composite_material_id = $1 AND material_id = ANY($2::int[])`,
+        [id, removedCompositions]
       );
-      const updatedMaterial = resMaterial.rows[0];
+    }
 
-      // อัปเดตหรือเพิ่ม composition
-      if (composition && Array.isArray(composition)) {
-        for (const comp of composition) {
-          const { material_id, quantity_used, unit_id } = comp;
+    // Update or insert new compositions
+    if (Array.isArray(sub_materials)) {
+      for (const comp of sub_materials) {
+        const { material_id, quantity_used, unit_id } = comp;
 
-          // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
-          const resCompCheck = await pool.query(
-            `SELECT * FROM material_composition 
-             WHERE composite_material_id = $1 AND material_id = $2`,
-            [id, material_id]
+        // Check if the composition already exists
+        const resCompCheck = await pool.query(
+          `SELECT * FROM material_composition 
+           WHERE composite_material_id = $1 AND material_id = $2`,
+          [id, material_id]
+        );
+
+        if (resCompCheck.rows.length > 0) {
+          // Update existing composition
+          await pool.query(
+            `UPDATE material_composition
+              SET quantity_used = $1, unit_id = $2
+              WHERE composite_material_id = $3 AND material_id = $4`,
+            [quantity_used, unit_id, id, material_id]
           );
-
-          if (resCompCheck.rows.length > 0) {
-            // อัปเดต composition
-            await pool.query(
-              `UPDATE material_composition
-                 SET quantity_used = $1, unit_id = $2
-                 WHERE composite_material_id = $3 AND material_id = $4`,
-              [quantity_used, unit_id, id, material_id]
-            );
-          } else {
-            // เพิ่ม composition ใหม่
-            await pool.query(
-              `INSERT INTO material_composition(composite_material_id, material_id, quantity_used, unit_id) 
-               VALUES($1, $2, $3, $4)`,
-              [id, material_id, quantity_used, unit_id]
-            );
-          }
+        } else {
+          // Insert new composition
+          await pool.query(
+            `INSERT INTO material_composition(composite_material_id, material_id, quantity_used, unit_id) 
+              VALUES($1, $2, $3, $4)`,
+            [id, material_id, quantity_used, unit_id]
+          );
         }
       }
-
-      return { material: updatedMaterial };
-    } catch (error) {
-      console.error("Error updating material:", error);
-      throw new Error("Unable to update material");
     }
+
+    // Retrieve updated compositions for the material
+    const resUpdatedCompositions = await pool.query(
+      `SELECT mc.material_id, mc.quantity_used, mc.unit_id, m.m_name AS material_name
+       FROM material_composition AS mc
+       INNER JOIN materials AS m ON mc.material_id = m.id
+       WHERE mc.composite_material_id = $1`,
+      [id]
+    );
+    const updatedCompositions = resUpdatedCompositions.rows;
+
+    // Combine updated material and sub_materials
+    updatedMaterial.sub_materials = updatedCompositions;
+
+    // console.log("Updated Material:", updatedMaterial);
+    return updatedMaterial;
   }
 
   static async delete_material(id) {

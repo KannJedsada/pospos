@@ -18,9 +18,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.get("/", authenticateToken, material.get_material);
-router.get("/:id", 
-  // authenticateToken, 
-  material.get_by_id);
+router.get("/:id", authenticateToken, material.get_by_id);
 router.post(
   "/add",
   authenticateToken,
@@ -31,7 +29,7 @@ router.put(
   "/edit/:id",
   authenticateToken,
   upload.single("m_img"), // Handle file upload
-  material.edit_material // Handle the material editing
+  material.edit_materials // Handle the material editing
 );
 
 router.delete("/delete/:id", authenticateToken, material.delete_material);

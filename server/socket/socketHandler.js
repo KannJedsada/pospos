@@ -1,15 +1,10 @@
-const socketHandler = (io) => {
+// socketHandler.js
+module.exports = (io) => {
   io.on("connection", (socket) => {
-    console.log("A user connected");
-
-    socket.on("workdateUpdated", (data) => {
-      io.emit("workdateUpdated", data);
-    });
+    console.log("New client connected");
 
     socket.on("disconnect", () => {
-      console.log("User disconnected");
+      console.log("Client disconnected");
     });
   });
 };
-
-module.exports = socketHandler;

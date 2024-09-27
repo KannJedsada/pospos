@@ -1,4 +1,5 @@
 const ws = require("../models/workdateModel");
+const io = require("../socket/socketHandler").io;
 
 const get_workdate = async (req, res) => {
   try {
@@ -33,7 +34,12 @@ const get_newdate = async (req, res) => {
 const add_workdate = async (req, res) => {
   try {
     const data = req.body;
-    const add_date = await ws.add_workdate(data);
+    const add_date = await ws.add_workdate(data); // ตรวจสอบว่า `ws` ถูกต้อง
+    if (req.io) {
+      req.io.emit("workdateUpdated", add_date); // ส่งข้อมูลไปยัง client
+    } else {
+      console.error("Socket.io is not initialized");
+    }
     res.status(201).json({ data: add_date });
   } catch (error) {
     console.error(error);

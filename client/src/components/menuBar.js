@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import AuthContext from "../components/auth/authcontext";
 import axios from "../utils/axiosInstance";
+import Menu from './../pages/kitchen/menu';
 
 const Menubar = () => {
   const location = useLocation();
@@ -185,7 +186,7 @@ const Menubar = () => {
                     className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                     onClick={toggleDrawer}
                   >
-                    <span>Material</span>
+                    <span>Raw material</span>
                   </Link>
                 </li>
                 <li>
@@ -195,6 +196,15 @@ const Menubar = () => {
                     onClick={toggleDrawer}
                   >
                     <span>Stock</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/menus" // Updated with actual path for Stock
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>menu</span>
                   </Link>
                 </li>
               </>

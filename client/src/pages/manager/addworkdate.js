@@ -66,10 +66,9 @@ const Addworkdate = () => {
     }
 
     const formattedDate = formatDate(selectedDate);
-
     try {
       for (const id_card of selectedEmployees) {
-        await axios.post(
+        const response = await axios.post(
           "/ws/add",
           {
             id_card: id_card,
@@ -81,6 +80,7 @@ const Addworkdate = () => {
             },
           }
         );
+        console.log(response.data); // ตรวจสอบการตอบกลับ
       }
       Swal.fire({
         icon: "success",
@@ -92,19 +92,11 @@ const Addworkdate = () => {
       setSelectedEmployees([]);
     } catch (error) {
       console.error("Failed to submit work dates:", error);
-      if (error.message.includes("Workdate already assigned")) {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: error.message,
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Failed to assign work dates.",
-        });
-      }
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to assign work dates.",
+      });
     }
   };
 

@@ -50,7 +50,7 @@ function Editmaterial() {
           Authorization: `Bearer ${authData.token}`,
         },
       });
-      console.log(res.data.data);
+      // console.log(res.data.data);
       // ตรวจสอบว่ามีข้อมูลใน res.data.data และเป็น array ที่ไม่ว่างเปล่า
       if (res.data.data && res.data.data.length > 0) {
         const item = res.data.data[0];
@@ -69,7 +69,7 @@ function Editmaterial() {
               }))
             : [],
         };
-        console.log(materialData);
+        // console.log(materialData);
         setData(materialData);
         setSubMaterials(materialData.sub_materials);
 
@@ -115,44 +115,54 @@ function Editmaterial() {
 
   const handleChange = (e) => {
     const { name, value, type, files, checked } = e.target;
+
     if (type === "file") {
       if (files && files[0]) {
         const file = files[0];
-        setSelectedFile(file);
+        setSelectedFile(file); // ตั้งค่าไฟล์ที่เลือกใหม่
+
+        setData((prevData) => ({
+          ...prevData,
+          m_img: file, // ใช้ file ที่มาจาก files[0] แทน selectedFile
+        }));
+
         const reader = new FileReader();
         reader.onloadend = () => {
-          setPreviewImage(reader.result);
+          setPreviewImage(reader.result); // ตั้งค่า preview image
         };
         reader.readAsDataURL(file);
       }
     } else if (name === "composite") {
       setData((prevData) => ({
         ...prevData,
-        [name]: checked,
-        sub_materials: checked
-          ? prevData.sub_materials
-          : prevData.sub_materials,
+        [name]: checked, // ตั้งค่า composite
+        sub_materials: checked ? prevData.sub_materials : [], // ถ้าไม่ใช่ composite ให้ล้างข้อมูล sub_materials
       }));
     } else {
       setData((prevData) => ({
         ...prevData,
-        [name]: value,
+        [name]: value, // ตั้งค่าฟิลด์อื่นๆ
       }));
-      validateField(name, value);
+      validateField(name, value); // ตรวจสอบ validation
     }
   };
 
   const handleSubMaterialChange = (index, e) => {
     const { name, value } = e.target;
+
     const updatedSubMaterials = [...data.sub_materials];
+
     updatedSubMaterials[index] = {
       ...updatedSubMaterials[index],
       [name]: value,
     };
+
     setData((prevData) => ({
       ...prevData,
       sub_materials: updatedSubMaterials,
     }));
+
+    console.log("Updated Sub Materials:", updatedSubMaterials);
   };
 
   const addSubMaterial = () => {
@@ -175,19 +185,10 @@ function Editmaterial() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("m_name", data.m_name);
-    formData.append("unit", data.unit);
-    formData.append("composite", data.composite);
-
-    if (selectedFile) {
-      formData.append("m_img", selectedFile);
-    }
-
-    formData.append("sub_materials", JSON.stringify(data.sub_materials));
-
+    const updateData = { ...data };
+    // console.log(updateData);
     try {
-      await axios.put(`/material/edit/${id}`, formData, {
+      await axios.put(`/material/edit/${id}`, updateData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           "Content-Type": "multipart/form-data",

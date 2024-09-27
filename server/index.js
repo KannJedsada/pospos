@@ -20,6 +20,7 @@ const PORT = process.env.PORT;
 
 const server = http.createServer(app);
 
+// server.js
 const io = socketIo(server, {
   cors: {
     origin: "http://localhost:3000",
@@ -46,6 +47,10 @@ app.use("/api/emp", employeeRoutes);
 app.use("/api/dept", deptRoutes);
 app.use("/api/pos", posRoutes);
 app.use("/api/ts", tsRoutes);
+app.use("/api/ws", (req, res, next) => {
+  req.io = io;
+  next();
+});
 app.use("/api/ws", workdateRoutes);
 app.use("/api/unit", unitRoutes);
 app.use("/api/material", materilaRoutes);
