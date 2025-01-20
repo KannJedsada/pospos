@@ -22,7 +22,7 @@ const orderRoutes = require("./routes/orderRoute");
 const receiptRoutes = require("./routes/receitRoute");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 const server = http.createServer(app);
 
