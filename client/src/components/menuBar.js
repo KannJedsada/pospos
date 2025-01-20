@@ -3,60 +3,60 @@ import { Link, useLocation } from "react-router-dom";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import AuthContext from "../components/auth/authcontext";
 import axios from "../utils/axiosInstance";
-import Menu from './../pages/kitchen/menu';
 
 const Menubar = () => {
   const location = useLocation();
   const { authData, logout } = useContext(AuthContext);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [dropdownStates, setDropdownStates] = useState({});
   const [deptId, setDeptId] = useState(null);
 
-  const pageName =
-    {
-      "/manager": "Manager",
-      "/empmanagement": "Employee Management",
-      "/checkin": "Check in",
-      "/checkout": "Check out",
-      "/addemp": "Add Employee",
-      "/editemp": "Edit Employee",
-      "/workdate": "Work date",
-      "/salary": "Salary",
-      "/kitchen": "Kitchen",
-    }[location.pathname] || "Default";
+  const pageName = "RMUTI POS";
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`/emp/data/${authData.id_card}`, {
+      const res = await axios.get(`/api/emp/data/${authData.id_card}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
       });
-      setDeptId(res.data.data[0].dept_id);
+      setDeptId(res.data.data[0].access);
     } catch (error) {
       console.error("Failed to fetch data", error);
     }
   };
 
-  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const toggleDrawer = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
+
+  const toggleDropdown = (dropdownName) => {
+    setDropdownStates((prevState) => ({
+      ...prevState,
+      [dropdownName]: !prevState[dropdownName],
+    }));
+  };
 
   const getPageLink = () => {
     switch (deptId) {
+      case 0:
       case 1:
-      case 5:
-        return "/manager";
       case 2:
-        return "/kitchen";
+        return "/manager";
       case 3:
-        return ""; // Provide the actual path if necessary
+        return "/kitchen";
+      case 4:
+        return "/order";
       default:
         return "";
     }
   };
 
-  const showEmployeeManagement = deptId === 1 || deptId === 5;
-  const showKinchen = deptId === 1 || deptId === 2;
+  const showOwner = deptId === 1 || deptId === 0;
+  const showEmployeeManagement = deptId === 1 || deptId === 2 || deptId === 0;
+  const showKinchen = deptId === 1 || deptId === 3 || deptId === 0;
+  const showCashier = deptId === 4 || deptId === 0;
 
   useEffect(() => {
     fetchData();
@@ -85,7 +85,7 @@ const Menubar = () => {
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-blue-700 text-white transform ${
           isDrawerOpen ? "translate-x-0" : "-translate-x-64"
-        } transition-transform duration-300 ease-in-out shadow-lg z-50`}
+        } transition-transform duration-300 ease-in-out shadow-lg z-50 flex flex-col scrollbar-hide`}
       >
         <div className="flex items-center justify-between p-4 border-b border-blue-600">
           <h2 className="text-xl font-semibold">{pageName}</h2>
@@ -97,25 +97,35 @@ const Menubar = () => {
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
-        <nav className="mt-4">
+
+        <nav className="flex-1 overflow-y-auto scrollbar-hide">
           <ul>
             {showEmployeeManagement && (
               <>
+                <li>
+                  <Link
+                    to="/manager"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>แดชบอร์ด</span>
+                  </Link>
+                </li>
                 <li>
                   <Link
                     to="/empmanagement"
                     className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                     onClick={toggleDrawer}
                   >
-                    <span>Employee Management</span>
+                    <span>การจัดการพนักงาน</span>
                   </Link>
                 </li>
                 <li className="relative">
                   <button
                     className="flex items-center px-4 py-2 w-full text-left hover:bg-blue-600 transition-colors"
-                    onClick={toggleDropdown}
+                    onClick={() => toggleDropdown("emptimestamp")}
                   >
-                    <span>Timestamp</span>
+                    <span>การลงเวลา</span>
                     <svg
                       className={`ml-auto transform transition-transform ${
                         isDropdownOpen ? "rotate-180" : ""
@@ -135,7 +145,7 @@ const Menubar = () => {
                       />
                     </svg>
                   </button>
-                  {isDropdownOpen && (
+                  {dropdownStates.emptimestamp && (
                     <ul className="bg-blue-600">
                       <li>
                         <Link
@@ -143,7 +153,7 @@ const Menubar = () => {
                           className="block px-4 py-2 hover:bg-blue-500 transition-colors"
                           onClick={toggleDrawer}
                         >
-                          Check in
+                          ลงเวลาเข้า
                         </Link>
                       </li>
                       <li>
@@ -152,7 +162,7 @@ const Menubar = () => {
                           className="block px-4 py-2 hover:bg-blue-500 transition-colors"
                           onClick={toggleDrawer}
                         >
-                          Check out
+                          ลงเวลาออก
                         </Link>
                       </li>
                     </ul>
@@ -164,16 +174,7 @@ const Menubar = () => {
                     className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                     onClick={toggleDrawer}
                   >
-                    <span>Work Date</span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/salary"
-                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
-                    onClick={toggleDrawer}
-                  >
-                    <span>Salary</span>
+                    <span>วันทำงาน</span>
                   </Link>
                 </li>
               </>
@@ -182,20 +183,47 @@ const Menubar = () => {
               <>
                 <li>
                   <Link
-                    to="/material"
+                    to="/kitchen"
                     className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                     onClick={toggleDrawer}
                   >
-                    <span>Raw material</span>
+                    <span>คำสั่งอาหาร</span>
                   </Link>
                 </li>
                 <li>
                   <Link
-                    to="/stock" // Updated with actual path for Stock
+                    to="/orderdinks"
                     className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                     onClick={toggleDrawer}
                   >
-                    <span>Stock</span>
+                    <span>คำสั่งเครื่องดื่ม</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/material"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>วัตถุดิบ</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/stocks"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>คลังวัตถุดิบ</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/stockdetail"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>รายละเอียดการสต๊อก</span>
                   </Link>
                 </li>
                 <li>
@@ -204,14 +232,133 @@ const Menubar = () => {
                     className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
                     onClick={toggleDrawer}
                   >
-                    <span>menu</span>
+                    <span>รายการอาหาร</span>
                   </Link>
+                </li>
+              </>
+            )}
+            {showOwner && (
+              <>
+                <li>
+                  <Link
+                    to="/department"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>แผนก</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/tables"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>โต๊ะ</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/promotion"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>โปรโมชั่น</span>
+                  </Link>
+                </li>
+              </>
+            )}
+            {showCashier && (
+              <>
+                <li>
+                  <Link
+                    to="/order"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>สั่งอาหาร</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/allreeipt"
+                    className="flex items-center px-4 py-2 hover:bg-blue-600 transition-colors"
+                    onClick={toggleDrawer}
+                  >
+                    <span>ใบเสร็จ</span>
+                  </Link>
+                </li>
+              </>
+            )}
+
+            {showKinchen && (
+              <>
+                <li className="relative">
+                  <button
+                    className="flex items-center px-4 py-2 w-full text-left hover:bg-blue-600 transition-colors"
+                    onClick={() => toggleDropdown("orther")}
+                  >
+                    <span>อื่น ๆ</span>
+                    <svg
+                      className={`ml-auto transform transition-transform ${
+                        isDropdownOpen ? "rotate-180" : ""
+                      }`}
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M6 9L12 15L18 9"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  {dropdownStates.orther && (
+                    <ul className="bg-blue-600">
+                      <li>
+                        <Link
+                          to="/menucategory"
+                          className="block px-4 py-2 hover:bg-blue-500 transition-colors"
+                          onClick={toggleDrawer}
+                        >
+                          การจัดการหมวดหมู่
+                        </Link>
+                      </li>
+
+                      <li>
+                        <Link
+                          to="/unit"
+                          className="block px-4 py-2 hover:bg-blue-500 transition-colors"
+                          onClick={toggleDrawer}
+                        >
+                          การจัดการหน่วยวัดน้ำหนัก
+                        </Link>
+                      </li>
+                      {showOwner && (
+                        <li>
+                          <Link
+                            to="/access"
+                            className="block px-4 py-2 hover:bg-blue-500 transition-colors"
+                            onClick={toggleDrawer}
+                          >
+                            กำหนดสิทธิ์ในการเข้าถึง
+                          </Link>
+                        </li>
+                      )}
+
+                    </ul>
+                  )}
                 </li>
               </>
             )}
           </ul>
         </nav>
-        <div className="absolute bottom-0 w-full p-4 border-t border-blue-600">
+        <div className="mt-auto p-4 border-t border-blue-600">
           <button
             onClick={() => {
               logout();

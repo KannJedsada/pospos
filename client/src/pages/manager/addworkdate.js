@@ -5,6 +5,7 @@ import AuthContext from "../../components/auth/authcontext";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
+import { ChevronLeft } from "lucide-react";
 
 const Addworkdate = () => {
   const [data, setData] = useState([]);
@@ -14,7 +15,7 @@ const Addworkdate = () => {
 
   const fetchEmp = async () => {
     try {
-      const res = await axios.get("/emp", {
+      const res = await axios.get("/api/emp", {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
@@ -38,16 +39,6 @@ const Addworkdate = () => {
     setSelectedDate(date);
   };
 
-  const handleEmployeeSelect = (id_card) => {
-    setSelectedEmployees((prevSelected) => {
-      if (prevSelected.includes(id_card)) {
-        return prevSelected.filter((id) => id !== id_card);
-      } else {
-        return [...prevSelected, id_card];
-      }
-    });
-  };
-
   const formatDate = (date) => {
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -69,7 +60,7 @@ const Addworkdate = () => {
     try {
       for (const id_card of selectedEmployees) {
         const response = await axios.post(
-          "/ws/add",
+          "/api/ws/add",
           {
             id_card: id_card,
             date: formattedDate,
@@ -101,6 +92,32 @@ const Addworkdate = () => {
   };
 
   const minDate = new Date();
+  const [isAllSelected, setIsAllSelected] = useState(false);
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedEmployees([]); // Clear all selections
+    } else {
+      setSelectedEmployees(data.map((employee) => employee.id_card)); // Select all employees
+    }
+    setIsAllSelected(!isAllSelected);
+  };
+
+  const handleEmployeeSelect = (id_card) => {
+    setSelectedEmployees(
+      (prev) =>
+        prev.includes(id_card)
+          ? prev.filter((id) => id !== id_card) // Deselect if already selected
+          : [...prev, id_card] // Add to selections
+    );
+  };
+
+  useEffect(() => {
+    // Update 'isAllSelected' state whenever selectedEmployees changes
+    setIsAllSelected(
+      data.length > 0 && selectedEmployees.length === data.length
+    );
+  }, [selectedEmployees, data]);
 
   useEffect(() => {
     fetchEmp();
@@ -109,55 +126,75 @@ const Addworkdate = () => {
   return (
     <div>
       <Menubar />
-      <div className="container mx-auto p-4">
-        <div className="mb-4 flex justify-start">
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center space-x-4">
           <button
             onClick={() => window.history.back()}
-            className="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:focus:ring-yellow-900 mr-4"
+            className="flex items-center gap-2 text-white bg-blue-400 hover:bg-blue-500 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:focus:ring-blue-900"
           >
-            Back
+            <ChevronLeft />
           </button>
-          <h1 className="text-xl font-bold">กำหนดวันทำงานพนักงาน</h1>
+          <h1 className="text-2xl font-extrabold text-blue-800">
+            กำหนดวันทำงานพนักงาน
+          </h1>
         </div>
 
-        <div className="mb-4">
-          <label className="block font-medium mb-2">เลือกวันที่:</label>
+        {/* Date Picker */}
+        <div className="bg-white shadow rounded-lg p-6 space-y-4">
+          <label className="block font-semibold text-gray-700">
+            เลือกวันที่:
+          </label>
           <DatePicker
             selected={selectedDate}
             onChange={handleDateChange}
             dateFormat="dd/MM/yyyy"
-            className="border border-gray-300 p-2 rounded"
+            className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             minDate={minDate}
             filterDate={(date) => date > minDate}
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block font-medium mb-2">เลือกพนักงาน:</label>
-          <ul>
+        {/* Employee Selection */}
+        <div className="bg-white shadow rounded-lg p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="block font-semibold text-gray-700">
+              เลือกพนักงาน:
+            </label>
+            <button
+              onClick={toggleSelectAll}
+              className="bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              {isAllSelected ? "ยกเลิกเลือกทั้งหมด" : "เลือกทั้งหมด"}
+            </button>
+          </div>
+          <ul className="space-y-3">
             {data.map((employee) => (
-              <li key={employee.id_card}>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={employee.id_card}
-                    checked={selectedEmployees.includes(employee.id_card)}
-                    onChange={() => handleEmployeeSelect(employee.id_card)}
-                    className="mr-2"
-                  />
-                  {employee.f_name} {employee.l_name} {employee.p_name}
-                </label>
+              <li key={employee.id_card} className="flex items-center">
+                <input
+                  type="checkbox"
+                  value={employee.id_card}
+                  checked={selectedEmployees.includes(employee.id_card)}
+                  onChange={() => handleEmployeeSelect(employee.id_card)}
+                  className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <span className="text-gray-800">
+                  {employee.f_name} {employee.l_name} ({employee.p_name})
+                </span>
               </li>
             ))}
           </ul>
         </div>
 
-        <button
-          onClick={handleSubmit}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          บันทึกวันทำงาน
-        </button>
+        {/* Submit Button */}
+        <div className="flex justify-end">
+          <button
+            onClick={handleSubmit}
+            className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300"
+          >
+            บันทึกวันทำงาน
+          </button>
+        </div>
       </div>
     </div>
   );

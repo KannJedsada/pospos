@@ -4,9 +4,29 @@ class Material {
   static async get_material() {
     try {
       const res = await pool.query(
-        `SELECT m.*, u.u_name 
+        `SELECT m.*, u.u_name ,c.category_name
          FROM materials AS m 
-         INNER JOIN units AS u ON m.unit = u.id`
+         INNER JOIN units AS u ON m.unit = u.id
+         LEFT JOIN categories AS c ON c.id = m.material_category
+         ORDER BY "id" asc`
+      );
+      return res.rows;
+    } catch (error) {
+      console.error("Error fetching materials:", error);
+      throw new Error("Unable to fetch materials");
+    }
+  }
+
+  static async get_material_bycategory(id) {
+    try {
+      const res = await pool.query(
+        `SELECT m.*, u.u_name ,c.category_name
+         FROM materials AS m 
+         INNER JOIN units AS u ON m.unit = u.id
+         LEFT JOIN categories AS c ON c.id = m.material_category
+         WHERE c.id = $1
+         ORDER BY "id" asc`,
+        [id]
       );
       return res.rows;
     } catch (error) {
@@ -17,44 +37,47 @@ class Material {
 
   static async add_material(data) {
     try {
-      const { m_name, m_img, unit, composite, composition } = data;
-      console.log("Data received:", {
-        m_name,
-        m_img,
-        unit,
-        composite,
-        composition,
-      });
-
+      const { m_name, m_img, unit, category, composite, composition } = data;
+      // Insert material data into materials table
       const res = await pool.query(
-        `INSERT INTO materials(m_name, m_img, unit, is_composite) 
-         VALUES($1, $2, $3, $4) 
-         RETURNING *`,
-        [m_name, m_img, unit, composite]
+        `INSERT INTO materials(m_name, m_img, unit, is_composite, material_category) 
+             VALUES($1, $2, $3, $4, $5) 
+             RETURNING *`,
+        [m_name, m_img, unit, composite, category]
       );
       const material = res.rows[0];
-      console.log("Material insertion result:", material);
+      // console.log("Material insertion result:", material);
 
       let compositionResults = [];
 
+      // Insert composition data into material_composition table if composite
       if (composite && composition && Array.isArray(composition)) {
         for (const comp of composition) {
           const { material_id, quantity_used, unit_id } = comp;
           const resComp = await pool.query(
             `INSERT INTO material_composition(composite_material_id, material_id, quantity_used, unit_id) 
-             VALUES($1, $2, $3, $4) 
-             RETURNING *`,
+                     VALUES($1, $2, $3, $4) 
+                     RETURNING *`,
             [material.id, material_id, quantity_used, unit_id]
           );
           compositionResults.push(resComp.rows[0]);
-          console.log(
-            "Material composition insertion result:",
-            resComp.rows[0]
-          );
         }
       }
 
-      return { material, composition: compositionResults };
+      // Insert the new material data into the stocks table
+      const resStock = await pool.query(
+        `INSERT INTO stocks(material_id, qty, min_qty, category_id)
+             VALUES($1, $2, $3, $4)
+             RETURNING *`,
+        [material.id, 0, 0, category] // Add appropriate values for qty and min_qty
+      );
+      // console.log("Stock insertion result:", resStock.rows[0]);
+
+      return {
+        material,
+        composition: compositionResults,
+        stock: resStock.rows[0],
+      };
     } catch (error) {
       console.error("Error adding material:", error);
       throw new Error("Unable to add material");
@@ -62,18 +85,21 @@ class Material {
   }
 
   static async edit_material(id, data) {
-    const { m_name, m_img, unit, sub_materials } = data;
-    // Update material details
+    const { m_name, m_img, unit, sub_materials, category, composite } = data; // Ensure composite is included here
+
     const resMaterial = await pool.query(
       `UPDATE materials
         SET 
           m_name = COALESCE($1, m_name),
           m_img = COALESCE($2, m_img),
-          unit = COALESCE($3, unit)
-        WHERE id = $4
+          unit = COALESCE($3, unit),
+          material_category = COALESCE($4, material_category),
+          is_composite = COALESCE($5, is_composite)
+        WHERE id = $6
         RETURNING *`,
-      [m_name, m_img, unit, id]
+      [m_name, m_img, unit, category, composite, id] // Ensure composite is passed here
     );
+
     const updatedMaterial = resMaterial.rows[0];
 
     // Retrieve existing compositions for the material
@@ -173,23 +199,57 @@ class Material {
   static async get_by_id(id) {
     try {
       const res = await pool.query(
-        `SELECT m.id, m.m_name, m.m_img, m.unit, m.is_composite,
-          CASE 
-              WHEN m.is_composite THEN
-                  array_agg(json_build_object(
-                      'sub_material', m2.id,
-                      'quantity_used', mc.quantity_used,
-                      'u_id', mc.unit_id
-                  ))
-              ELSE
-                  NULL
-          END AS sub_materials
-          FROM materials AS m
-          LEFT JOIN units AS u ON m.unit = u.id
-          LEFT JOIN material_composition AS mc ON m.id = mc.composite_material_id
-          LEFT JOIN materials AS m2 ON m2.id = mc.material_id
-          WHERE m.id = $1
-          GROUP BY m.id, m.m_name, m.m_img, m.unit, m.is_composite;`,
+        `SELECT 
+            m.id, 
+            m.m_name, 
+            m.m_img, 
+            m.unit, 
+            m.is_composite, 
+            m.material_category,
+            CASE 
+                WHEN m.is_composite THEN
+                    json_agg(json_build_object(
+                        'sub_material', m2.id,
+                        'quantity_used', mc.quantity_used,
+                        'u_id', mc.unit_id
+                    ))
+                ELSE
+                    NULL
+            END AS sub_materials
+        FROM 
+            materials AS m
+        LEFT JOIN 
+            material_composition AS mc ON m.id = mc.composite_material_id
+        LEFT JOIN 
+            materials AS m2 ON m2.id = mc.material_id
+        WHERE 
+            m.id = $1
+        GROUP BY 
+            m.id, m.m_name, m.m_img, m.unit, m.is_composite, m.material_category;`,
+        [id]
+      );
+      return res.rows;
+    } catch (error) {
+      console.error("Error fetching material:", error);
+      throw new Error("Unable to fetch material");
+    }
+  }
+
+  static async get_by_idtrue(id) {
+    try {
+      const res = await pool.query(
+        `SELECT mc.material_id, mc.quantity_used, mp.price
+            FROM material_composition AS mc 
+            LEFT JOIN (
+                SELECT material_id, price
+                FROM material_prices
+                WHERE (material_id, effective_date) IN (
+                    SELECT material_id, MAX(effective_date)
+                    FROM material_prices
+                    GROUP BY material_id
+                )
+            ) AS mp ON mc.material_id = mp.material_id
+            WHERE mc.composite_material_id = $1`,
         [id]
       );
       return res.rows;

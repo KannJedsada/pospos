@@ -4,6 +4,7 @@ import Menubar from "../../components/menuBar";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
 import Swal from "sweetalert2";
+import { ChevronLeft } from "lucide-react";
 
 function Editmaterial() {
   const { state } = useLocation();
@@ -15,12 +16,14 @@ function Editmaterial() {
     m_img: "",
     composite: false,
     sub_materials: [],
+    category: "",
   });
   const [units, setUnits] = useState([]);
   const [subMaterial, setSubMaterials] = useState([]);
   const [material, setMaterial] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
+  const [category, setCategory] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState({
@@ -45,22 +48,22 @@ function Editmaterial() {
   // Fetch material data
   const fetchdata = async () => {
     try {
-      const res = await axios.get(`/material/${id}`, {
+      const res = await axios.get(`/api/material/${id}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
       });
-      // console.log(res.data.data);
+
       // ตรวจสอบว่ามีข้อมูลใน res.data.data และเป็น array ที่ไม่ว่างเปล่า
       if (res.data.data && res.data.data.length > 0) {
         const item = res.data.data[0];
 
         const materialData = {
-          m_name: item.m_name || "", // ใช้ค่าเริ่มต้นหากเป็น undefined
+          m_name: item.m_name || "",
           unit: item.unit || "",
           m_img: item.m_img || "",
-          composite: item.is_composite || false,
-          // หาก composite เป็น true ให้แปลง sub_materials, ถ้าไม่ให้เป็น array ว่าง
+          composite: item.is_composite || false, // Make sure this line is correct
+          category: item.material_category || "",
           sub_materials: item.is_composite
             ? item.sub_materials.map((sub) => ({
                 material_id: sub.sub_material || "",
@@ -69,13 +72,13 @@ function Editmaterial() {
               }))
             : [],
         };
-        // console.log(materialData);
+
         setData(materialData);
         setSubMaterials(materialData.sub_materials);
 
         if (materialData.m_img) {
           setPreviewImage(
-            `http://localhost:5000/uploads/material/${materialData.m_img}`
+            `${process.env.REACT_APP_NGROK_URL_5000}/uploads/material/${materialData.m_img}`
           );
         }
       } else {
@@ -91,7 +94,7 @@ function Editmaterial() {
   // Fetch units and materials
   const fetchUnits = async () => {
     try {
-      const res = await axios.get("/unit");
+      const res = await axios.get("/api/unit");
       setUnits(res.data.data);
     } catch (error) {
       console.error("Error fetching units:", error);
@@ -101,7 +104,7 @@ function Editmaterial() {
 
   const fetchMaterials = async () => {
     try {
-      const res = await axios.get(`/material`, {
+      const res = await axios.get(`/api/material`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
@@ -110,6 +113,16 @@ function Editmaterial() {
     } catch (error) {
       console.error("Error fetching materials:", error);
       setErrorMessage("Failed to fetch materials");
+    }
+  };
+
+  const fetchCategory = async () => {
+    try {
+      const res = await axios.get("/api/stock/category");
+      setCategory(res.data.data);
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      setErrorMessage("Failed to fetch category");
     }
   };
 
@@ -186,9 +199,9 @@ function Editmaterial() {
     e.preventDefault();
 
     const updateData = { ...data };
-    // console.log(updateData);
+    console.log(updateData);
     try {
-      await axios.put(`/material/edit/${id}`, updateData, {
+      await axios.put(`/api/material/edit/${id}`, updateData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           "Content-Type": "multipart/form-data",
@@ -214,25 +227,31 @@ function Editmaterial() {
       fetchdata();
       fetchUnits();
       fetchMaterials();
+      fetchCategory();
     }
   }, [id]);
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Menubar />
-      <div className="container mx-auto p-6">
-        <div className="mb-4 flex justify-start">
+      <div className="container mx-auto p-4">
+        <div className="mb-4 flex items-center">
           <button
             onClick={() => window.history.back()}
-            className="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:focus:ring-yellow-900 mr-4"
+            className="text-white bg-blue-700 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-4 shadow"
           >
-            Back
+            <ChevronLeft />
           </button>
-          <h1 className="text-2xl font-semibold mb-4">แก้ไขวัตถุดิบ</h1>
+          <h1 className="text-3xl font-semibold text-blue-700">
+            แก้ไขวัตถุดิบ
+          </h1>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 bg-white p-6 rounded-lg shadow-md"
+        >
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-blue-700 mb-1">
               ชื่อวัตถุดิบ:
             </label>
             <input
@@ -240,40 +259,41 @@ function Editmaterial() {
               name="m_name"
               value={data.m_name}
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {errors.m_name && (
               <p className="text-red-500 text-sm mt-1">{errors.m_name}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-blue-700 mb-1">
               เลือกรูปภาพ:
             </label>
             <input
               type="file"
               name="m_img"
               accept="image/*"
-              onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {previewImage && (
-              <div className="mt-4">
+              <div className="mt-4 flex justify-center">
                 <img
                   src={previewImage}
                   alt="Selected Preview"
-                  className="w-32 h-32 object-cover"
+                  className="w-40 h-40 object-cover"
                 />
               </div>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">หน่วย:</label>
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              หน่วย:
+            </label>
             <select
               name="unit"
               value={data.unit}
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">เลือกหน่วย</option>
               {units.map((unit) => (
@@ -286,6 +306,30 @@ function Editmaterial() {
               <p className="text-red-500 text-sm mt-1">{errors.unit}</p>
             )}
           </div>
+          <div>
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              หมวดหมู่:
+            </label>
+            <select
+              name="category"
+              value={data.category}
+              onChange={handleChange}
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+            >
+              <option value="">เลือกหมวดหมู่</option>
+              {category.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.category_name}
+                </option>
+              ))}
+            </select>
+
+            {errors.material_category && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.material_category}
+              </p>
+            )}
+          </div>
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -295,14 +339,17 @@ function Editmaterial() {
               onChange={handleChange}
               className="mr-2"
             />
-            <label htmlFor="isComposite" className="text-sm font-medium">
+            <label
+              htmlFor="isComposite"
+              className="text-sm font-medium text-blue-700"
+            >
               วัตถุดิบนี้เป็นวัตถุดิบผสม (Composite)
             </label>
           </div>
 
           {data.composite && (
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium text-blue-700 mb-1">
                 วัตถุดิบย่อย:
               </label>
               {data.sub_materials.map((subMaterial, index) => (
@@ -311,7 +358,7 @@ function Editmaterial() {
                     name="material_id"
                     value={subMaterial.material_id}
                     onChange={(e) => handleSubMaterialChange(index, e)}
-                    className="px-4 py-2 border border-gray-300 rounded-md w-1/2"
+                    className="px-4 py-2 border border-gray-300 rounded-md w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                   >
                     <option value="">เลือกวัตถุดิบย่อย</option>
                     {material.map((mat) => (
@@ -326,13 +373,13 @@ function Editmaterial() {
                     value={subMaterial.quantity_used}
                     onChange={(e) => handleSubMaterialChange(index, e)}
                     placeholder="ปริมาณ"
-                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
+                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
                   />
                   <select
                     name="unit_id"
                     value={subMaterial.unit_id}
                     onChange={(e) => handleSubMaterialChange(index, e)}
-                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
+                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
                   >
                     <option value="">เลือกหน่วย</option>
                     {units.map((unit) => (
@@ -344,7 +391,7 @@ function Editmaterial() {
                   <button
                     type="button"
                     onClick={() => removeSubMaterial(index)}
-                    className="px-2 py-1 bg-red-500 text-white rounded-md"
+                    className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-400 shadow"
                   >
                     ลบ
                   </button>
@@ -353,7 +400,7 @@ function Editmaterial() {
               <button
                 type="button"
                 onClick={addSubMaterial}
-                className="px-4 py-2 bg-green-500 text-white rounded-md mt-2"
+                className="px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-600 mt-2 shadow"
               >
                 เพิ่มวัตถุดิบย่อย
               </button>
@@ -361,7 +408,7 @@ function Editmaterial() {
           )}
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+            className="px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 shadow-md"
           >
             บันทึก
           </button>

@@ -1,6 +1,7 @@
-// utils/socket.js
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // ปรับพอร์ตตามเซิร์ฟเวอร์ของคุณ
+const socket = io(process.env.REACT_APP_NGROK_URL_5000, {
+  transports: ["websocket"],
+});
 
 export default socket;

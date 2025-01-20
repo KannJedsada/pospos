@@ -35,7 +35,17 @@ const check_out = async (req, res) => {
 const check_late = async (req, res) => {
   try {
     const late = await ts.check_late();
-    res.status(200).json({ data: late})
+    res.status(200).json({ data: late });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const count_late = async (req, res) => {
+  try {
+    const countlate = await ts.count_late();
+    res.status(200).json({ data: countlate });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
@@ -46,5 +56,6 @@ module.exports = {
   get_timestamp,
   check_in,
   check_out,
-  check_late
+  check_late,
+  count_late,
 };

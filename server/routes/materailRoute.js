@@ -19,6 +19,16 @@ const upload = multer({ storage });
 
 router.get("/", authenticateToken, material.get_material);
 router.get("/:id", authenticateToken, material.get_by_id);
+router.get(
+  "/material/:id",
+  authenticateToken,
+  material.get_material_bycategory
+);
+router.get(
+  "/true/:id",
+  // authenticateToken,
+  material.get_by_idtrue
+);
 router.post(
   "/add",
   authenticateToken,

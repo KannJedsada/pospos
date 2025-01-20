@@ -10,7 +10,6 @@ const Logout = () => {
   useEffect(() => {
     const performLogout = async () => {
       logout();
-      console.log("test");
       navigate("/login", { replace: true });
     };
 

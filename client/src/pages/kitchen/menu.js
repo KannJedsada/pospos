@@ -4,8 +4,10 @@ import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
-function Menu() {
+function Menus() {
   const { authData } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState("");
   const [menus, setMenus] = useState([]);
@@ -13,18 +15,23 @@ function Menu() {
   const [category, setCategory] = useState([]);
   const [selectCategory, setSelectdCategory] = useState("");
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [menusPerPage] = useState(10);
 
   const fetchMenus = async (catId = "") => {
     try {
+      setIsLoading(true);
       let res;
       if (catId) {
-        res = await axios.get(`/menu/menu/category/${catId}`, {
+        res = await axios.get(`/api/menu/menu/category/${catId}`, {
           headers: {
             Authorization: `Bearer ${authData.token}`,
           },
         });
       } else {
-        res = await axios.get(`/menu/menus`, {
+        res = await axios.get(`/api/menu/menus`, {
           headers: {
             Authorization: `Bearer ${authData.token}`,
           },
@@ -35,12 +42,14 @@ function Menu() {
     } catch (error) {
       console.error("Error fetching menus:", error);
       Swal.fire("Error", "Failed to fetch menus", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(`/menu/menucategory`, {
+      const res = await axios.get(`/api/menu/menucategory`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
@@ -54,18 +63,23 @@ function Menu() {
 
   const handleDelete = async (id) => {
     try {
+      const menuRes = await axios.get(`/api/menu/menu/${id}`);
+      const menu = menuRes.data.data;
+      const menuname = menu.menu_name;
+
       const result = await Swal.fire({
         icon: "warning",
-        title: "Are you sure?",
-        text: `Do you want to delete this menu with ID: ${id}?`,
+        title: "คุณต้องการลบหรือไม่?",
+        text: `ต้องการลบเมนู ${menuname} หรือไม่?`,
         showCancelButton: true,
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "Cancel",
+        confirmButtonText: "ลบ",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#f44336",
         reverseButtons: true,
       });
 
       if (result.isConfirmed) {
-        await axios.delete(`/menu/deletemenu/${id}`, {
+        await axios.delete(`/api/menu/deletemenu/${id}`, {
           headers: {
             Authorization: `Bearer ${authData.token}`,
           },
@@ -73,7 +87,7 @@ function Menu() {
 
         Swal.fire({
           icon: "success",
-          title: "Delete successful",
+          title: "ลบสำเร็จ",
           showConfirmButton: false,
           timer: 1000,
         });
@@ -90,6 +104,10 @@ function Menu() {
 
   const handleEdit = (id) => {
     navigate(`/editmenu`, { state: { id } });
+  };
+
+  const handleEditPrice = (id) => {
+    navigate(`/editprice`, { state: { id } });
   };
 
   const handleAddMenu = () => {
@@ -115,24 +133,114 @@ function Menu() {
     fetchMenus(selectCategory);
   }, [selectCategory, authData.token]);
 
+  const indexOfLastMaterial = currentPage * menusPerPage;
+  const indexOfFirstMaterial = indexOfLastMaterial - menusPerPage;
+  const currentMaterials = filteredMenus.slice(
+    indexOfFirstMaterial,
+    indexOfLastMaterial
+  );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredMenus.length / menusPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const generatePaginationButtons = (currentPage, totalPages, isMobile) => {
+    const maxButtons = isMobile ? 3 : 6; // จำนวนปุ่มสูงสุดที่แสดง
+    const buttons = [];
+
+    const addButton = (value) => {
+      if (!buttons.includes(value)) {
+        buttons.push(value);
+      }
+    };
+
+    if (totalPages <= maxButtons) {
+      // กรณีที่จำนวนหน้าทั้งหมดน้อยกว่าหรือเท่ากับจำนวนปุ่มสูงสุด
+      for (let i = 1; i <= totalPages; i++) {
+        addButton(i);
+      }
+    } else if (isMobile) {
+      // กรณีสำหรับมือถือ (isMobile = true)
+      addButton(1);
+      if (currentPage > 2) {
+        addButton("...");
+      }
+      if (currentPage > 1 && currentPage < totalPages) {
+        addButton(currentPage); // หน้าปัจจุบัน
+      }
+      if (currentPage < totalPages - 1) {
+        addButton(" ..."); // จุดไข่ปลา
+      }
+      addButton(totalPages); // หน้าสุดท้าย
+    } else {
+      // กรณีสำหรับเดสก์ท็อป (isMobile = false)
+      const half = Math.floor(maxButtons / 2);
+
+      if (currentPage <= half + 1) {
+        // กรณีที่อยู่ในหน้าแรก ๆ
+        for (let i = 1; i <= maxButtons - 1; i++) {
+          addButton(i);
+        }
+        addButton("...");
+        addButton(totalPages);
+      } else if (currentPage >= totalPages - half) {
+        // กรณีที่อยู่ในหน้าท้าย ๆ
+        addButton(1);
+        addButton("...");
+        for (let i = totalPages - (maxButtons - 3); i <= totalPages; i++) {
+          addButton(i);
+        }
+      } else {
+        // กรณีที่อยู่ในหน้ากลาง
+        addButton(1);
+        addButton("...");
+        const start = Math.max(
+          2,
+          currentPage - Math.floor((maxButtons - 4) / 2)
+        ); // เริ่มต้นที่หน้า 2
+        const end = Math.min(
+          totalPages - 1,
+          currentPage + Math.floor((maxButtons - 4) / 2)
+        ); // สิ้นสุดที่หน้าก่อนหน้าสุดท้าย
+
+        for (let i = start; i <= end; i++) {
+          addButton(i);
+        }
+
+        addButton("...");
+        addButton(totalPages);
+      }
+    }
+
+    return buttons.map((button, index) => ({
+      value: button,
+      key: typeof button === "string" ? `ellipsis-${index}` : `page-${button}`,
+    }));
+  };
+
+  const isMobile = window.innerWidth < 640;
+
   return (
-    <div>
+    <div className="min-h-screen bg-blue-50">
       <Menubar />
       <div className="container mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-4">Menus</h1>
-        <div className="mb-4 flex justify-between">
-          <div>
+        <h1 className="text-3xl font-semibold text-blue-700 mb-6">
+          รายการอาหาร
+        </h1>
+        <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
+          <div className="flex flex-wrap gap-4 w-full sm:w-auto">
             <input
               type="text"
-              placeholder="Search by name..."
+              placeholder="ค้นหาด้วยชื่อ"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
+              className="flex-1 min-w-[200px] px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <select
               value={selectCategory}
               onChange={(e) => setSelectdCategory(e.target.value)}
-              className="border border-gray-300 p-2 rounded-md mr-4 ml-4"
+              className="flex-1 px-4 py-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
             >
               <option value="">หมวดหมู่</option>
               {category.length > 0 &&
@@ -145,74 +253,190 @@ function Menu() {
           </div>
           <button
             onClick={handleAddMenu}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-800 text-white px-5 py-2 rounded-lg shadow-lg hover:from-blue-500 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Add Menu
+            + เพิ่มเมนู
           </button>
         </div>
-        <table className="min-w-full bg-white border border-gray-300 rounded-md shadow-md">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="px-4 py-2 border-b">No.</th>
-              <th className="px-4 py-2 border-b">Name</th>
-              <th className="px-4 py-2 border-b">Price (บาท)</th>
-              <th className="px-4 py-2 border-b">Img</th>
-              <th className="px-4 py-2 border-b">Category</th>
-              <th className="px-4 py-2 border-b">Action</th>
-            </tr>
-          </thead>
-          <tbody className="text-center">
-            {filteredMenus.length > 0 ? (
-              filteredMenus.map((menu, index) => {
-                return (
-                  <tr key={menu.menu_id}>
-                    <td className="px-4 py-2 border-b">{index + 1}</td>
-                    <td className="px-4 py-2 border-b">
-                      {menu.menu_name || "N/A"}
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      {menu.price || "N/A"}
-                    </td>
-                    <td className="px-4 py-2 border-b flex justify-center items-center">
-                      {menu.menu_img ? (
-                        <img
-                          src={`http://localhost:5000/uploads/menu/${menu.menu_img}`}
-                          alt={menu.menu_name || "Menu image"}
-                          className="w-20 h-20 object-cover"
-                        />
-                      ) : (
-                        "N/A"
-                      )}
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      {menu.category_name || "N/A"}
-                    </td>
-                    <td className="px-4 py-2 border-b">
-                      <button
-                        className="mr-8"
-                        onClick={() => handleEdit(menu.menu_id)}
-                      >
-                        edit
-                      </button>
-                      <button onClick={() => handleDelete(menu.menu_id)}>
-                        delete
-                      </button>
+        {isLoading ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto overflow-y-auto rounded-lg shadow-lg">
+            <table className="w-full bg-white border-collapse">
+              <thead>
+                <tr className="bg-gradient-to-r from-blue-700 to-blue-800 text-white">
+                  <th className="px-4 py-2 border-b text-left">ลำดับ</th>
+                  <th className="px-4 py-2 border-b text-left">ชื่อ</th>
+                  <th className="px-4 py-2 border-b text-left">ราคา (บาท)</th>
+                  <th className="px-4 py-2 border-b text-left">รูปภาพ</th>
+                  <th className="px-4 py-2 border-b text-left">หมวดหมู่</th>
+                  <th className="px-4 py-2 border-b text-left">แก้ไข</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-700">
+                {filteredMenus.length > 0 ? (
+                  filteredMenus.map((menu, index) => (
+                    <tr
+                      key={menu.menu_id}
+                      className="transition-all duration-300 bg-white hover:bg-blue-50"
+                    >
+                      <td className="px-4 py-2 border-b text-center h-full">
+                        {indexOfFirstMaterial + index + 1}
+                      </td>
+                      <td className="px-4 py-2 border-b truncate h-full">
+                        {menu.menu_name || "N/A"}
+                      </td>
+                      <td className="px-4 py-2 border-b text-center h-full">
+                        {menu.price || "N/A"}
+                      </td>
+                      <td className="px-4 py-2 border-b text-center h-full">
+                        {menu.menu_img ? (
+                          <div className="flex justify-center items-center h-full">
+                            <img
+                              src={`${process.env.REACT_APP_NGROK_URL_5000}/uploads/menu/${menu.menu_img}`}
+                              alt={menu.menu_name || "Menu image"}
+                              className="w-16 h-16 object-cover rounded-lg sm:w-20 sm:h-20"
+                            />
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">N/A</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 border-b truncate h-full">
+                        {menu.category_name || "N/A"}
+                      </td>
+                      <td className="px-4 py-2 border-b h-full">
+                        <div className="flex space-x-2 items-center h-full relative">
+                          <Menu
+                            as="div"
+                            className="relative inline-block text-left"
+                          >
+                            <div>
+                              <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-blue-500 hover:bg-blue-500">
+                                <Pencil />
+                              </MenuButton>
+                            </div>
+
+                            <MenuItems
+                              transition
+                              className="absolute left-0 z-20 mt-2 w-40 origin-top-left rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
+                              style={{
+                                position: "absolute",
+                                top: "-70%",
+                                left: "-340%",
+                              }} // ปรับตำแหน่งเมนู
+                            >
+                              <div className="py-1">
+                                <MenuItem>
+                                  {({ active }) => (
+                                    <button
+                                      onClick={() =>
+                                        handleEditPrice(menu.menu_id)
+                                      }
+                                      className={`block w-full px-4 py-2 text-left text-sm ${
+                                        active
+                                          ? "bg-blue-100 text-blue-700"
+                                          : "text-gray-700"
+                                      }`}
+                                    >
+                                      แก้ไขราคา
+                                    </button>
+                                  )}
+                                </MenuItem>
+                                <MenuItem>
+                                  {({ active }) => (
+                                    <button
+                                      onClick={() => handleEdit(menu.menu_id)}
+                                      className={`block w-full px-4 py-2 text-left text-sm ${
+                                        active
+                                          ? "bg-blue-100 text-blue-700"
+                                          : "text-gray-700"
+                                      }`}
+                                    >
+                                      แก้ไขเมนู
+                                    </button>
+                                  )}
+                                </MenuItem>
+                              </div>
+                            </MenuItems>
+                          </Menu>
+
+                          <button
+                            className="flex items-center justify-center w-10 h-10 bg-red-600 text-white rounded-lg shadow hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
+                            onClick={() => handleDelete(menu.menu_id)}
+                          >
+                            <X />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="6"
+                      className="px-4 py-2 text-center text-gray-500"
+                    >
+                      ไม่มีข้อมูล
                     </td>
                   </tr>
-                );
-              })
-            ) : (
-              <tr>
-                <td colSpan="6" className="px-4 py-2 text-center">
-                  No data available
-                </td>
-              </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="flex justify-center items-center mt-6">
+          {/* ปุ่มย้อนกลับ */}
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <ChevronLeft />
+          </button>
+
+          {/* ปุ่มเลขหน้า */}
+          <div className="mx-4 flex space-x-1">
+            {generatePaginationButtons(currentPage, totalPages, isMobile).map(
+              (page, index) =>
+                page === "..." ? (
+                  <span key={index} className="px-4 py-2 text-gray-500">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={page.key}
+                    onClick={() => paginate(page.value)}
+                    className={`px-4 py-2 rounded-lg ${
+                      currentPage === page.value
+                        ? "bg-blue-700 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                    disabled={page.value === "..."}
+                  >
+                    {page.value}
+                  </button>
+                )
             )}
-          </tbody>
-        </table>
+          </div>
+
+          {/* ปุ่มไปข้างหน้า */}
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <ChevronRight />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-export default Menu;
+export default Menus;

@@ -12,26 +12,33 @@ const Schedules = () => {
   const [countAbsent, setCountAbsent] = useState(0);
   const { authData, logout } = useContext(AuthContext);
   const [personalInfo, setPersonalInfo] = useState({});
+  const [qrcodeValue, setQrcodeValue] = useState(null);
+  const [isQrExpired, setIsQrExpired] = useState(false);
+  const [qrCodeTimer, setQrCodeTimer] = useState(null);
 
   const fetchSchedules = useCallback(async () => {
     try {
-      const response = await axios.get(`/emp/data/${authData.id_card}`, {
+      const response = await axios.get(`/api/emp/data/${authData.id_card}`, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
+      console.log(response.data.data);
 
-      const workdate = await axios.get(`/emp/workdate/${authData.id_card}`, {
-        headers: { Authorization: `Bearer ${authData.token}` },
-      });
+      const workdate = await axios.get(
+        `/api/emp/workdate/${authData.id_card}`,
+        {
+          headers: { Authorization: `Bearer ${authData.token}` },
+        }
+      );
 
       const countLateResponse = await axios.get(
-        `/emp/countlate/${authData.id_card}`,
+        `/api/emp/countlate/${authData.id_card}`,
         {
           headers: { Authorization: `Bearer ${authData.token}` },
         }
       );
 
       const countAbsentResponse = await axios.get(
-        `/emp/countabsent/${authData.id_card}`,
+        `/api/emp/countabsent/${authData.id_card}`,
         {
           headers: { Authorization: `Bearer ${authData.token}` },
         }
@@ -45,7 +52,7 @@ const Schedules = () => {
         emp_mail,
         p_name,
         dept_name,
-        salary,
+        start_time,
       } = response.data.data[0];
       setPersonalInfo({
         id_card,
@@ -55,7 +62,7 @@ const Schedules = () => {
         emp_mail,
         p_name,
         dept_name,
-        salary,
+        start_time,
       });
 
       const filteredSchedules = workdate.data.data
@@ -76,7 +83,7 @@ const Schedules = () => {
             weekday: "long",
           }).format(date);
         });
-
+      setQrcodeValue(authData.id_card);
       setSchedules(filteredSchedules);
       setCountLate(parseInt(countLateResponse.data.data[0].countlate));
       setCountAbsent(parseInt(countAbsentResponse.data.data[0].absent_count));
@@ -106,75 +113,114 @@ const Schedules = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Personal Information</h2>
-      <div className="mb-6">
-        <p>
-          <strong>ID Card:</strong> {personalInfo.id_card}
-        </p>
-        <p>
-          <strong>First Name:</strong> {personalInfo.f_name}
-        </p>
-        <p>
-          <strong>Last Name:</strong> {personalInfo.l_name}
-        </p>
-        <p>
-          <strong>Phone:</strong> {personalInfo.emp_phone}
-        </p>
-        <p>
-          <strong>Email:</strong> {personalInfo.emp_mail}
-        </p>
-        <p>
-          <strong>Position:</strong> {personalInfo.p_name}
-        </p>
-        <p>
-          <strong>Department:</strong> {personalInfo.dept_name}
-        </p>
-        <p>
-          <strong>Salary:</strong> {personalInfo.salary}
-        </p>
-      </div>
-      {authData.id_card && (
-        <>
-          <h2 className="text-2xl font-bold mb-4">QR Code สำหรับลงเวลางาน</h2>
-          <div className="flex items-center justify-center">
-            <QRCode value={authData.id_card} size={150} />
+    <div className="p-6 bg-gradient-to-br from-blue-100 to-blue-50 min-h-screen flex flex-col items-center">
+      <div className="w-full max-w-3xl">
+        <h2 className="text-4xl font-extrabold mb-8 text-blue-700 text-center">
+          ข้อมูลส่วนตัว
+        </h2>
+        <div className="mb-8 bg-white rounded-xl shadow-lg p-8">
+          <div className="space-y-4">
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">รหัสประจำตัว:</span>{" "}
+              {personalInfo.id_card}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">ชื่อ:</span>{" "}
+              {personalInfo.f_name}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">นามสกุล:</span>{" "}
+              {personalInfo.l_name}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">
+                เบอร์โทรศัพท์:
+              </span>{" "}
+              {personalInfo.emp_phone}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">อีเมล:</span>{" "}
+              {personalInfo.emp_mail}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">ตำแหน่ง:</span>{" "}
+              {personalInfo.p_name}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">แผนก:</span>{" "}
+              {personalInfo.dept_name}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">เวลาเริ่มงาน:</span>{" "}
+              {personalInfo.start_time}
+            </p>
           </div>
-        </>
-      )}
-      <h2 className="text-2xl font-bold mb-2">Schedules</h2>
-      <div className="mb-3">
-        <p>
-          <strong>ขาดงาน:</strong> {countAbsent} ครั้ง
-        </p>
-        <p>
-          <strong>สาย:</strong> {countLate} ครั้ง
-        </p>
+        </div>
+        {authData.id_card && (
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold mb-6 text-blue-700 text-center">
+              QR Code สำหรับลงเวลางาน
+            </h2>
+            <div className="flex items-center justify-center mb-6">
+              {qrcodeValue ? (
+                <QRCode value={qrcodeValue} size={160} />
+              ) : (
+                <p className="text-red-500 text-lg">
+                  {isQrExpired ? "QR Code หมดอายุแล้ว" : "ไม่มี QR Code"}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold mb-6 text-blue-700">ตารางเวลา</h2>
+          <div className="mb-6 bg-white rounded-xl shadow-lg p-8">
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">ขาดงาน:</span>{" "}
+              {countAbsent} ครั้ง
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">สาย:</span>{" "}
+              {countLate} ครั้ง
+            </p>
+          </div>
+          <table className="min-w-full bg-white rounded-xl shadow-lg overflow-hidden">
+            <thead className="bg-blue-700 text-white">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wide">
+                  วันที่ทำงาน
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {schedules.length > 0 ? (
+                schedules.map((schedule, index) => (
+                  <tr key={index} className="odd:bg-blue-100 even:bg-blue-50">
+                    <td className="px-6 py-4 text-sm text-gray-800">
+                      {schedule}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="1"
+                    className="px-6 py-4 text-center text-sm text-gray-500"
+                  >
+                    ไม่มีข้อมูลตารางเวลา
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <button
+          onClick={logout}
+          className="mt-8 w-full py-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-lg font-semibold rounded-lg shadow-lg hover:from-red-600 hover:to-red-700 transition-all"
+        >
+          Logout
+        </button>
       </div>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Schedule
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {schedules.map((schedule, index) => (
-            <tr key={index}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {schedule || "No schedule available"}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <button
-        onClick={logout}
-        className="mt-6 px-4 py-2 bg-red-500 text-white rounded"
-      >
-        Logout
-      </button>
     </div>
   );
 };

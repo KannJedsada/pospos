@@ -9,9 +9,17 @@ class Emp {
   }
 
   static async get_by_id(id) {
-    const res = await pool.query("SELECT * FROM employees WHERE id_card = $1", [
-      id,
-    ]);
+    const res = await pool.query(
+      `SELECT emp.id_card, emp.f_name, emp.l_name, emp.emp_phone, emp.emp_mail, 
+      emp.house_number, emp.road, emp.province, emp.district, emp.subdistrict, 
+      emp.zipcode, p.p_name, dept.dept_name FROM employees emp 
+      LEFT JOIN positions p 
+      ON emp.p_id = p.id 
+      LEFT JOIN departments dept 
+      ON p.dept_id = dept.id 
+      WHERE id_card = $1`,
+      [id]
+    );
     return res.rows[0];
   }
 
@@ -53,10 +61,9 @@ class Emp {
       province,
       zipcode,
       p_id,
-      salary,
     } = data;
     const res = await pool.query(
-      "INSERT INTO employees(id_card, f_name, l_name, emp_phone, emp_mail, house_number, road, subdistrict, district, province, zipcode, p_id, start_date, salary) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_DATE, $13) RETURNING *",
+      "INSERT INTO employees(id_card, f_name, l_name, emp_phone, emp_mail, house_number, road, subdistrict, district, province, zipcode, p_id, start_date) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_DATE) RETURNING *",
       [
         id_card,
         f_name,
@@ -70,7 +77,6 @@ class Emp {
         province,
         zipcode,
         p_id,
-        salary,
       ]
     );
     return res.rows[0];
@@ -89,7 +95,6 @@ class Emp {
       province,
       zipcode,
       p_id,
-      salary,
     } = data;
 
     const res = await pool.query(
@@ -106,9 +111,8 @@ class Emp {
                 district = $8,
                 province = $9,
                 zipcode = $10,
-                p_id = $11,
-                salary = $12
-            WHERE id_card = $13
+                p_id = $11
+            WHERE id_card = $12
             RETURNING *
         `,
       [
@@ -123,7 +127,6 @@ class Emp {
         province,
         zipcode,
         p_id,
-        salary,
         id,
       ]
     );
@@ -139,19 +142,12 @@ class Emp {
     return res.rows;
   }
 
-  static async get_by_id(id) {
-    const res = await pool.query("SELECT * FROM employees WHERE id_card = $1", [
-      id,
-    ]);
-    return res.rows[0];
-  }
-
   static async get_data(id_card) {
     const res = await pool.query(
       `SELECT *
        FROM employees as emp
-       INNER JOIN positions as p ON emp.p_id = p.id
-       INNER JOIN departments AS dept ON p.dept_id = dept.id
+       LEFT JOIN positions as p ON emp.p_id = p.id
+       LEFT JOIN departments AS dept ON p.dept_id = dept.id
        WHERE emp.id_card = $1`,
       [id_card]
     );
@@ -168,10 +164,8 @@ class Emp {
 
   static async get_dept(id_card) {
     const res = await pool.query(
-      `SELECT dept.id
+      `SELECT access
        FROM employees AS emp 
-       INNER JOIN positions AS p ON emp.p_id = p.id
-       INNER JOIN departments AS dept ON p.dept_id = dept.id
        WHERE emp.id_card = $1`,
       [id_card]
     );
@@ -206,6 +200,16 @@ class Emp {
       [id_card]
     );
     return res.rows;
+  }
+
+  static async permission(id_card, newAccess) {
+    console.log(newAccess);
+    console.log(id_card);
+    const res = await pool.query(
+      `UPDATE employees SET access = $1 WHERE id_card = $2`,
+      [newAccess, id_card]
+    );
+    return res.rows[0];
   }
 }
 

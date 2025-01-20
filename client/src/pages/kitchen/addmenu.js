@@ -3,6 +3,7 @@ import Menubar from "../../components/menuBar";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
 import Swal from "sweetalert2";
+import { ChevronLeft } from "lucide-react";
 
 function Addmenu() {
   const { authData } = useContext(AuthContext);
@@ -10,9 +11,9 @@ function Addmenu() {
   const [data, setData] = useState({
     name: "",
     img: "",
-    category: "", // This will be used for the selected category ID
-    price: "",
-    ingredients: [], // materials array including sub-materials
+    category: "",
+    ingredients: [],
+    menutype: "",
   });
 
   const [units, setUnits] = useState([]);
@@ -20,11 +21,11 @@ function Addmenu() {
   const [categories, setCategories] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
+  const [menutype, setMenutype] = useState([]);
 
-  // Fetch available materials
   const fetchMaterials = async () => {
     try {
-      const materialRes = await axios.get("/material", {
+      const materialRes = await axios.get("/api/material", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       setMaterials(materialRes.data.data);
@@ -33,10 +34,9 @@ function Addmenu() {
     }
   };
 
-  // Fetch available units
   const fetchUnits = async () => {
     try {
-      const unitRes = await axios.get("/unit", {
+      const unitRes = await axios.get("/api/unit", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       setUnits(unitRes.data.data);
@@ -45,16 +45,23 @@ function Addmenu() {
     }
   };
 
-  // Fetch available categories
   const fetchCategories = async () => {
     try {
-      const categoryRes = await axios.get("/menu/menucategory", {
+      const categoryRes = await axios.get("/api/menu/menucategory", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
-      console.log(categoryRes.data.data);
       setCategories(categoryRes.data.data);
     } catch (error) {
       console.error("Error fetching categories", error);
+    }
+  };
+
+  const fetchMenutype = async () => {
+    try {
+      const menutypeRes = await axios.get("/api/menu/menutype");
+      setMenutype(menutypeRes.data.data);
+    } catch (error) {
+      console.error("Error fetching menu type", error);
     }
   };
 
@@ -62,16 +69,15 @@ function Addmenu() {
     fetchMaterials();
     fetchUnits();
     fetchCategories();
+    fetchMenutype();
   }, []);
 
-  // Handle file input change and preview
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
     setPreviewImage(URL.createObjectURL(file));
   };
 
-  // Handle form input changes
   const handleChange = (e) => {
     setData({
       ...data,
@@ -81,12 +87,12 @@ function Addmenu() {
 
   // Handle materials and sub-material changes
   const handleMaterialChange = (index, e) => {
-    const updatedIngredients = [...data.ingredients]; // Fixed typo
+    const updatedIngredients = [...data.ingredients];
     updatedIngredients[index] = {
       ...updatedIngredients[index],
       [e.target.name]: e.target.value,
     };
-    setData({ ...data, ingredients: updatedIngredients }); // Fixed typo
+    setData({ ...data, ingredients: updatedIngredients });
   };
 
   // Add new material
@@ -111,12 +117,12 @@ function Addmenu() {
     e.preventDefault();
 
     if (!selectedFile) {
-      Swal.fire("Error", "Please upload an image", "error");
+      Swal.fire("Error", "กรุณาใส่รูปภาพ", "error");
       return;
     }
 
-    if (data.ingredients.length === 0) {
-      Swal.fire("Error", "Please add at least one material", "error");
+    if (data.ingredients.length < 2) {
+      Swal.fire("Error", "ต้องมีวัตถุดิบอย่างน้อย 2 วัตถุดิบ ขึ้นไป", "error");
       return;
     }
 
@@ -125,12 +131,12 @@ function Addmenu() {
       formData.append("name", data.name);
       formData.append("img", selectedFile);
       formData.append("category", data.category);
-      formData.append("price", data.price);
       formData.append("ingredients", JSON.stringify(data.ingredients));
-    //   for (let [key, value] of formData.entries()) {
-    //     console.log(`${key}: ${value}`);
-    //   }
-      const response = await axios.post("/menu/addmenu", formData, {
+      formData.append("menutype", data.menutype);
+      // for (let [key, value] of formData.entries()) {
+      //   console.log(`${key}: ${value}`);
+      // }
+      const response = await axios.post("/api/menu/addmenu", formData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           "Content-Type": "multipart/form-data",
@@ -138,19 +144,19 @@ function Addmenu() {
       });
 
       if (response.status === 200) {
-        Swal.fire("Success", "Menu added successfully", "success");
+        Swal.fire("Success", "เพิ่มเมนูสำเร็จ", "success");
         setData({
           name: "",
           img: "",
           category: "",
-          price: "",
           ingredients: [],
+          menutype: "",
         });
         setPreviewImage("");
         setSelectedFile(null);
       }
     } catch (error) {
-      Swal.fire("Error", "Failed to add menu", "error");
+      Swal.fire("Error", "เกิดข้อผิดพลาดในการเพิ่มเมนู", "error");
       console.error(
         "Error:",
         error.response ? error.response.data : error.message
@@ -159,53 +165,67 @@ function Addmenu() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-blue-50">
       <Menubar />
       <div className="container mx-auto p-6">
         <div className="mb-4 flex justify-start">
           <button
             onClick={() => window.history.back()}
-            className="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:focus:ring-yellow-900 mr-4"
+            className="text-white bg-blue-700 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-4 shadow"
           >
-            Back
+            <ChevronLeft />
           </button>
-          <h1 className="text-2xl font-semibold mb-4">เพิ่มเมนู</h1>
+          <h1 className="text-3xl font-semibold mb-4 text-blue-700">
+            เพิ่มเมนู
+          </h1>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 bg-white p-6 rounded-lg shadow-md"
+        >
           {/* Menu Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">ชื่อเมนู</label>
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              ชื่อเมนู
+            </label>
             <input
               type="text"
               name="name"
               value={data.name}
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
-              required
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
           </div>
-
-          {/* Menu Image */}
           <div>
-            <label className="block text-sm font-medium mb-1">รูปภาพเมนู</label>
-            <input type="file" onChange={handleFileChange} />
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              รูปภาพเมนู
+            </label>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+            />
             {previewImage && (
-              <img
-                src={previewImage}
-                alt="Preview"
-                className="mt-2 w-32 h-32"
-              />
+              <div className="mt-4 flex justify-center">
+                <img
+                  src={previewImage}
+                  alt="Preview"
+                  className="w-40 h-40 object-cover rounded-md shadow"
+                />
+              </div>
             )}
           </div>
 
           {/* Category Dropdown */}
           <div>
-            <label className="block text-sm font-medium mb-1">หมวดหมู่</label>
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              หมวดหมู่
+            </label>
             <select
               name="category"
               value={data.category}
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
               required
             >
               <option value="">เลือกหมวดหมู่</option>
@@ -216,30 +236,40 @@ function Addmenu() {
               ))}
             </select>
           </div>
-
-          {/* Price */}
           <div>
-            <label className="block text-sm font-medium mb-1">ราคา</label>
-            <input
-              type="number"
-              name="price"
-              value={data.price}
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              ประเภท
+            </label>
+            <select
+              name="menutype"
+              value={data.menutype}
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
               required
-            />
+            >
+              <option value="">เลือกประเภท</option>
+              {menutype.map((type) => (
+                <option key={type.id} value={type.id}>
+                  {type.typename}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Materials and Sub-materials */}
           <div>
-            <label className="block text-sm font-medium mb-1">วัตถุดิบ</label>
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              วัตถุดิบ
+            </label>
             {data.ingredients.map((material, index) => (
-              <div key={index} className="flex items-center space-x-2 mb-2">
+              <div
+                key={index}
+                className="flex flex-wrap items-center gap-5 mb-4 border border-gray-200 rounded-lg p-4 bg-gray-50"
+              >
                 <select
                   name="material_id"
                   value={material.material_id}
                   onChange={(e) => handleMaterialChange(index, e)}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-1/2"
+                  className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
                   {materials.map((mat) => (
@@ -254,13 +284,13 @@ function Addmenu() {
                   value={material.quantity_used}
                   onChange={(e) => handleMaterialChange(index, e)}
                   placeholder="ปริมาณ"
-                  className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
+                  className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <select
                   name="unit_id"
                   value={material.unit_id}
                   onChange={(e) => handleMaterialChange(index, e)}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
+                  className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกหน่วย</option>
                   {units.map((unit) => (
@@ -272,7 +302,7 @@ function Addmenu() {
                 <button
                   type="button"
                   onClick={() => removeMaterial(index)}
-                  className="px-2 py-1 bg-red-500 text-white rounded-md"
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
                   ลบ
                 </button>
@@ -281,15 +311,18 @@ function Addmenu() {
             <button
               type="button"
               onClick={addMaterial}
-              className="px-4 py-2 bg-green-500 text-white rounded-md mt-2"
+              className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              เพิ่มวัตถุดิบ
+              +
             </button>
           </div>
 
           {/* Submit Button */}
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2">
-            Add Menu
+          <button
+            type="submit"
+            className="w-full md:w-auto bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all focus:outline-none focus:ring-4 focus:ring-blue-400"
+          >
+            เพิ่มเมนู
           </button>
         </form>
       </div>

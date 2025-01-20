@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
@@ -8,6 +8,22 @@ export const AuthProvider = ({ children }) => {
     const id_card = localStorage.getItem("id_card");
     return token && id_card ? { token, id_card } : {};
   });
+
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const now = Math.floor(Date.now() / 1000);
+        if (payload.exp < now) {
+          logout();
+        }
+      }
+    };
+    checkTokenExpiration(); 
+    const interval = setInterval(checkTokenExpiration, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const login = (token, id_card) => {
     localStorage.setItem("token", token);

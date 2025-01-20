@@ -32,6 +32,7 @@ router.get(
 router.post("/", authenticateToken, employeeController.add_emp);
 router.put("/:id", authenticateToken, employeeController.update_emp);
 router.delete("/:id", authenticateToken, employeeController.delete_emp);
+router.put("/permission/:id", employeeController.permission);
 
 // นับจำนวนการมาสายขาดงานเฉพาะเดือนนี้
 router.get("/countlate/:id_card", employeeController.count_late);

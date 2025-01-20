@@ -10,10 +10,12 @@ function Workdate() {
   const { authData } = useContext(AuthContext);
   const [emp, setEmp] = useState([]);
   const [workdate, setWorkdate] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = async () => {
     try {
-      const res = await axios("/ws", {
+      setIsLoading(true);
+      const res = await axios("/api/ws", {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
@@ -30,17 +32,6 @@ function Workdate() {
         return acc;
       }, {});
 
-      // // Convert groupedData to an array of objects
-      // const processedData = Object.keys(groupedData).map((date) => ({
-      //   work_date: date,
-      //   employees: groupedData[date],
-      // }));
-
-      // // Sort processedData by work_date from newest to oldest
-      // const sortedData = processedData.sort(
-      //   (a, b) => new Date(a.work_date) - new Date(b.work_date)
-      // );
-
       setWorkdate(groupedData);
       setEmp(filterDept);
     } catch (error) {
@@ -50,6 +41,8 @@ function Workdate() {
         title: "Error",
         text: "Failed to fetch data.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,87 +58,72 @@ function Workdate() {
     navigate("/editworkdate");
   };
 
-  // Process the workdate data to be displayed
-  // const workdateContent = workdate.map((item) => {
-  //   const date = new Date(item.work_date);
-  //   const formattedDate = new Intl.DateTimeFormat("th-TH", {
-  //     year: "numeric",
-  //     month: "long",
-  //     day: "numeric",
-  //     weekday: "long",
-  //   }).format(date);
-
-  // return (
-  //   <div
-  //     key={item.work_date}
-  //     className="p-4 mb-4 bg-white shadow-md rounded-md"
-  //   >
-  //     <h1 className="text-xl font-semibold mb-2 text-gray-800">
-  //       {formattedDate}
-  //     </h1>
-  //     {item.employees.map((employee, index) => (
-  //       <p key={index} className="text-gray-600 text-xl">
-  //         {index + 1}. {employee}
-  //       </p>
-  //     ))}
-  //   </div>
-  // );
-
   return (
     <div className="wrapper min-h-screen bg-gray-100">
       <Menubar />
-      <div className="p-6">
-        <div className="mb-4 flex justify-between">
-          <h1 className="text-3xl font-bold mb-4">Work Schedule Overview</h1>
-          <div>
+      <div className="p-3">
+        <div className="mb-1 flex justify-between items-center">
+          <h1 className="text-xl font-bold text-blue-800 sm:text-xl md:text-3xl lg:text-4xl">
+            ตารางวันทำงาน
+          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-3 space-y-2 sm:space-y-0">
             <button
-              className="bg-green-500 text-white p-4 rounded-xl mr-4"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
               onClick={() => handleAddWorkdate()}
             >
-              Add Work Date
+              เพิ่ม
             </button>
             <button
-              className="bg-gray-400 text-white p-4 rounded-xl"
+              className="bg-blue-400 text-white px-6 py-3 rounded-lg shadow-md ml-4 hover:bg-blue-500 transition duration-300"
               onClick={handleEditWorkdate}
             >
-              Edit work date
+              แก้ไข
             </button>
           </div>
         </div>
       </div>
-      <div className="container p-4">
-        {Object.keys(workdate).map((date) => (
-          <div key={date} className="date-section">
-            <h2 className="mb-4 text-xl font-bold">
-              {new Intl.DateTimeFormat("th-TH", { dateStyle: "full" }).format(
-                new Date(date)
-              )}
-            </h2>
-            <div className="flex justify-center">
-              <table className="table-fiexd w-5/6 text-left mb-8">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2">ลำดับ</th>
-                    <th className="px-4 py-2">Name</th>
-                    <th className="px-4 py-2">Position</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {workdate[date].map((emp, index) => (
-                    <tr key={emp.id_card}>
-                      <td className="border px-4 py-2">{index + 1}</td>
-                      <td className="border px-4 py-2">
-                        {emp.f_name} {emp.l_name}
-                      </td>
-                      <td className="border px-4 py-2">{emp.p_name}</td>
+      {isLoading ? (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
+        </div>
+      ) : (
+        <div className="container p-4">
+          {Object.keys(workdate).map((date) => (
+            <div
+              key={date}
+              className="mb-6 bg-white p-6 rounded-lg shadow-lg border border-blue-200"
+            >
+              <h2 className="text-xl font-semibold text-blue-700 mb-4">
+                {new Intl.DateTimeFormat("th-TH", { dateStyle: "full" }).format(
+                  new Date(date)
+                )}
+              </h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-left">
+                  <thead>
+                    <tr className="bg-blue-100 text-blue-700">
+                      <th className="px-6 py-3 border-b">ลำดับ</th>
+                      <th className="px-6 py-3 border-b">ชื่อ-นามสกุล</th>
+                      <th className="px-6 py-3 border-b">ตำแหน่ง</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {workdate[date].map((emp, index) => (
+                      <tr key={emp.id_card} className="border-b">
+                        <td className="px-6 py-4">{index + 1}</td>
+                        <td className="px-6 py-4">
+                          {emp.f_name} {emp.l_name}
+                        </td>
+                        <td className="px-6 py-4">{emp.p_name}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

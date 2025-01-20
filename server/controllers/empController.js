@@ -165,6 +165,18 @@ const count_absent = async (req, res) => {
   }
 };
 
+const permission = async (req, res) => {
+  try {
+    const id_card = req.params.id;
+    const newAccess = req.body.newAccess;
+    const result = await emp.permission(id_card, newAccess); 
+    res.status(200).json({ data: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   get_emp,
   get_by_id,
@@ -179,4 +191,5 @@ module.exports = {
   get_by_dept_and_position,
   count_late,
   count_absent,
+  permission,
 };

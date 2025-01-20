@@ -24,12 +24,29 @@ const get_material = async (req, res) => {
   }
 };
 
+const get_material_bycategory = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const material = await Material.get_material_bycategory(id);
+    res.status(200).json({ data: material });
+  } catch (error) {
+    console.error("Error fetching materials:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const add_material = async (req, res) => {
   try {
-    const { m_name, unit, composite, composition } = req.body;
+    const { m_name, unit, composite, composition, category } = req.body;
     const m_img = req.file ? req.file.filename : null;
 
-    console.log("Request body:", { m_name, unit, composite, composition });
+    console.log("Request body:", {
+      m_name,
+      unit,
+      composite,
+      composition,
+      category,
+    });
 
     // ตรวจสอบประเภทของ composition
     let parsedComposition;
@@ -45,6 +62,7 @@ const add_material = async (req, res) => {
       unit: unit,
       composite: composite === "true" || composite === true, // แปลง composite เป็น boolean
       composition: parsedComposition || [], // ใช้ array ที่แปลงแล้ว หรือ array ว่างหากไม่มีข้อมูล
+      category: category,
     });
 
     res.status(200).json({ data: result });
@@ -57,7 +75,7 @@ const add_material = async (req, res) => {
 const edit_materials = async (req, res) => {
   try {
     const id = req.params.id;
-    const { m_name, unit, sub_materials } = req.body;
+    const { m_name, unit, sub_materials, category } = req.body;
 
     // Fetch the material to be edited
     const materialToEdit = await Material.get_by_id(id);
@@ -90,6 +108,7 @@ const edit_materials = async (req, res) => {
       unit,
       m_img,
       sub_materials, // ส่ง sub_materials
+      category,
     });
 
     // Respond with the updated data
@@ -147,11 +166,24 @@ const get_by_id = async (req, res) => {
   }
 };
 
+const get_by_idtrue = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const material_id = await Material.get_by_idtrue(id);
+    res.status(200).json({ data: material_id });
+  } catch (error) {
+    console.error("Error deleting material:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   get_material,
+  get_material_bycategory,
   add_material,
   edit_materials,
   delete_material,
   get_by_id,
   upload,
+  get_by_idtrue,
 };

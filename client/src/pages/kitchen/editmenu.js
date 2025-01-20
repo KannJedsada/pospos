@@ -4,6 +4,7 @@ import Menubar from "../../components/menuBar";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
 import Swal from "sweetalert2";
+import { ChevronLeft } from "lucide-react";
 
 function Editmenu() {
   const { state } = useLocation();
@@ -18,15 +19,17 @@ function Editmenu() {
     menu_name: "",
     menu_img: "",
     menu_category: "",
-    price: "",
     ingredients: [],
+    menutype: "",
   });
   const navigate = useNavigate();
+  const [menutype, setMenutype] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch available materials
   const fetchMaterials = async () => {
     try {
-      const materialRes = await axios.get("/material", {
+      const materialRes = await axios.get("/api/material", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       setMaterials(materialRes.data.data);
@@ -38,7 +41,7 @@ function Editmenu() {
   // Fetch available units
   const fetchUnits = async () => {
     try {
-      const unitRes = await axios.get("/unit", {
+      const unitRes = await axios.get("/api/unit", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       setUnits(unitRes.data.data);
@@ -50,7 +53,7 @@ function Editmenu() {
   // Fetch available categories
   const fetchCategories = async () => {
     try {
-      const categoryRes = await axios.get("/menu/menucategory", {
+      const categoryRes = await axios.get("/api/menu/menucategory", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       setCategories(categoryRes.data.data);
@@ -61,7 +64,8 @@ function Editmenu() {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`/menu/menu/${id}`, {
+      setIsLoading(true);
+      const res = await axios.get(`/api/menu/menu/${id}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
@@ -71,7 +75,6 @@ function Editmenu() {
         menu_name: item.menu_name,
         menu_img: item.menu_img,
         menu_category: item.menu_category,
-        price: item.price || "",
         ingredients: item.ingredients
           ? item.ingredients.map((ing) => ({
               material_id: ing.material_id,
@@ -80,6 +83,7 @@ function Editmenu() {
               unit_id: ing.unit_id,
             }))
           : [],
+        menutype: item.menu_type,
       };
       setData(menuData);
       if (item.menu_img) {
@@ -88,6 +92,17 @@ function Editmenu() {
     } catch (error) {
       console.error("Error fetching menu data:", error);
       Swal.fire("Error", "Failed to fetch menu data", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchMenutype = async () => {
+    try {
+      const menutypeRes = await axios.get("/api/menu/menutype");
+      setMenutype(menutypeRes.data.data);
+    } catch (error) {
+      console.error("Error fetching menu type", error);
     }
   };
 
@@ -97,6 +112,7 @@ function Editmenu() {
     fetchMaterials();
     fetchCategories();
     fetchData();
+    fetchMenutype();
   }, []);
 
   // Handle change in input fields
@@ -137,175 +153,206 @@ function Editmenu() {
     const formData = new FormData();
     formData.append("menu_name", data.menu_name);
     formData.append("menu_category", data.menu_category);
-    formData.append("price", data.price);
-    formData.append("ingredients", JSON.stringify(data.ingredients)); // ตรวจสอบว่าข้อมูลนี้ถูกต้อง
+    formData.append("ingredients", JSON.stringify(data.ingredients));
+    formData.append("menutype", data.menutype);
 
     if (selectedFile) {
       formData.append("img", selectedFile);
     }
 
-    // ตรวจสอบค่าใน FormData
-    // for (let [key, value] of formData.entries()) {
-    //   console.log(`${key}: ${value}`);
-    // }
-
     try {
-      await axios.put(`/menu/editmenu/${id}`, formData, {
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+
+      await axios.put(`/api/menu/editmenu/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           "Content-Type": "multipart/form-data",
         },
       });
-      Swal.fire("Success", "Menu updated successfully", "success");
+      Swal.fire("Success", "อัปเดตสำเร็จ", "success");
       navigate("/menus");
     } catch (error) {
       console.error(
         "Error updating menu:",
         error.response ? error.response.data : error.message
       );
-      Swal.fire("Error", "Failed to update menu", "error");
+      Swal.fire("Error", "เกิดข้อผิดพลาดในการอัปเดต", "error");
     }
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-blue-50">
       <Menubar />
       <div className="container mx-auto p-6">
         <div className="mb-4 flex justify-start">
           <button
             onClick={() => window.history.back()}
-            className="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:focus:ring-yellow-900 mr-4"
+            className="text-white bg-blue-700 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-4 shadow"
           >
-            Back
+            <ChevronLeft />
           </button>
-          <h1 className="text-2xl font-semibold mb-4">Edit Menu</h1>
+          <h1 className="text-3xl font-semibold mb-4 text-blue-700">
+            แก้ไขเมนู
+          </h1>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Menu Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Menu Name</label>
-            <input
-              type="text"
-              name="menu_name"
-              value={data.menu_name}
-              onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
-              required
-            />
+        {isLoading ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
           </div>
-
-          {/* Menu Image */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Menu Image</label>
-            <input type="file" onChange={handleFileChange} />
-            {previewImage && (
-              <img
-                src={previewImage}
-                alt="Preview"
-                className="mt-2 w-32 h-32"
-              />
-            )}
-          </div>
-
-          {/* Category Dropdown */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Category</label>
-            <select
-              name="menu_category"
-              value={data.menu_category}
-              onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.category_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Price */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Price</label>
-            <input
-              type="number"
-              name="price"
-              value={data.price}
-              onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
-              required
-            />
-          </div>
-
-          {/* Materials and Sub-materials */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Ingredients
-            </label>
-            {data.ingredients.map((material, index) => (
-              <div key={index} className="flex items-center space-x-2 mb-2">
-                <select
-                  name="material_id"
-                  value={material.material_id}
-                  onChange={(e) => handleMaterialChange(index, e)}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-1/2"
-                >
-                  <option value="">Select Material</option>
-                  {materials.map((mat) => (
-                    <option key={mat.id} value={mat.id}>
-                      {mat.m_name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  name="quantity_used"
-                  value={material.quantity_used}
-                  onChange={(e) => handleMaterialChange(index, e)}
-                  placeholder="Quantity"
-                  className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
-                />
-                <select
-                  name="unit_id"
-                  value={material.unit_id}
-                  onChange={(e) => handleMaterialChange(index, e)}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
-                >
-                  <option value="">Select Unit</option>
-                  {units.map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.u_name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={() => removeMaterial(index)}
-                  className="px-2 py-1 bg-red-500 text-white rounded-md"
-                >
-                  ลบ
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addMaterial}
-              className="px-4 py-2 bg-green-500 text-white rounded-md mt-2"
-            >
-              เพิ่มวัตถุดิบ
-            </button>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 bg-white p-6 rounded-lg shadow-md"
           >
-            บันทึก
-          </button>
-        </form>
+            {/* Menu Name */}
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                ชื่อเมนู
+              </label>
+              <input
+                type="text"
+                name="menu_name"
+                value={data.menu_name}
+                onChange={handleChange}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+                required
+              />
+            </div>
+
+            {/* Menu Image */}
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                รูปภาพเมนู
+              </label>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+              />
+              {previewImage && (
+                <div className="mt-4 flex justify-center">
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="w-40 h-40 object-cover rounded-md shadow"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Category Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                หมวดหมู่
+              </label>
+              <select
+                name="menu_category"
+                value={data.menu_category}
+                onChange={handleChange}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+                required
+              >
+                <option value="">เลือกหมวดหมู่</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.category_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                ประเภท
+              </label>
+              <select
+                name="menutype"
+                value={data.menutype}
+                onChange={handleChange}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+                required
+              >
+                <option value="">เลือกประเภท</option>
+                {menutype.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.typename}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Materials and Sub-materials */}
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                วัตถุดิบ
+              </label>
+              {data.ingredients.map((material, index) => (
+                <div
+                  key={index}
+                  className="flex flex-wrap items-center gap-5 mb-4 border border-gray-200 rounded-lg p-4 bg-gray-50"
+                >
+                  <select
+                    name="material_id"
+                    value={material.material_id}
+                    onChange={(e) => handleMaterialChange(index, e)}
+                    className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">เลือกวัตถุดิบ</option>
+                    {materials.map((mat) => (
+                      <option key={mat.id} value={mat.id}>
+                        {mat.m_name}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    name="quantity_used"
+                    value={material.quantity_used}
+                    onChange={(e) => handleMaterialChange(index, e)}
+                    placeholder="ปริมาณ"
+                    className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <select
+                    name="unit_id"
+                    value={material.unit_id}
+                    onChange={(e) => handleMaterialChange(index, e)}
+                    className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">เลือกหน่อย</option>
+                    {units.map((unit) => (
+                      <option key={unit.id} value={unit.id}>
+                        {unit.u_name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => removeMaterial(index)}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all focus:outline-none focus:ring-2 focus:ring-red-400"
+                  >
+                    ลบ
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addMaterial}
+                className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                +
+              </button>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full md:w-auto bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all focus:outline-none focus:ring-4 focus:ring-blue-400"
+            >
+              บันทึก
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

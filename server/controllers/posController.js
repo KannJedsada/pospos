@@ -61,9 +61,22 @@ const delete_pos = async (req, res) => {
   }
 };
 
+const get_pos_byid = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const position = await pos.get_pos_byid(id);
+    res.status(200).json({ data: position})
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
 module.exports = {
   get_pos,
   add_pos,
   update_pos,
   delete_pos,
+  get_pos_byid
 };

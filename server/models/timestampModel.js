@@ -104,6 +104,33 @@ class Timestamp {
     );
     return res.rows;
   }
+
+  static async count_late() {
+    const lateRes = await pool.query(
+      `SELECT 
+      COUNT(*) AS late_count
+      FROM employees AS emp
+      INNER JOIN positions AS p ON emp.p_id = p.id
+      INNER JOIN timestamps AS ts ON emp.id_card = ts.id_card
+      WHERE 
+      EXTRACT(EPOCH FROM (ts.check_in::time - p.start_time::time)) > 300 
+      AND ts.work_date = CURRENT_DATE`
+    );
+
+    const absentRes = await pool.query(
+      `SELECT 
+      COUNT(*) AS absent_count
+      FROM employees AS emp
+      INNER JOIN positions AS p ON emp.p_id = p.id
+      INNER JOIN timestamps AS ts ON emp.id_card = ts.id_card
+      WHERE 
+      EXTRACT(EPOCH FROM (ts.check_in::time - p.start_time::time)) > 3600
+      AND ts.work_date = CURRENT_DATE`
+    );
+    const countlate = lateRes.rows[0];
+    const absent = absentRes.rows[0];
+    return {countlate, absent};
+  }
 }
 
 module.exports = Timestamp;

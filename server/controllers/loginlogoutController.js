@@ -22,7 +22,6 @@ const login = async (req, res) => {
         expiresIn: "10h",
       }
     );
-
     res
       .status(200)
       .json({ token, id_card: employee.id_card, message: "Login successful" });

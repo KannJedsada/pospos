@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import Menubar from "../../components/menuBar";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
+import { ChevronLeft } from "lucide-react";
 
 function Addmaterial() {
   const { authData } = useContext(AuthContext);
@@ -10,6 +11,7 @@ function Addmaterial() {
     unit: "",
     m_img_url: "",
     composite: false,
+    material_category: "",
   });
 
   const [errors, setErrors] = useState({
@@ -23,13 +25,14 @@ function Addmaterial() {
   const [errorMessage, setErrorMessage] = useState("");
   const [units, setUnits] = useState([]);
   const [material, setMaterial] = useState([]);
+  const [category, setCategory] = useState([]);
   const [subMaterials, setSubMaterials] = useState([
     { material_id: "", quantity_used: "", unit_id: "" },
   ]);
 
   const fetchUnits = async () => {
     try {
-      const res = await axios.get("/unit");
+      const res = await axios.get("/api/unit");
       setUnits(res.data.data);
     } catch (error) {
       console.error("Error fetching units:", error);
@@ -39,7 +42,7 @@ function Addmaterial() {
 
   const fetchMaterial = async () => {
     try {
-      const res = await axios.get("/material", {
+      const res = await axios.get("/api/material", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       setMaterial(res.data.data);
@@ -49,10 +52,20 @@ function Addmaterial() {
     }
   };
 
+  const fetchCategory = async () => {
+    try {
+      const res = await axios.get("/api/stock/category");
+      setCategory(res.data.data);
+    } catch (error) {
+      console.error("Error fetching category:", error);
+      setErrorMessage("Failed to fetch category");
+    }
+  };
+
   const validateField = (name, value) => {
     let error = "";
     if (name === "m_name" && !value.trim()) {
-      error = "ชื่อวัสดุไม่สามารถเป็นค่าว่างได้";
+      error = "ชื่อวัตถุดิบไม่สามารถเป็นค่าว่างได้";
     }
     if (name === "unit" && !value.trim()) {
       error = "หน่วยไม่สามารถเป็นค่าว่างได้";
@@ -76,7 +89,7 @@ function Addmaterial() {
         reader.readAsDataURL(file);
       }
     } else if (name === "composite") {
-      // จัดการ checkbox ของ composite
+      // Handle composite checkbox
       setData((prevData) => ({
         ...prevData,
         [name]: !prevData.composite,
@@ -111,11 +124,16 @@ function Addmaterial() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log("category :", data.material_category);
     const newErrors = {};
     Object.keys(data).forEach((key) => {
       validateField(key, data[key]);
     });
+
+    if (Object.values(newErrors).some((error) => error)) {
+      setErrors(newErrors);
+      return;
+    }
 
     if (Object.values(newErrors).some((error) => error)) {
       setErrors(newErrors);
@@ -127,11 +145,14 @@ function Addmaterial() {
       formData.append("m_name", data.m_name);
       formData.append("unit", data.unit);
       formData.append("composite", data.composite);
+      formData.append("category", data.material_category);
 
       if (selectedFile) {
         formData.append("m_img", selectedFile);
       }
-
+      // for (const [key, value] of formData.entries()) {
+      //   console.log(`${key}:`, value);
+      // }
       if (data.composite) {
         subMaterials.forEach((subMaterial, index) => {
           formData.append(
@@ -149,7 +170,7 @@ function Addmaterial() {
         });
       }
 
-      const response = await axios.post("/material/add", formData, {
+      const response = await axios.post("/api/material/add", formData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           "Content-Type": "multipart/form-data",
@@ -163,12 +184,13 @@ function Addmaterial() {
         unit: "",
         m_img_url: "",
         composite: false,
+        material_category: "",
       });
       setSelectedFile(null);
       setPreviewImage("");
       setSubMaterials([{ material_id: "", quantity_used: "", unit_id: "" }]);
     } catch (error) {
-      setErrorMessage("เกิดข้อผิดพลาดในการส่งข้อมูล");
+      setErrorMessage("เกิดข้อผิดพลาดในการบันทึก");
       console.error("Error submitting data:", error);
     }
   };
@@ -176,25 +198,31 @@ function Addmaterial() {
   useEffect(() => {
     fetchUnits();
     fetchMaterial();
+    fetchCategory();
     setData(data);
-  }, [data]);
+  }, []);
 
   return (
-    <div>
+    <div className="min-h-screen bg-blue-50">
       <Menubar />
       <div className="container mx-auto p-6">
-        <div className="mb-4 flex justify-start">
+        <div className="mb-6 flex items-center">
           <button
             onClick={() => window.history.back()}
-            className="text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:focus:ring-yellow-900 mr-4"
+            className="text-white bg-blue-700 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-4 shadow"
           >
-            Back
+            <ChevronLeft />
           </button>
-          <h1 className="text-2xl font-semibold mb-4">เพิ่มวัตถุดิบ</h1>
+          <h1 className="text-3xl font-semibold text-blue-700">
+            เพิ่มวัตถุดิบ
+          </h1>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6 bg-white p-6 rounded-lg shadow-md"
+        >
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-blue-700 mb-1">
               ชื่อวัตถุดิบ:
             </label>
             <input
@@ -202,14 +230,14 @@ function Addmaterial() {
               name="m_name"
               value={data.m_name}
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {errors.m_name && (
               <p className="text-red-500 text-sm mt-1">{errors.m_name}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">
+            <label className="block text-sm font-medium text-blue-700 mb-1">
               เลือกรูปภาพ:
             </label>
             <input
@@ -217,14 +245,14 @@ function Addmaterial() {
               name="m_img"
               accept="image/*"
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {previewImage ? (
-              <div className="mt-4">
+              <div className="mt-4 flex justify-center">
                 <img
                   src={previewImage}
                   alt="Selected Preview"
-                  className="w-32 h-32 object-cover"
+                  className="w-40 h-40 object-cover rounded-md shadow"
                 />
               </div>
             ) : (
@@ -233,19 +261,21 @@ function Addmaterial() {
                   <img
                     src={data.m_img_url}
                     alt="Existing Material"
-                    className="w-32 h-32 object-cover"
+                    className="w-40 h-40 object-cover rounded-md shadow"
                   />
                 </div>
               )
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">หน่วย:</label>
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              หน่วย:
+            </label>
             <select
               name="unit"
               value={data.unit}
               onChange={handleChange}
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">เลือกหน่วย</option>
               {units.map((unit) => (
@@ -258,7 +288,29 @@ function Addmaterial() {
               <p className="text-red-500 text-sm mt-1">{errors.unit}</p>
             )}
           </div>
-
+          <div>
+            <label className="block text-sm font-medium text-blue-700 mb-1">
+              หมวดหมู่:
+            </label>
+            <select
+              name="material_category"
+              value={data.material_category}
+              onChange={handleChange}
+              className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+            >
+              <option value="">เลือกหมวดหมู่</option>
+              {category.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.category_name}
+                </option>
+              ))}
+            </select>
+            {errors.material_category && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.material_category}
+              </p>
+            )}
+          </div>
           <div className="flex items-center">
             <input
               type="checkbox"
@@ -268,14 +320,16 @@ function Addmaterial() {
               onChange={handleChange}
               className="mr-2"
             />
-            <label htmlFor="isComposite" className="text-sm font-medium">
+            <label
+              htmlFor="isComposite"
+              className="text-sm font-medium text-blue-700"
+            >
               วัตถุดิบนี้เป็นวัตถุดิบผสม (Composite)
             </label>
           </div>
-
           {data.composite && (
             <div>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-sm font-medium text-blue-700 mb-1">
                 วัตถุดิบย่อย:
               </label>
               {subMaterials.map((subMaterial, index) => (
@@ -284,7 +338,7 @@ function Addmaterial() {
                     name="material_id"
                     value={subMaterial.material_id}
                     onChange={(e) => handleSubMaterialChange(index, e)}
-                    className="px-4 py-2 border border-gray-300 rounded-md w-1/2"
+                    className="px-4 py-2 border border-gray-300 rounded-md w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                   >
                     <option value="">เลือกวัตถุดิบย่อย</option>
                     {material.map((material) => (
@@ -299,13 +353,13 @@ function Addmaterial() {
                     value={subMaterial.quantity_used}
                     onChange={(e) => handleSubMaterialChange(index, e)}
                     placeholder="ปริมาณ"
-                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
+                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
                   />
                   <select
                     name="unit_id"
                     value={subMaterial.unit_id}
                     onChange={(e) => handleSubMaterialChange(index, e)}
-                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4"
+                    className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
                   >
                     <option value="">เลือกหน่วย</option>
                     {units.map((unit) => (
@@ -317,7 +371,7 @@ function Addmaterial() {
                   <button
                     type="button"
                     onClick={() => removeSubMaterial(index)}
-                    className="px-2 py-1 bg-red-500 text-white rounded-md"
+                    className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-400 shadow"
                   >
                     ลบ
                   </button>
@@ -326,16 +380,15 @@ function Addmaterial() {
               <button
                 type="button"
                 onClick={addSubMaterial}
-                className="px-4 py-2 bg-green-500 text-white rounded-md mt-2"
+                className="px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-600 mt-2 shadow"
               >
                 เพิ่มวัตถุดิบย่อย
               </button>
             </div>
           )}
-
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-md"
+            className="px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 shadow-md"
           >
             บันทึก
           </button>

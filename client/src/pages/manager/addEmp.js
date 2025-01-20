@@ -3,6 +3,7 @@ import Menubar from "../../components/menuBar";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
 import Swal from "sweetalert2";
+import ArrowBackIosNewOutlinedIcon from "@mui/icons-material/ArrowBackIosNewOutlined";
 
 const Addemp = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +22,6 @@ const Addemp = () => {
     subdistrictName: "",
     zipcode: "",
     p_id: "",
-    salary: "",
   });
 
   const [errors, setErrors] = useState({
@@ -31,7 +31,7 @@ const Addemp = () => {
   });
 
   // ตรวจสอบ email phonenumber and id card
-  const validateField = (name, value) => {
+  const validateField = (name, value, otherFieldValues) => {
     switch (name) {
       case "mail":
         if (!/\S+@\S+\.\S+/.test(value)) {
@@ -40,7 +40,6 @@ const Addemp = () => {
         break;
       case "id_card":
         if (!/^\d+$/.test(value)) {
-          // ตรวจสอบว่าเป็นตัวเลขทั้งหมด
           return "กรุณากรอกเลขบัตรประชาชนเป็นตัวเลขเท่านั้น";
         }
         if (value.length !== 13) {
@@ -49,13 +48,35 @@ const Addemp = () => {
         break;
       case "phone":
         if (!/^\d+$/.test(value)) {
-          // ตรวจสอบว่าเป็นตัวเลขทั้งหมด
           return "กรุณากรอกเบอร์โทรศัพท์เป็นตัวเลขเท่านั้น";
         }
         if (value.length !== 10) {
           return "กรุณากรอกเบอร์โทรศัพท์ให้ครบ 10 หลัก";
         }
         break;
+      case "f_name":
+        if (!/^[\u0E00-\u0E7F]+$/.test(value) && !/^[A-Za-z]+$/.test(value)) {
+          return "กรุณากรอกชื่อ-นามสกุลเป็นภาษาไทยหรือภาษาอังกฤษเท่านั้น";
+        }
+        break;
+
+      case "l_name":
+        if (!/^[\u0E00-\u0E7F]+$/.test(value) && !/^[A-Za-z]+$/.test(value)) {
+          return "กรุณากรอกชื่อ-นามสกุลเป็นภาษาไทยหรือภาษาอังกฤษเท่านั้น";
+        }
+        console.log(value);
+        const isThai = /^[\u0E00-\u0E7F]+$/.test(value);
+        const isEnglish = /^[A-Za-z]+$/.test(value);
+
+        const isOtherThai = /^[\u0E00-\u0E7F]+$/.test(formData.f_name);
+        const isOtherEnglish = /^[A-Za-z]+$/.test(formData.f_name);
+
+        // // ตรวจสอบว่าทั้งสองฟิลด์เป็นภาษาที่ตรงกันหรือไม่
+        if ((isThai && !isOtherThai) || (isEnglish && !isOtherEnglish)) {
+          return "ชื่อและนามสกุลต้องเป็นภาษาเดียวกัน";
+        }
+        break;
+
       default:
         return "";
     }
@@ -75,9 +96,12 @@ const Addemp = () => {
       try {
         const [provincesRes, positionsRes] = await Promise.all([
           axios.get(
-            "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json"
+            "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_province.json",
+            {
+              withCredentials: false,
+            }
           ),
-          axios.get("/pos"),
+          axios.get("/api/pos"),
         ]);
 
         setProvinces(provincesRes.data);
@@ -85,7 +109,6 @@ const Addemp = () => {
           (position) => position.dept_id !== 1 && position.dept_id !== 5
         );
         setPosition(filteredPositions);
-        // console.log(filteredPositions);
       } catch (error) {
         console.error("Error fetching data:", error);
         Swal.fire("Error", "Failed to fetch data", "error");
@@ -101,7 +124,10 @@ const Addemp = () => {
       if (formData.province) {
         try {
           const { data } = await axios.get(
-            "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_amphure.json"
+            "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_amphure.json",
+            {
+              withCredentials: false,
+            }
           );
           const filteredAmphures = data.filter(
             (amphure) => amphure.province_id === Number(formData.province)
@@ -125,7 +151,10 @@ const Addemp = () => {
       if (formData.district) {
         try {
           const { data } = await axios.get(
-            "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_tambon.json"
+            "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api_tambon.json",
+            {
+              withCredentials: false,
+            }
           );
           const filteredTambons = data.filter(
             (tambon) => tambon.amphure_id === Number(formData.district)
@@ -214,25 +243,41 @@ const Addemp = () => {
       });
     }
   };
-  
+
   const handleBlur = (e) => {
     const { name, value } = e.target;
-    const errorMsg = validateField(name, value);
-    setErrors({ ...errors, [name]: errorMsg });
+    const error = validateField(name, value, formData);
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
+    }));
   };
 
   // เมื่อกด submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ตรวจสอบว่ามี error ในฟอร์มหรือไม่
+    const hasErrors = Object.values(errors).some((error) => error !== "");
+
+    if (hasErrors) {
+      Swal.fire({
+        title: "กรุณากรอกข้อมูลให้ครบถ้วน",
+        icon: "error",
+        showConfirmButton: true,
+      });
+      return;
+    }
+
     const postData = {
       ...formData,
       province: formData.provinceName,
       district: formData.districtName,
       subdistrict: formData.subdistrictName,
     };
-    // console.log(postData);
+
     try {
-      await axios.post("/emp", postData, {
+      await axios.post("/api/emp", postData, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
       Swal.fire({
@@ -266,103 +311,116 @@ const Addemp = () => {
       subdistrictName: "",
       zipcode: "",
       p_id: "",
-      salary: "",
     });
     setAmphures([]);
     setTambons([]);
+    setErrors({});
   };
 
   return (
-    <div className="relative">
+    <div className="">
       <Menubar />
       <button
         onClick={() => window.history.back()}
-        className="absolute top-20
-       left-5 text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:focus:ring-yellow-900"
+        className="absolute top-20 left-5 text-white bg-blue-700 hover:bg-blue-600 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-sm px-5 py-2.5 shadow-md"
       >
-        Back
+        <ArrowBackIosNewOutlinedIcon />
       </button>
-      <div className="flex justify-center min-h-screen">
-        <div className="w-full max-w-xxl p-8 rounded-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">
-            Add New Employee
+      <div className="flex justify-center items-center px-4">
+        <div className="w-full max-w-4xl p-8 bg-white">
+          <h2 className="text-3xl font-semibold mb-6 text-blue-700 text-center">
+            เพิ่มข้อมูลพนักงานใหม่
           </h2>
           <form onSubmit={handleSubmit}>
-            {/* Id Card Input */}
+            {/* ID Card Input */}
             <div className="mb-4">
-              <label className="block text-sm font-bold mb-2">ID Card:</label>
+              <label className="block text-sm font-bold mb-2">
+                เลขประจำตัวประชาชน:
+              </label>
               <input
                 type="text"
                 name="id_card"
                 value={formData.id_card}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                className={`w-full p-2 border ${
+                className={`w-full px-3 py-2 border ${
                   errors.id_card ? "border-red-500" : "border-gray-300"
-                } rounded`}
-                placeholder="Enter Id Card"
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                placeholder="เลขประจำตัวประชาชน 13 หลัก"
                 required
               />
               {errors.id_card && (
-                <p className="text-red-500 text-sm">{errors.id_card}</p>
+                <p className="text-red-500 text-sm mt-1">{errors.id_card}</p>
               )}
             </div>
-            <div className="flex justify-between mb-4">
+
+            {/* First and Last Name Inputs */}
+            <div className="flex flex-col md:flex-row md:gap-4 mb-4">
               {/* First Name Input */}
-              <div className="w-1/2 mr-2">
+              <div className="w-full md:w-1/2">
                 <label className="block text-sm font-bold mb-2">
-                  First Name*
+                  ชื่อจริง*
                 </label>
                 <input
                   type="text"
                   name="f_name"
                   value={formData.f_name}
                   onChange={handleChange}
-                  placeholder="Enter First Name"
-                  className="w-full px-3 py-2 border rounded"
+                  onBlur={handleBlur}
+                  placeholder="ชื่อจริง"
+                  className={`w-full px-3 py-2 border ${
+                    errors.f_name ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                   required
                 />
+                {errors.f_name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.f_name}</p>
+                )}
               </div>
               {/* Last Name Input */}
-              <div className="w-1/2">
-                <label className="block text-sm font-bold mb-2">
-                  Last Name*
-                </label>
+              <div className="w-full md:w-1/2">
+                <label className="block text-sm font-bold mb-2">นามสกุล*</label>
                 <input
                   type="text"
                   name="l_name"
                   value={formData.l_name}
                   onChange={handleChange}
-                  placeholder="Enter Last Name"
-                  className="w-full px-3 py-2 border rounded"
+                  onBlur={handleBlur}
+                  placeholder="นามสกุล"
+                  className={`w-full px-3 py-2 border ${
+                    errors.l_name ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                   required
                 />
+                {errors.l_name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.l_name}</p>
+                )}
               </div>
             </div>
-            <div className="flex justify-between mb-4">
-              {/* Email Input */}
-              <div className="w-1/2 mr-2">
-                <label className="block text-sm font-bold mb-2">Email*</label>
+
+            {/* Email and Phone Inputs */}
+            <div className="flex flex-col md:flex-row md:gap-4 mb-4">
+              <div className="w-full md:w-1/2">
+                <label className="block text-sm font-bold mb-2">อีเมล*</label>
                 <input
-                  type="text"
+                  type="email"
                   name="mail"
                   value={formData.mail}
-                  placeholder="Enter Email"
+                  placeholder="example@email.com"
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full px-3 py-2 border rounded ${
+                  className={`w-full px-3 py-2 border rounded-lg ${
                     errors.mail ? "border-red-500" : "border-gray-300"
-                  } rounded`}
+                  } focus:outline-none focus:ring-2 focus:ring-blue-300`}
                   required
                 />
                 {errors.mail && (
-                  <p className="text-red-500 text-sm">{errors.mail}</p>
+                  <p className="text-red-500 text-sm mt-1">{errors.mail}</p>
                 )}
               </div>
-              {/* Mobile Input */}
-              <div className="w-1/2">
+              <div className="w-full md:w-1/2">
                 <label className="block text-sm font-bold mb-2">
-                  Phone Number:
+                  เบอร์โทรศัพท์:
                 </label>
                 <input
                   type="text"
@@ -370,61 +428,64 @@ const Addemp = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  placeholder="Enter Phone number"
-                  required
-                  className={`w-full p-2 border ${
+                  placeholder="เบอร์โทรศัพท์"
+                  className={`w-full px-3 py-2 border ${
                     errors.phone ? "border-red-500" : "border-gray-300"
-                  } rounded`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                  required
                 />
                 {errors.phone && (
-                  <p className="text-red-500 text-sm">{errors.phone}</p>
+                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
                 )}
               </div>
             </div>
-            <div className="flex justify-between mb-4">
+
+            {/* Address Inputs */}
+            <div className="flex flex-col md:flex-row md:gap-4 mb-4">
               {/* House number */}
-              <div className="w-1/2 mr-2">
+              <div className="w-full md:w-1/2">
                 <label className="block text-sm font-bold mb-2">
-                  House number
+                  บ้านเลขที่
                 </label>
                 <input
                   type="text"
                   name="h_number"
                   value={formData.h_number}
                   onChange={handleChange}
-                  placeholder="Enter House number"
-                  className="w-full px-3 py-2 border rounded"
+                  placeholder="บ้านเลขที่"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
                   required
                 />
               </div>
               {/* Road */}
-              <div className="w-1/2">
-                <label className="block text-sm font-bold mb-2">Road</label>
+              <div className="w-full md:w-1/2">
+                <label className="block text-sm font-bold mb-2">ถนน</label>
                 <input
                   type="text"
                   name="road"
                   value={formData.road}
                   onChange={handleChange}
-                  placeholder="Enter road"
-                  className="w-full px-3 py-2 border rounded"
+                  placeholder="ถนน"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
               </div>
             </div>
 
-            <div className="flex justify-between mb-4">
-              {/* Province Selection */}
-              <div className="w-1/4 mr-2">
-                <label className="block text-sm font-bold mb-2">
-                  Province*
+            {/* Province, District, Subdistrict and Zipcode Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              {/* Province */}
+              <div className="w-full">
+                <label className="block text-sm font-semibold mb-2">
+                  จังหวัด*
                 </label>
                 <select
                   name="province"
                   value={formData.province}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
                 >
-                  <option value="">Select Province</option>
+                  <option value="">เลือกจังหวัด</option>
                   {provinces.map((province) => (
                     <option key={province.id} value={province.id}>
                       {province.name_th}
@@ -432,19 +493,17 @@ const Addemp = () => {
                   ))}
                 </select>
               </div>
-              {/* District (Amphure) Selection */}
-              <div className="w-1/4 mr-2">
-                <label className="block text-sm font-bold mb-2">
-                  District*
-                </label>
+              {/* District */}
+              <div className="w-full">
+                <label className="block text-sm font-bold mb-2">อำเภอ*</label>
                 <select
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
                 >
-                  <option value="">Select District</option>
+                  <option value="">เลือกอำเภอ</option>
                   {amphures.map((amphure) => (
                     <option key={amphure.id} value={amphure.id}>
                       {amphure.name_th}
@@ -452,19 +511,17 @@ const Addemp = () => {
                   ))}
                 </select>
               </div>
-              {/* Subdistrict (Tambon) Selection */}
-              <div className="w-1/4 mr-2">
-                <label className="block text-sm font-bold mb-2">
-                  Subdistrict*
-                </label>
+              {/* Subdistrict */}
+              <div className="w-full">
+                <label className="block text-sm font-bold mb-2">ตำบล*</label>
                 <select
                   name="subdistrict"
                   value={formData.subdistrict}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
                 >
-                  <option value="">Select Subdistrict</option>
+                  <option value="">เลือกตำบล</option>
                   {tambons.map((tambon) => (
                     <option key={tambon.id} value={tambon.id}>
                       {tambon.name_th}
@@ -473,71 +530,56 @@ const Addemp = () => {
                 </select>
               </div>
               {/* Zipcode */}
-              <div className="w-1/4">
-                <label className="block text-sm font-bold mb-2">Zipcode*</label>
+              <div className="w-full">
+                <label className="block text-sm font-bold mb-2">
+                  รหัสไปรษณีย์*
+                </label>
                 <input
                   type="text"
                   name="zipcode"
                   value={formData.zipcode}
                   onChange={handleChange}
-                  placeholder="Enter Zipcode"
-                  className="w-full px-3 py-2 border rounded"
+                  placeholder="รหัสไปรษณีย์"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
                 />
               </div>
             </div>
 
-            <div className="flex justify-between mb-4">
-              {/* Position */}
-              <div className="w-1/2 mr-2">
-                <label className="block text-sm font-bold mb-2">
-                  Position*
-                </label>
-                <select
-                  name="p_id"
-                  value={formData.p_id}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded"
-                  required
-                >
-                  <option value="">Select Position</option>
-                  {Array.isArray(positions) &&
-                    positions.map((pos) => (
-                      <option key={pos.id} value={pos.id}>
-                        {pos.p_name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              {/* Salary */}
-              <div className="w-1/2">
-                <label className="block text-sm font-bold mb-2">Salary*</label>
-                <input
-                  type="text"
-                  name="salary"
-                  value={formData.salary}
-                  onChange={handleChange}
-                  placeholder="Enter salary"
-                  className="w-full px-3 py-2 border rounded"
-                  required
-                />
-              </div>
+            {/* Position */}
+            <div className="w-full mb-4">
+              <label className="block text-sm font-bold mb-2">ตำแหน่ง*</label>
+              <select
+                name="p_id"
+                value={formData.p_id}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                required
+              >
+                <option value="">เลือกตำแหน่ง</option>
+                {Array.isArray(positions) &&
+                  positions.map((pos) => (
+                    <option key={pos.id} value={pos.id}>
+                      {pos.p_name}
+                    </option>
+                  ))}
+              </select>
             </div>
 
-            {/* Form Buttons */}
-            <div className="flex justify-center">
+            {/* Submit and Reset Buttons */}
+            <div className="flex justify-center mt-6 gap-4">
               <button
                 type="button"
                 onClick={handleReset}
-                className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 mr-4"
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
               >
-                Reset
+                คืนค่า
               </button>
               <button
                 type="submit"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                Submit
+                บันทึก
               </button>
             </div>
           </form>

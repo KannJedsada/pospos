@@ -46,6 +46,17 @@ const get_menucategory = async (req, res) => {
   }
 };
 
+const get_menu_bycategoryone = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const cateone = await menu.get_menu_bycategoryone(id);
+    res.status(200).json({ data: cateone });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 const get_price = async (req, res) => {
   try {
     const price = await menu.get_price();
@@ -59,7 +70,7 @@ const get_price = async (req, res) => {
 const get_pricebyid = async (req, res) => {
   try {
     const id = req.params.id;
-    const price = await menu.get_menu_byid(id);
+    const price = await menu.get_price_byid(id);
     res.status(200).json({ data: price });
   } catch (error) {
     console.error(error);
@@ -70,6 +81,16 @@ const get_pricebyid = async (req, res) => {
 const get_menu = async (req, res) => {
   try {
     const menus = await menu.get_menu();
+    res.status(200).json({ data: menus });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const get_menu_cus = async (req, res) => {
+  try {
+    const menus = await menu.get_menu_cus();
     res.status(200).json({ data: menus });
   } catch (error) {
     console.error(error);
@@ -133,21 +154,17 @@ const add_status = async (req, res) => {
 
 const add_menu = async (req, res) => {
   try {
-    // Extract form data and file
-    console.log("Request Body:", req.body);
-    console.log("Uploaded File:", req.file);
-
-    const { name, category, price, ingredients } = req.body;
+    const { name, category, ingredients, menutype } = req.body;
     const img = req.file ? req.file.filename : null; // Get uploaded file name
 
     // Validation
-    if (!name || !category || !price || !ingredients || !img) {
+    if (!name || !category || !ingredients || !img) {
       console.error("Missing fields:", {
         name,
         category,
-        price,
         ingredients,
         img,
+        menutype,
       });
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -156,9 +173,9 @@ const add_menu = async (req, res) => {
     const new_menu = await menu.add_menu({
       name,
       category,
-      price,
-      ingredients: JSON.parse(ingredients), // Parse JSON string
+      ingredients: JSON.parse(ingredients),
       img,
+      menutype,
     });
     res.status(200).json({ data: new_menu });
   } catch (error) {
@@ -170,17 +187,16 @@ const add_menu = async (req, res) => {
 const edit_menu = async (req, res) => {
   try {
     const id = req.params.id;
-    const { menu_name, menu_category, price, ingredients } = req.body;
+    const { menu_name, menu_category, ingredients } = req.body;
     const img = req.file ? req.file.filename : null;
 
-    // ตรวจสอบข้อมูลที่ได้รับ
-    console.log("Request body:", {
-      menu_name,
-      menu_category,
-      price,
-      ingredients,
-    });
-    console.log("Uploaded file:", img);
+    // // ตรวจสอบข้อมูลที่ได้รับ
+    // console.log("Request body:", {
+    //   menu_name,
+    //   menu_category,
+    //   ingredients,
+    // });
+    // console.log("Uploaded file:", img);
 
     // Fetch existing menu
     const menuToEdit = await menu.get_menu_byid(id);
@@ -192,7 +208,7 @@ const edit_menu = async (req, res) => {
     const updatedImg = img || menuToEdit.menu_img;
 
     // Validate required fields
-    if (!menu_name || !menu_category || !price || !ingredients) {
+    if (!menu_name || !menu_category || !ingredients) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -206,7 +222,6 @@ const edit_menu = async (req, res) => {
     const updatedMenu = await menu.edit_menu(id, {
       name: menu_name,
       category: menu_category,
-      price,
       ingredients: parsedIngredients,
       img: updatedImg,
     });
@@ -274,6 +289,106 @@ const delete_menu = async (req, res) => {
   }
 };
 
+const get_menu_type = async (req, res) => {
+  try {
+    const menu_type = await menu.get_menu_type();
+    res.status(200).json({ data: menu_type });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const add_menu_type = async (req, res) => {
+  try {
+    const typename = req.body;
+    const add_type = await menu.add_menu_type(typename);
+    res.status(200).json({ data: add_type });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const edit_menu_type = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = req.body;
+    const edit_type = await menu.edit_menu_type(id, data);
+    res.status(200).json({ data: edit_type });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const delete_menu_type = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const delete_type = await menu.delete_menu_type(id);
+    res.status(200).json({ data: delete_type });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const get_cost_menu = async (req, res) => {
+  try {
+    const menu_id = req.params.id;
+    const costmenu = await menu.get_cost_menu(menu_id);
+    res.status(200).json({ data: costmenu });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const new_price = async (req, res) => {
+  try {
+    const menu_id = req.params.id;
+    const data = req.body;
+    const newPrice = await menu.new_price(menu_id, data);
+    res.status(200).json({ data: newPrice });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const edit_menu_cat = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const data = req.body;
+    const edit_cat = await menu.edit_menu_cat(id, data);
+    res.status(200).json({ data: edit_cat });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const delete_menu_cat = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const delete_cat = await menu.delete_menu_cat(id);
+    res.status(200).json({ data: delete_cat });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const get_recommend = async (req, res) => {
+  try {
+    const recom = await menu.get_recommend();
+    res.status(200).json({ data: recom });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   upload,
   get_menucategory,
@@ -288,4 +403,15 @@ module.exports = {
   add_menu,
   delete_menu,
   edit_menu,
+  get_menu_bycategoryone,
+  get_menu_type,
+  add_menu_type,
+  edit_menu_type,
+  delete_menu_type,
+  get_cost_menu,
+  new_price,
+  edit_menu_cat,
+  delete_menu_cat,
+  get_recommend,
+  get_menu_cus
 };

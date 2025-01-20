@@ -13,48 +13,70 @@ const loginRoutes = require("./routes/loginlogoutRoute");
 const unitRoutes = require("./routes/unitRoute");
 const menuRoutes = require("./routes/menuRoute");
 const materilaRoutes = require("./routes/materailRoute");
+const stockRoutes = require("./routes/stockRoutes");
 const socketHandler = require("./socket/socketHandler");
+const qrRoutes = require(`./routes/qrRoute`);
+const tableRoutes = require(`./routes/tableRoute`);
+const promotionRoutes = require("./routes/promoRoute");
+const orderRoutes = require("./routes/orderRoute");
+const receiptRoutes = require("./routes/receitRoute");
 
 const app = express();
 const PORT = process.env.PORT;
 
 const server = http.createServer(app);
 
-// server.js
+// ตรวจสอบตัวแปรสภาพแวดล้อมสำหรับ CORS
+// ngrok frontend
+// const clientUrl = process.env.NGROK_URL_3000;
+
+const clientUrl = process.env.NGROK_URL_3000;
+
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
+    origin: clientUrl, // Allows only this URL to connect
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    credentials: true, // Allow credentials (cookies, headers, etc.)
   },
 });
 
-socketHandler(io);
+socketHandler(io); // Attach socket event handlers
 
+// app.use(cors(corsOptions));
 const corsOptions = {
-  origin: "http://localhost:3000",
-  credentials: true,
+  // origin: process.env.NGROK_URL_3000, // URL ของ frontend
+  origin: clientUrl, // URL ของ frontend
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // methods ที่รองรับ
+  credentials: true, // เปิดให้รองรับ cookies หรือ session
+  allowedHeaders: ["Content-Type", "Authorization"], // Headers ที่อนุญาต
 };
 
-app.use(cors(corsOptions));
+app.use(cors(corsOptions)); // ใช้กับทุก endpoint
+app.options("*", cors(corsOptions)); // รองรับ OPTIONS สำหรับทุก path
 
 app.use(express.json());
-
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// ตั้งค่าเส้นทาง API
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 app.use("/api", loginRoutes);
 app.use("/api/emp", employeeRoutes);
 app.use("/api/dept", deptRoutes);
 app.use("/api/pos", posRoutes);
 app.use("/api/ts", tsRoutes);
-app.use("/api/ws", (req, res, next) => {
-  req.io = io;
-  next();
-});
 app.use("/api/ws", workdateRoutes);
 app.use("/api/unit", unitRoutes);
 app.use("/api/material", materilaRoutes);
 app.use("/api/menu", menuRoutes);
+app.use("/api/stock", stockRoutes);
+app.use("/api/qr", qrRoutes);
+app.use("/api/table", tableRoutes);
+app.use("/api/promotion", promotionRoutes);
+app.use("/api/order", orderRoutes);
+app.use("/api/receipt", receiptRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
