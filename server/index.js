@@ -22,37 +22,31 @@ const orderRoutes = require("./routes/orderRoute");
 const receiptRoutes = require("./routes/receitRoute");
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
 
-// ตรวจสอบตัวแปรสภาพแวดล้อมสำหรับ CORS
-// ngrok frontend
-// const clientUrl = process.env.NGROK_URL_3000;
-
-const clientUrl = process.env.NGROK_URL_3000;
+const clientUrl = process.env.FRONT_URL;
 
 const io = socketIo(server, {
   cors: {
-    origin: clientUrl, // Allows only this URL to connect
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
-    credentials: true, // Allow credentials (cookies, headers, etc.)
+    origin: clientUrl,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
   },
 });
 
-socketHandler(io); // Attach socket event handlers
+socketHandler(io);
 
-// app.use(cors(corsOptions));
 const corsOptions = {
-  // origin: process.env.NGROK_URL_3000, // URL ของ frontend
-  origin: clientUrl, // URL ของ frontend
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // methods ที่รองรับ
-  credentials: true, // เปิดให้รองรับ cookies หรือ session
-  allowedHeaders: ["Content-Type", "Authorization"], // Headers ที่อนุญาต
+  origin: clientUrl,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-app.use(cors(corsOptions)); // ใช้กับทุก endpoint
-app.options("*", cors(corsOptions)); // รองรับ OPTIONS สำหรับทุก path
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -62,6 +56,7 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
+
 app.use("/api", loginRoutes);
 app.use("/api/emp", employeeRoutes);
 app.use("/api/dept", deptRoutes);
