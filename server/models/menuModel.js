@@ -71,27 +71,30 @@ class Menu {
   static async get_menu_byid(id) {
     const res = await pool.query(
       `SELECT 
-          m.menu_id,
-          m.menu_name,
-          m.menu_img,
-          m.menu_category,
-          m.menu_type,
-          mp.price,
-          mp.date_start,
-          array_agg(
-            json_build_object(
-              'material_id', mi.material_id,
-              'material_name', materials.m_name,
-              'quantity_used', mi.quantity_used,
-              'unit_id', mi.unit_id
-            )
-          ) AS ingredients
-        FROM menus AS m
-        LEFT JOIN menu_price AS mp ON m.menu_id = mp.menu_id
-        LEFT JOIN menu_ingredients AS mi ON m.menu_id = mi.menu_id
-        LEFT JOIN materials ON mi.material_id = materials.id
-        WHERE m.menu_id = $1
-        GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start`,
+    m.menu_id,
+    m.menu_name,
+    m.menu_img,
+    m.menu_category,
+    m.menu_type,
+    mp.price,
+    mp.date_start,
+    array_agg(
+        json_build_object(
+            'material_id', mi.material_id,
+            'material_name', materials.m_name,
+            'quantity_used', mi.quantity_used,
+            'unit_id', mi.unit_id,
+            'u_name', u.u_name
+        )
+    ) AS ingredients
+FROM menus AS m
+LEFT JOIN menu_price AS mp ON m.menu_id = mp.menu_id
+LEFT JOIN menu_ingredients AS mi ON m.menu_id = mi.menu_id
+INNER JOIN units u ON mi.unit_id = u.id
+LEFT JOIN materials ON mi.material_id = materials.id
+WHERE m.menu_id = $1
+GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
+`,
       [id]
     );
     return res.rows[0];
@@ -291,9 +294,9 @@ class Menu {
 
       if (unit_conversion.rows.length > 0) {
         const converrate = unit_conversion.rows[0].conversion_rate;
-        cost = menu.quantity_used * converrate * parseFloat(menu.price); 
+        cost = menu.quantity_used * converrate * parseFloat(menu.price);
       } else {
-        cost = menu.quantity_used * parseFloat(menu.price); 
+        cost = menu.quantity_used * parseFloat(menu.price);
       }
 
       totalcost += cost; // สะสมค่าต้นทุนรวม

@@ -144,15 +144,15 @@ const Schedules = () => {
             </p>
             <p className="text-lg text-gray-700">
               <span className="font-semibold text-blue-700">ตำแหน่ง:</span>{" "}
-              {personalInfo.p_name}
+              {personalInfo.p_name || "-"}
             </p>
             <p className="text-lg text-gray-700">
               <span className="font-semibold text-blue-700">แผนก:</span>{" "}
-              {personalInfo.dept_name}
+              {personalInfo.dept_name || "-"}
             </p>
             <p className="text-lg text-gray-700">
               <span className="font-semibold text-blue-700">เวลาเริ่มงาน:</span>{" "}
-              {personalInfo.start_time}
+              {personalInfo.start_time || "-"}
             </p>
           </div>
         </div>

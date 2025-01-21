@@ -70,14 +70,17 @@ function Allreceipt() {
       return acc;
     }
 
+    let total_price = curr.price; // Initialize total_price with the current price
+
     const existingItem = acc.find((item) => item.menu_id === curr.menu_id);
 
     if (existingItem) {
       existingItem.qty += curr.qty;
-      existingItem.price += curr.price;
+      existingItem.price += curr.price; // Update price for the existing item
     } else {
       acc.push({
         ...curr,
+        total_price,
       });
     }
     return acc;

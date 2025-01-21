@@ -34,7 +34,7 @@ const PrintReceipt = ({ receiptData, receiptDetailData, currpage }) => {
           const scaledHeight = img.height * scaleFactor;
 
           // Convert back to inches for PDF
-          const pdfWidth = scaledWidth / 96;
+          const pdfWidth = scaledWidth / 104;
           const pdfHeight = scaledHeight / 96; // Convert pixels to inches
 
           // Create PDF with calculated dimensions
@@ -114,7 +114,9 @@ const PrintReceipt = ({ receiptData, receiptDetailData, currpage }) => {
               {receiptDetailData.map((item, index) => (
                 <tr key={index}>
                   <td className="py-1">{item.menu_name || "-"}</td>
-                  <td className="text-center py-1">{item.qty || 0}</td>
+                  <td className="text-center py-1">
+                    {item.qty} x {item.total_price}
+                  </td>
                   <td className="text-right py-1">
                     {(item.price || 0).toFixed(2)}
                   </td>
@@ -210,12 +212,6 @@ const PrintReceipt = ({ receiptData, receiptDetailData, currpage }) => {
         >
           {isPrinting ? "กำลังพิมพ์..." : "พิมพ์ใบเสร็จ"}
         </button>
-        {/* <button
-          onClick={SaveAsPDFHandler}
-          className="px-6 py-2 rounded bg-green-700 text-white hover:bg-green-800 mt-4"
-        >
-          บันทึกเป็น PDF
-        </button> */}
       </div>
 
       {/* CSS Styles */}

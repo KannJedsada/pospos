@@ -216,12 +216,14 @@ function Receipt() {
   const groupedReceiptDetail = (receiptDetail || []).reduce((acc, curr) => {
     const existingItem = acc.find((item) => item.menu_id === curr.menu_id);
 
+    let total_price = curr.price;
     if (existingItem) {
       existingItem.qty += curr.qty;
       existingItem.price += curr.price;
     } else {
       acc.push({
         ...curr,
+        total_price
       });
     }
 
@@ -474,7 +476,7 @@ function Receipt() {
             <PrintReceipt
               receiptData={receipt}
               receiptDetailData={groupedReceiptDetail}
-              currpage={back}
+              currpage={"receipt"}
             />
           </div>
         </div>

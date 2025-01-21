@@ -4,7 +4,7 @@ import axios from "../../utils/axiosInstance";
 import AuthContext from "../../components/auth/authcontext";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-import { Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { View, Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 function Menus() {
@@ -16,6 +16,9 @@ function Menus() {
   const [selectCategory, setSelectdCategory] = useState("");
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [menuIng, setMenuIng] = useState([]);
+  const [isLoadingModal, setIsloadingModal] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [menusPerPage] = useState(10);
@@ -112,6 +115,29 @@ function Menus() {
 
   const handleAddMenu = () => {
     navigate("/addmenu");
+  };
+
+  const handleView = async (id) => {
+    try {
+      setIsOpenModal(true);
+      setIsloadingModal(true);
+      const res = await axios.get(`/api/menu/menu/${id}`, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+        },
+      });
+      setMenuIng(res.data.data);
+      console.log(res.data.data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsloadingModal(false);
+    }
+  };
+
+  const closeModal = () => {
+    setIsOpenModal(false);
+    setMenuIng([]);
   };
 
   // Run once when the component mounts
@@ -309,12 +335,18 @@ function Menus() {
                       </td>
                       <td className="px-4 py-2 border-b h-full">
                         <div className="flex space-x-2 items-center h-full relative">
+                          <button
+                            className="flex items-center justify-center w-10 h-10 bg-blue-400 text-white rounded-lg shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                            onClick={() => handleView(menu.menu_id)}
+                          >
+                            <View />
+                          </button>
                           <Menu
                             as="div"
                             className="relative inline-block text-left"
                           >
                             <div>
-                              <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-blue-500 hover:bg-blue-500">
+                              <MenuButton className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white shadow hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
                                 <Pencil />
                               </MenuButton>
                             </div>
@@ -326,7 +358,7 @@ function Menus() {
                                 position: "absolute",
                                 top: "-70%",
                                 left: "-340%",
-                              }} // ปรับตำแหน่งเมนู
+                              }}
                             >
                               <div className="py-1">
                                 <MenuItem>
@@ -385,6 +417,67 @@ function Menus() {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {isOpenModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-lg sm:w-2/3 lg:w-1/3 shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">รายละเอียดเมนู</h2>
+              </div>
+              {isLoadingModal ? (
+                <div className="flex justify-center items-center min-h-screen">
+                  <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
+                </div>
+              ) : (
+                <>
+                  {menuIng && (
+                    <div className="max-h-[90vh] overflow-y-auto">
+                      <div className="mb-4 flex justify-center">
+                        <img
+                          src={
+                            menuIng.menu_img
+                              ? `${process.env.REACT_APP_NGROK_URL_5000}/uploads/menu/${menuIng.menu_img}`
+                              : "/path/to/placeholder-image.png"
+                          }
+                          alt={menuIng.menu_name || "เมนูนี้ไม่มีชื่อ"}
+                          className="w-48 h-48 object-cover rounded-lg shadow-md"
+                        />
+                      </div>
+
+                      <div className="mb-4">
+                        <h3 className="text-lg font-semibold">
+                          ชื่อเมนู: {menuIng.menu_name}
+                        </h3>
+                        <p>ราคา: {menuIng.price || "-"} บาท</p>
+                      </div>
+                      <div>
+                        <h4 className="text-md font-semibold mb-2">
+                          วัตถุดิบที่ใช้:
+                        </h4>
+                        <ul className="list-disc pl-6">
+                          {menuIng.ingredients.map((ingredient, index) => (
+                            <li key={index}>
+                              {ingredient.material_name} -{" "}
+                              {ingredient.quantity_used} {ingredient.u_name}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mt-6 text-right">
+                        <button
+                          className="bg-red-500 text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                          onClick={closeModal}
+                        >
+                          ปิด
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         )}
 
