@@ -57,6 +57,17 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error querying database:', error);
+    res.status(500).send('Database query error');
+  }
+});
+
+
 app.use("/api", loginRoutes);
 app.use("/api/emp", employeeRoutes);
 app.use("/api/dept", deptRoutes);
