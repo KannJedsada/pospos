@@ -25,6 +25,7 @@ const EmpManagement = () => {
   // fetch data emp
   const fetchEmployees = async (deptId = "", positionId = "") => {
     try {
+      setIsLoading(true);
       let response;
       if (deptId && positionId) {
         response = await axios.get(
@@ -59,6 +60,8 @@ const EmpManagement = () => {
     } catch (error) {
       console.error("Error fetching employees:", error);
       Swal.fire("Error", "Failed to fetch employee data", "error");
+    }finally{
+      setIsLoading(false);
     }
   };
 
