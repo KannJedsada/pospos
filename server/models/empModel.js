@@ -3,7 +3,7 @@ const pool = require("../config/db");
 class Emp {
   static async get_emp() {
     const res = await pool.query(
-      "SELECT * FROM employees AS emp "
+      "SELECT * FROM employees AS emp INNER JOIN positions AS p ON emp.p_id = p.id INNER JOIN departments AS dept ON p.dept_id = dept.id"
     );
     return res.rows;
   }
