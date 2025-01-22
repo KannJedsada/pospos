@@ -94,6 +94,7 @@ const Editemp = () => {
   const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [empAccess, setEmpAccess] = useState([]);
 
   // Fetch provinces once on component mount
   useEffect(() => {
@@ -271,14 +272,35 @@ const Editemp = () => {
     }
   }, [id_card, authData.token, provinces]);
 
+   useEffect(() => {
+    const fetchEmployeeData = async () => {
+      try {
+        setIsLoading(true);
+        const access = await axios.get(`/api/emp/empdept/${authData.id_card}`);
+        const empData = access?.data?.data;
+        setEmpAccess(empData); // อัปเดต State
+      } catch (error) {
+        console.error("Error fetching employee data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmployeeData();
+  }, []);
+
   // fetch position
   useEffect(() => {
     const fetchPos = async () => {
       try {
         const positionsRes = await axios.get("/api/pos");
-        const filteredPositions = positionsRes.data.data.filter(
-          (position) => position.dept_id !== 1 && position.dept_id !== 5
-        );
+        const allPositions = positionsRes.data.data;
+        const filteredPositions =
+          empAccess.access === 1 || empAccess.access === 0
+            ? allPositions
+            : allPositions.filter(
+                (position) => position.dept_id !== 1 && position.dept_id !== 2
+              );
         setPosition(filteredPositions);
       } catch (error) {
         console.error("Error fetching data:", error);
