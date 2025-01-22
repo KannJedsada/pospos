@@ -200,6 +200,7 @@ const Editemp = () => {
           },
         });
         const employeeData = response.data.data;
+        console.log(employeeData);
 
         const province = provinces.find(
           (p) => p.name_th === employeeData.province
