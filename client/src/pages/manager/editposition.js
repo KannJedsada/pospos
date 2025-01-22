@@ -59,7 +59,6 @@ function Editposition() {
     }
 
     try {
-      console.log(data);
       const res = await axios.put(`/api/pos/${id}`, data, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
