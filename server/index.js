@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { Pool } = require("pg");
+const pool = require('./config/db'); 
 const express = require("express");
 const cors = require("cors");
 const http = require("http");
