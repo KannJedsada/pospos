@@ -12,7 +12,7 @@ class Emp {
     const res = await pool.query(
       `SELECT emp.id_card, emp.f_name, emp.l_name, emp.emp_phone, emp.emp_mail, 
       emp.house_number, emp.road, emp.province, emp.district, emp.subdistrict, 
-      emp.zipcode, p.p_name, dept.dept_name FROM employees emp 
+      emp.zipcode, p.p_name, dept.dept_name,emp.access, emp.p_id FROM employees emp 
       LEFT JOIN positions p 
       ON emp.p_id = p.id 
       LEFT JOIN departments dept 
