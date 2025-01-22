@@ -86,10 +86,29 @@ const Addemp = () => {
   const [amphures, setAmphures] = useState([]);
   const [tambons, setTambons] = useState([]);
   const [positions, setPosition] = useState([]);
+  const [empAccess, setEmpAccess] = useState([]);
 
   const { authData } = useContext(AuthContext);
 
   // fetch provinces and position
+  useEffect(() => {
+    const fetchEmployeeData = async () => {
+      try {
+        setIsLoading(true);
+        const access = await axios.get(`/api/emp/empdept/${authData.id_card}`);
+        const empData = access?.data?.data;
+        setEmpAccess(empData); // อัปเดต State
+      } catch (error) {
+        console.error("Error fetching employee data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmployeeData();
+  }, []);
+
+  // useEffect to fetch provinces and positions
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -104,9 +123,15 @@ const Addemp = () => {
         ]);
 
         setProvinces(provincesRes.data);
-        const filteredPositions = positionsRes.data.data.filter(
-          (position) => position.dept_id !== 1 && position.dept_id !== 5
-        );
+
+        // กรองตำแหน่งตามเงื่อนไข empAccess.access
+        const allPositions = positionsRes.data.data;
+        const filteredPositions =
+          empAccess.access === 1 || empAccess.access === 0
+            ? allPositions
+            : allPositions.filter(
+                (position) => position.dept_id !== 1 && position.dept_id !== 2
+              );
         setPosition(filteredPositions);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -115,7 +140,7 @@ const Addemp = () => {
     };
 
     fetchData();
-  }, []);
+  }, [empAccess]);
 
   // fetch Amphues
   useEffect(() => {
