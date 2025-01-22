@@ -4,7 +4,7 @@ const employeeController = require("../controllers/empController");
 const authenticateToken = require("../middlewares/authMiddleware");
 
 // ดึงขอมูลพนักงานทั้งหมด
-router.get("/", authenticateToken, employeeController.get_emp);
+router.get("/", employeeController.get_emp);
 // ดึงข้อมูลเฉพาะบุคคล
 router.get("/data/:id_card", authenticateToken, employeeController.get_data);
 // ดึงเวลาทำงานของพนักงาน
