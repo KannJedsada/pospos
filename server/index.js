@@ -60,7 +60,8 @@ app.use((req, res, next) => {
 
 app.get('/test-db', async (req, res) => {
   try {
-    res.send('Hello World!');
+    const result = await pool.query('SELECT * FROM employees');
+    res.json(result.rows);
   } catch (error) {
     console.error('Error querying database:', error);
   }
