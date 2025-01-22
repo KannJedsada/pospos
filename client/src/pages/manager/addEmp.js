@@ -64,7 +64,6 @@ const Addemp = () => {
         if (!/^[\u0E00-\u0E7F]+$/.test(value) && !/^[A-Za-z]+$/.test(value)) {
           return "กรุณากรอกชื่อ-นามสกุลเป็นภาษาไทยหรือภาษาอังกฤษเท่านั้น";
         }
-        console.log(value);
         const isThai = /^[\u0E00-\u0E7F]+$/.test(value);
         const isEnglish = /^[A-Za-z]+$/.test(value);
 
