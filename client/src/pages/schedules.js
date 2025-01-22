@@ -21,7 +21,6 @@ const Schedules = () => {
       const response = await axios.get(`/api/emp/data/${authData.id_card}`, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
-      console.log(response.data.data);
 
       const workdate = await axios.get(
         `/api/emp/workdate/${authData.id_card}`,
