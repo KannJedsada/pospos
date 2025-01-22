@@ -64,6 +64,7 @@ app.get('/test-db', async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('Error querying database:', error);
+    res.status(500).send('Database query error');
   }
 });
 
