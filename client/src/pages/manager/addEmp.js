@@ -87,6 +87,7 @@ const Addemp = () => {
   const [tambons, setTambons] = useState([]);
   const [positions, setPosition] = useState([]);
   const [empAccess, setEmpAccess] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { authData } = useContext(AuthContext);
 
