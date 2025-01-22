@@ -180,14 +180,13 @@ function DeptManagement() {
                         <button
                           onClick={() => handleDelete(dept.id)}
                           className={`px-4 py-1 rounded-lg text-white ${
-                            dept.dept_id === 1 ||
-                            dept.id_card === authData.id_card
+                            dept.id === 1 ||
+                            dept.id === 2
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-red-500 hover:bg-red-600"
                           } text-white ml-2`}
                           disabled={
-                            dept.dept_id === 1 ||
-                            dept.id_card === authData.id_card
+                            dept.id === 1 || dept.id === 2
                           }
                         >
                           <X />
