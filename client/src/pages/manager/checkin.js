@@ -95,6 +95,9 @@ const Checkin = () => {
       });
     } finally {
       setIsProcessing(false);
+      // ปิดกล้องแล้วเปิดใหม่
+      stopScanner();
+      setTimeout(startScanner, 1000); // เปิดกล้องใหม่หลังจาก 1 วินาที
     }
   };
 
