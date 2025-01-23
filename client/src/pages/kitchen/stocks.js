@@ -265,7 +265,7 @@ function Stocks() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="px-4 py-4 text-gray-700">
+                  <td colSpan="8" className="px-4 py-4 text-gray-700 text-center">
                     ไม่มีข้อมูล
                   </td>
                 </tr>
