@@ -52,6 +52,7 @@ const Schedules = () => {
         p_name,
         dept_name,
         start_time,
+        end_time,
       } = response.data.data[0];
       setPersonalInfo({
         id_card,
@@ -62,6 +63,7 @@ const Schedules = () => {
         p_name,
         dept_name,
         start_time,
+        end_time,
       });
 
       const filteredSchedules = workdate.data.data
