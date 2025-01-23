@@ -365,7 +365,7 @@ function Allreceipt() {
           </div>
         )}
 
-        {/* {currentPage > 1 && ( */}
+       {currentPage > 1 && ( 
         <div className="flex justify-center items-center mt-6">
           {/* ปุ่มย้อนกลับ */}
           <button
@@ -412,7 +412,7 @@ function Allreceipt() {
             <ChevronRight />
           </button>
         </div>
-        {/* )} */}
+        )}
       </div>
     </div>
   );
