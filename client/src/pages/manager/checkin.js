@@ -11,27 +11,64 @@ const Checkin = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { authData } = useContext(AuthContext);
 
-  const startScanner = () => {
-    if (videoRef.current) {
-      const scanner = new QrScanner(
-        videoRef.current,
-        async (result) => {
-          if (!isProcessing && result.data) {
-            await handleScan(result.data);
-          }
-        },
-        {
-          onDecodeError: (error) => {
-            console.error("QR Code decode error:", error);
-          },
-        }
-      );
-      scanner.start().catch((error) => {
-        console.error("Error starting QR scanner:", error);
-      });
-      setQrScanner(scanner);
+const handleScan = async (data) => {
+  setIsProcessing(true);
+  try {
+    if (!authData || !authData.token) {
+      throw new Error("Authentication data is missing or invalid.");
     }
-  };
+
+    // ปิดกล้องก่อนเพื่อเริ่มใหม่
+    stopScanner();
+
+    const response = await axios.post(
+      "/api/ts/checkin",
+      { id_card: data },
+      {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+        },
+      }
+    );
+
+    if (response.data.data.is_late) {
+      Swal.fire({
+        title: "คุณมาสาย!",
+        text: "คุณได้เช็คอินล่าช้า",
+        icon: "warning",
+        showConfirmButton: false,
+        timer: 1000,
+      });
+    } else {
+      Swal.fire({
+        title: "เช็คอินสำเร็จ",
+        text: "คุณได้เช็คอินสำเร็จ",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1000,
+      });
+    }
+  } catch (error) {
+    console.error("Error during check-in:", error);
+    const errorMessage =
+      error.response?.data?.message || "เกิดข้อผิดพลาดในการเช็คอิน";
+    Swal.fire({
+      title: "เกิดข้อผิดพลาด",
+      text: errorMessage,
+      icon: "error",
+      showConfirmButton: false,
+      timer: 1000,
+    });
+  } finally {
+    setIsProcessing(false);
+
+    // เปิดกล้องใหม่หลังจากการประมวลผลเสร็จ
+    setTimeout(() => {
+      startScanner();
+    }, 1000); // ตั้งเวลาหน่วงก่อนเริ่มกล้องใหม่ (เพื่อหลีกเลี่ยงการรีสแกนทันที)
+  }
+};
+
 
   const stopScanner = () => {
     if (qrScanner) {
