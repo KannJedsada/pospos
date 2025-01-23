@@ -22,6 +22,16 @@ const EmpManagement = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [materialsPerPage] = useState(10);
+  const [accData, setAccData] = useState()
+
+
+  const accessData = async () => {
+      const access = await axios.get(
+        `/api/emp/empdept/${authData.id_card}`
+      );
+      const acc = access?.data?.data?.access;
+    setAccData(acc);
+  }
   // fetch data emp
   const fetchEmployees = async (deptId = "", positionId = "") => {
     try {
@@ -167,6 +177,7 @@ const EmpManagement = () => {
       fetchDepartments();
       fetchPositions();
       fetchEmployees(selectedDept, selectedPosition);
+      accessData();
   }, [selectedDept, selectedPosition, authData.token]);
 
   useEffect(() => {
@@ -366,12 +377,7 @@ const EmpManagement = () => {
                       <td className="py-3 px-6 text-sm flex flex-col sm:flex-row">
                         <button
                           onClick={() => openModal(employee.id_card)}
-                          className={`px-4 py-1 rounded-lg text-white ${
-                            employee.dept_id === 1
-                              ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-blue-400 hover:bg-blue-500"
-                          }`}
-                          disabled={employee.dept_id === 1}
+                          className={`px-4 py-1 rounded-lg text-white bg-blue-400 hover:bg-blue-500`}
                         >
                           <View />
                         </button>
@@ -382,7 +388,7 @@ const EmpManagement = () => {
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-blue-700 hover:bg-blue-800"
                           }`}
-                          disabled={employee.dept_id === 1}
+                          disabled={accData !== 1 && accData !== 0}
                         >
                           <Pencil />
                         </button>
@@ -394,10 +400,7 @@ const EmpManagement = () => {
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-red-500 hover:bg-red-600"
                           }`}
-                          disabled={
-                            employee.dept_id === 1 ||
-                            employee.id_card === authData.id_card
-                          }
+                          disabled={accData !== 1 && accData !== 0}
                         >
                           <X />
                         </button>
