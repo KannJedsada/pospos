@@ -384,7 +384,7 @@ const EmpManagement = () => {
                         <button
                           onClick={() => handleEdit(employee.id_card)}
                           className={`px-4 py-1 rounded-lg mt-2 sm:mt-0 sm:ml-2 text-white ${
-                            employee.dept_id === 1
+                            accData !== 1 && accData !== 0 || employeee.dept_id === 1
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-blue-700 hover:bg-blue-800"
                           }`}
@@ -395,8 +395,8 @@ const EmpManagement = () => {
                         <button
                           onClick={() => handleDelete(employee.id_card)}
                           className={`px-4 py-1 rounded-lg mt-2 sm:mt-0 sm:ml-2 text-white ${
-                            employee.dept_id === 1 ||
-                            employee.id_card === authData.id_card
+                            accData !== 1 && accData !== 0 ||
+                            employee.id_card === authData.id_card || employeee.dept_id === 1
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-red-500 hover:bg-red-600"
                           }`}
