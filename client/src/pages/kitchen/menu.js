@@ -480,8 +480,9 @@ function Menus() {
             </div>
           </div>
         )}
-
-        <div className="flex justify-center items-center mt-6">
+          
+{currentPage > 1 && (
+   <div className="flex justify-center items-center mt-6">
           {/* ปุ่มย้อนกลับ */}
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -527,6 +528,8 @@ function Menus() {
             <ChevronRight />
           </button>
         </div>
+)}
+       
       </div>
     </div>
   );
