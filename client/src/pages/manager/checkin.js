@@ -11,7 +11,7 @@ const Checkin = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { authData } = useContext(AuthContext);
 
-const handleScan = async (data) => {
+const handleScanner = async (data) => {
   setIsProcessing(true);
   try {
     if (!authData || !authData.token) {
@@ -68,7 +68,6 @@ const handleScan = async (data) => {
     }, 1000); // ตั้งเวลาหน่วงก่อนเริ่มกล้องใหม่ (เพื่อหลีกเลี่ยงการรีสแกนทันที)
   }
 };
-
 
   const stopScanner = () => {
     if (qrScanner) {
