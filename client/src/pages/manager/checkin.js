@@ -62,7 +62,7 @@ const Checkin = () => {
         { id_card: data },
         {
           headers: {
-            Authorization: Bearer ${authData.token},
+            Authorization: `Bearer ${authData.token}`,
           },
         }
       );
