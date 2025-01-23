@@ -108,7 +108,9 @@ const Schedules = () => {
     };
   }, [fetchSchedules]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div className="flex justify-center items-center min-h-screen">
+          <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
+        </div>;
   if (error) return <p>{error}</p>;
 
   return (
@@ -152,6 +154,10 @@ const Schedules = () => {
             <p className="text-lg text-gray-700">
               <span className="font-semibold text-blue-700">เวลาเริ่มงาน:</span>{" "}
               {personalInfo.start_time || "-"}
+            </p>
+            <p className="text-lg text-gray-700">
+              <span className="font-semibold text-blue-700">เวลาเลิกงาน:</span>{" "}
+              {personalInfo.end_time || "-"}
             </p>
           </div>
         </div>
