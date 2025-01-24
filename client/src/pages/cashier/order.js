@@ -359,7 +359,8 @@ function Order() {
   };
 
   const closeQr = async (qrid) => {
-    console.log(qrid);
+    const res = await axios.put(`/api/qr/change_qr/${qrid}`);
+    fetchDataByTable(selectedTable);
   };
 
   return (
@@ -512,7 +513,7 @@ function Order() {
                                 พิมพ์ QR Code
                               </button>
                               <button
-                                onClick={() => closeQr()}
+                                onClick={() => closeQr(dataByTable.id)}
                                 disabled={groupedOrders?.length > 0}
                                 className={`ml-4 px-4 py-2 mt-4 ${
                                   groupedOrders.length > 0
