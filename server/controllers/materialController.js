@@ -2,17 +2,7 @@ const Material = require("../models/materialModel");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads/material"));
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
-});
-
-const upload = multer({ storage });
+const cloudinary = require("../config/cloudinary");
 
 const get_material = async (req, res) => {
   try {
@@ -76,6 +66,7 @@ const edit_materials = async (req, res) => {
   try {
     const id = req.params.id;
     const { m_name, unit, sub_materials, category } = req.body;
+    const img = req.file ? req.file.filename : null;
 
     // Fetch the material to be edited
     const materialToEdit = await Material.get_by_id(id);
@@ -84,22 +75,20 @@ const edit_materials = async (req, res) => {
     }
 
     // If a new file is uploaded, use it; otherwise, keep the old image
-    const m_img = req.file ? req.file.filename : materialToEdit.m_img;
+    const m_img = req.file ? `https://res.cloudinary.com/dquqxt3tl/image/upload/v1737743158/${img}` : materialToEdit.m_img;
 
-    // Delete the old image file if a new one is provided
+    // If a new image is uploaded and there is an old image, delete the old image from Cloudinary
     if (req.file && materialToEdit.m_img) {
-      const filePath = path.join(
-        __dirname,
-        "../uploads/material",
-        materialToEdit.m_img
-      );
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error("Error deleting old file:", err);
-        } else {
-          console.log("Old file deleted successfully");
-        }
-      });
+      const publicId = materialToEdit.m_img.split("/").slice(7).join("/").split(".")[0]; // Extract publicId from old image URL
+
+      try {
+        // Delete the old image from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+        console.log("Old image deleted from Cloudinary successfully");
+      } catch (err) {
+        console.error("Error deleting image from Cloudinary:", err.message);
+        return res.status(500).json({ message: "Error deleting image from Cloudinary" });
+      }
     }
 
     // Update the material in the database
@@ -107,7 +96,7 @@ const edit_materials = async (req, res) => {
       m_name,
       unit,
       m_img,
-      sub_materials, // ส่ง sub_materials
+      sub_materials, // Send sub_materials
       category,
     });
 
@@ -118,6 +107,7 @@ const edit_materials = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const delete_material = async (req, res) => {
   try {
@@ -132,20 +122,18 @@ const delete_material = async (req, res) => {
     // Delete the material record
     await Material.delete_material(id);
 
-    // Delete the image file if it exists
+    // Delete the image file from Cloudinary if it exists
     if (materialToDelete.m_img) {
-      const filePath = path.join(
-        __dirname,
-        "../uploads/material",
-        materialToDelete.m_img
-      );
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error("Error deleting file:", err);
-        } else {
-          console.log("File deleted successfully");
-        }
-      });
+      const publicId = materialToDelete.m_img.split("/").slice(7).join("/").split(".")[0]; // Extract publicId from image URL
+
+      try {
+        // Delete the image from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+        console.log("Image deleted from Cloudinary successfully");
+      } catch (err) {
+        console.error("Error deleting image from Cloudinary:", err.message);
+        return res.status(500).json({ message: "Error deleting image from Cloudinary" });
+      }
     }
 
     res.status(200).json({ message: "Material deleted successfully" });
@@ -184,6 +172,5 @@ module.exports = {
   edit_materials,
   delete_material,
   get_by_id,
-  upload,
   get_by_idtrue,
 };

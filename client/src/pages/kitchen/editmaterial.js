@@ -78,7 +78,7 @@ function Editmaterial() {
 
         if (materialData.m_img) {
           setPreviewImage(
-            `${process.env.REACT_APP_NGROK_URL_5000}/uploads/material/${materialData.m_img}`
+            `${materialData.m_img}`
           );
         }
       } else {
