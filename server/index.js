@@ -68,7 +68,6 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-
 app.use("/api", loginRoutes);
 app.use("/api/emp", employeeRoutes);
 app.use("/api/dept", deptRoutes);
