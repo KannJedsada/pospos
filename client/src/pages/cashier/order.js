@@ -361,6 +361,7 @@ function Order() {
   const closeQr = async (qrid) => {
     const res = await axios.put(`/api/qr/change_qr/${qrid}`);
     fetchDataByTable(selectedTable);
+    fetchTable();
   };
 
   return (
