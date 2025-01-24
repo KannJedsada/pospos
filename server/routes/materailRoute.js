@@ -5,6 +5,7 @@ const material = require("../controllers/materialController");
 const authenticateToken = require("../middlewares/authMiddleware");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary"); 
+const multer = require("multer");
 
 // ตั้งค่า Storage ของ Cloudinary
 const storage = new CloudinaryStorage({
