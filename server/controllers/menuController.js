@@ -164,8 +164,8 @@ const edit_menu = async (req, res) => {
     if (!menuToEdit) {
       return res.status(404).json({ message: "Menu not found" });
     }
-    console.log(menuToEdit[0]);
-    const menuImg = menuToEdit[0];
+    console.log(menuToEdit);
+    const menuImg = menuToEdit;
     console.log(menuImg);
     // If no new image is uploaded, keep the old one
     const updatedImg = img || menuImg.menu_img;
@@ -227,7 +227,7 @@ const delete_menu = async (req, res) => {
     // Delete the menu
     await menu.delete_menu(id);
 
-    const menuImg = menuToDelete[0];
+    const menuImg = menuToDelete;
 
     // If the menu has an associated image, delete it from the server
     if (menuImg.menu_img) {
