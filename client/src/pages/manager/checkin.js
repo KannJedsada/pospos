@@ -19,6 +19,7 @@ const Checkin = () => {
                 async (result) => {
                     if (!isProcessing && result.data) {
                         // ตรวจสอบว่าซ้ำกับ QR Code ล่าสุดหรือไม่
+                        stopScanner();
                         setIsProcessing(true); // ตั้งสถานะกำลังประมวลผล
                         await handleScan(result.data); // ส่งข้อมูลไปประมวลผล
                     }
@@ -75,8 +76,10 @@ const Checkin = () => {
             if (response.status !== 200) {
                 throw new Error(`Unexpected response: ${response.status}`);
             }
+            
+            console.log(response.data.data);
 
-            const { already_checked_in, existing_checkin, new_checkin, is_late } = response.data;
+            const { already_checked_in, existing_checkin, new_checkin, is_late } = response.data.data;
 
             if (already_checked_in) {
                 // แสดงแจ้งเตือนว่าเคยเช็คอินแล้ว
