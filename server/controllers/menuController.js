@@ -164,7 +164,7 @@ const edit_menu = async (req, res) => {
       return res.status(404).json({ message: "Menu not found" });
     }
 
-    const menuImg = menuToEdit[0]
+    const menuImg = menuToEdit[0];
     // If no new image is uploaded, keep the old one
     const updatedImg = img || menuImg.menu_img;
 
@@ -188,7 +188,7 @@ const edit_menu = async (req, res) => {
     });
 
     if (img && menuImg.menu_img) {
-      const publicId = menuImg.m_img.split('/').slice(-3).join('/').split('.')[0];
+      const publicId = menuImg.menu_img.split('/').slice(-3).join('/').split('.')[0];
       console.log("Public ID for deletion:", publicId);
 
       try {
