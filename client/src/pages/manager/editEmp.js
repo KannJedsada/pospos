@@ -101,16 +101,13 @@ const Editemp = () => {
       try {
         setIsLoading(true);
         const access = await axios.get(`/api/emp/empdept/${authData.id_card}`);
-        console.log("Response from API:", access); // ตรวจสอบ Response ทั้งหมด
         const empData = access?.data?.data;
         setEmpAccess(empData); // อัปเดต State
-        console.log("Employee Data:", empData); // ตรวจสอบค่า empData
       } catch (error) {
         console.error("Error fetching employee data:", error);
       } finally {
         setIsLoading(false);
       }
-
     };
 
     fetchEmployeeData();
