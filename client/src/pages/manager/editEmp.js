@@ -297,7 +297,6 @@ const Editemp = () => {
       try {
         const positionsRes = await axios.get("/api/pos");
         const allPositions = positionsRes.data.data;
-        console.log(empAccess.access);
         const filteredPositions =
           empAccess.access === 1 || empAccess.access === 0
             ? allPositions

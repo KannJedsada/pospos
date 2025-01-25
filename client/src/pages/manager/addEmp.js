@@ -127,7 +127,6 @@ const Addemp = () => {
 
         // กรองตำแหน่งตามเงื่อนไข empAccess.access
         const allPositions = positionsRes.data.data;
-        console.log(empAccess.access);
         const filteredPositions =
           empAccess.access === 1 || empAccess.access === 0
             ? allPositions
