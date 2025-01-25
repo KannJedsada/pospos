@@ -28,31 +28,24 @@ const get_material_bycategory = async (req, res) => {
 const add_material = async (req, res) => {
   try {
     const { m_name, unit, composite, composition, category } = req.body;
-    const m_img = req.file ? req.file.filename : null;
+    const m_img = req.file ? req.file.path : null; // ใช้ req.file.path สำหรับ URL
 
-    console.log("Request body:", {
-      m_name,
-      unit,
-      composite,
-      composition,
-      category,
-    });
+    console.log("Request body:", { m_name, unit, composite, composition, category });
 
-    // ตรวจสอบประเภทของ composition
     let parsedComposition;
     if (typeof composition === "string") {
-      parsedComposition = JSON.parse(composition); // ถ้าเป็น string ให้แปลงเป็น array
+      parsedComposition = JSON.parse(composition);
     } else {
-      parsedComposition = composition; // ถ้าเป็น object หรือ array แล้วก็ใช้ได้เลย
+      parsedComposition = composition;
     }
 
     const result = await Material.add_material({
-      m_name: m_name,
-      m_img: m_img,
-      unit: unit,
-      composite: composite === "true" || composite === true, // แปลง composite เป็น boolean
-      composition: parsedComposition || [], // ใช้ array ที่แปลงแล้ว หรือ array ว่างหากไม่มีข้อมูล
-      category: category,
+      m_name,
+      m_img, // เก็บ URL ของ Cloudinary
+      unit,
+      composite: composite === "true" || composite === true,
+      composition: parsedComposition || [],
+      category,
     });
 
     res.status(200).json({ data: result });
@@ -66,27 +59,19 @@ const edit_materials = async (req, res) => {
   try {
     const id = req.params.id;
     const { m_name, unit, sub_materials, category } = req.body;
-    const img = req.file ? req.file.filename : null;
+    const newImgUrl = req.file ? req.file.path : null; // ใช้ req.file.path สำหรับ URL
 
-    // Fetch the material to be edited
     const materialToEdit = await Material.get_by_id(id);
     if (!materialToEdit) {
       return res.status(404).json({ message: "Material not found" });
     }
 
-    // If a new file is uploaded, use it; otherwise, keep the old image
-    const m_img = req.file ? `${img}` : materialToEdit.m_img;
-    console.log("new_img",m_img);
+    const m_img = newImgUrl || materialToEdit.m_img;
 
-    // If a new image is uploaded and there is an old image, delete the old image from Cloudinary
-    if (req.file && materialToEdit.m_img) {
-      const publicId = materialToEdit.m_img;
-      // .split("/").slice(7).join("/").split(".")[0]; // Extract publicId from old image URL
-      console.log("img_to_delete",publicId);
-
+    if (newImgUrl && materialToEdit.m_img) {
+      const publicId = materialToEdit.m_img.split("/").slice(7).join("/").split(".")[0];
       try {
-        // Delete the old image from Cloudinary
-        await cloudinary.uploader.destroy(publicId);
+        await cloudinary.uploader.destroy(publicId); // ลบรูปภาพเก่า
         console.log("Old image deleted from Cloudinary successfully");
       } catch (err) {
         console.error("Error deleting image from Cloudinary:", err.message);
@@ -94,16 +79,14 @@ const edit_materials = async (req, res) => {
       }
     }
 
-    // Update the material in the database
     const updatedMaterial = await Material.edit_material(id, {
       m_name,
       unit,
       m_img,
-      sub_materials, 
+      sub_materials,
       category,
     });
 
-    // Respond with the updated data
     res.status(200).json({ data: updatedMaterial });
   } catch (error) {
     console.error("Error updating material:", error);
@@ -111,28 +94,21 @@ const edit_materials = async (req, res) => {
   }
 };
 
-
 const delete_material = async (req, res) => {
   try {
     const id = req.params.id;
 
-    // Fetch the material from the database to get the image file name
     const materialToDelete = await Material.get_by_id(id);
     if (!materialToDelete) {
       return res.status(404).json({ message: "Material not found" });
     }
 
-    // Delete the material record
     await Material.delete_material(id);
 
-    // Delete the image file from Cloudinary if it exists
     if (materialToDelete.m_img) {
-      const publicId = materialToDelete.m_img;
-      // .split("/").slice(7).join("/").split(".")[0]; // Extract publicId from image URL
-
+      const publicId = materialToDelete.m_img.split("/").slice(-1)[0].split(".")[0]; // ดึง public_id จาก URL
       try {
-        // Delete the image from Cloudinary
-        await cloudinary.uploader.destroy(publicId);
+        await cloudinary.uploader.destroy(publicId); // ลบรูปภาพ
         console.log("Image deleted from Cloudinary successfully");
       } catch (err) {
         console.error("Error deleting image from Cloudinary:", err.message);

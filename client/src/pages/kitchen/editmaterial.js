@@ -273,6 +273,7 @@ function Editmaterial() {
               type="file"
               name="m_img"
               accept="image/*"
+              onChange={handleChange}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {previewImage && (
