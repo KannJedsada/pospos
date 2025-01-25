@@ -95,7 +95,24 @@ const Editemp = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [empAccess, setEmpAccess] = useState([]);
+  
+  useEffect(() => {
+    const fetchEmployeeData = async () => {
+      try {
+        setIsLoading(true);
+        const access = await axios.get(`/api/emp/empdept/${authData.id_card}`);
+        const empData = access?.data?.data;
+        setEmpAccess(empData); // อัปเดต State
+      } catch (error) {
+        console.error("Error fetching employee data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchEmployeeData();
+  }, []);
+  
   // Fetch provinces once on component mount
   useEffect(() => {
     const fetchProvince = async () => {
@@ -139,7 +156,7 @@ const Editemp = () => {
 
     fetchAmphures();
   }, [formData.province]);
-
+  
   // fetch tambons
   useEffect(() => {
     const fetchTambons = async () => {
@@ -272,22 +289,6 @@ const Editemp = () => {
     }
   }, [id_card, authData.token, provinces]);
 
-  useEffect(() => {
-    const fetchEmployeeData = async () => {
-      try {
-        setIsLoading(true);
-        const access = await axios.get(`/api/emp/empdept/${authData.id_card}`);
-        const empData = access?.data?.data;
-        setEmpAccess(empData); // อัปเดต State
-      } catch (error) {
-        console.error("Error fetching employee data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchEmployeeData();
-  }, []);
 
   // fetch position
   useEffect(() => {
