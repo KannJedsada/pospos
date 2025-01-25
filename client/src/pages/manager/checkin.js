@@ -10,6 +10,7 @@ const Checkin = () => {
     const [qrScanner, setQrScanner] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [lastScanned, setLastScanned] = useState(""); // จดจำ QR Code ล่าสุด
+    const [mockData, setMockData] = useState(""); // ข้อมูลสำหรับการเทส
     const { authData } = useContext(AuthContext);
 
     // เริ่มการสแกน QR
@@ -104,6 +105,13 @@ const Checkin = () => {
         }
     };
 
+    // ฟังก์ชันทดสอบการอ่าน Mock QR Code
+    const handleMockScan = () => {
+        if (mockData) {
+            handleScan(mockData);
+        }
+    };
+
     return (
         <div className="wrapper bg-blue-50 min-h-screen">
             <Menubar />
@@ -138,6 +146,22 @@ const Checkin = () => {
                             <p>กำลังประมวลผล...</p>
                         </div>
                     )}
+                    {/* ส่วนสำหรับการเทส Mock QR Code */}
+                    <div className="mt-6">
+                        <input
+                            type="text"
+                            placeholder="ใส่ข้อมูล QR Code สำหรับเทส"
+                            value={mockData}
+                            onChange={(e) => setMockData(e.target.value)}
+                            className="w-full p-2 border rounded"
+                        />
+                        <button
+                            onClick={handleMockScan}
+                            className="mt-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                        >
+                            ทดสอบอ่าน QR Code
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
