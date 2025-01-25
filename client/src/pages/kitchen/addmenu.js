@@ -22,6 +22,7 @@ function Addmenu() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
   const [menutype, setMenutype] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchMaterials = async () => {
     try {
@@ -127,6 +128,7 @@ function Addmenu() {
     }
 
     try {
+      setIsLoading(true);
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("img", selectedFile);
@@ -161,6 +163,8 @@ function Addmenu() {
         "Error:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -193,6 +197,7 @@ function Addmenu() {
               name="name"
               value={data.name}
               onChange={handleChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
           </div>
@@ -203,6 +208,7 @@ function Addmenu() {
             <input
               type="file"
               onChange={handleFileChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {previewImage && (
@@ -225,6 +231,7 @@ function Addmenu() {
               name="category"
               value={data.category}
               onChange={handleChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
               required
             >
@@ -244,6 +251,7 @@ function Addmenu() {
               name="menutype"
               value={data.menutype}
               onChange={handleChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
               required
             >
@@ -269,6 +277,7 @@ function Addmenu() {
                   name="material_id"
                   value={material.material_id}
                   onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
@@ -282,6 +291,7 @@ function Addmenu() {
                   type="text"
                   name="quantity_used"
                   value={material.quantity_used}
+                  disabled={isLoading}
                   onChange={(e) => handleMaterialChange(index, e)}
                   placeholder="ปริมาณ"
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -290,6 +300,7 @@ function Addmenu() {
                   name="unit_id"
                   value={material.unit_id}
                   onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกหน่วย</option>
@@ -302,6 +313,7 @@ function Addmenu() {
                 <button
                   type="button"
                   onClick={() => removeMaterial(index)}
+                  disabled={isLoading}
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
                   ลบ
@@ -311,6 +323,7 @@ function Addmenu() {
             <button
               type="button"
               onClick={addMaterial}
+              disabled={isLoading}
               className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               +
@@ -320,9 +333,39 @@ function Addmenu() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full md:w-auto bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all focus:outline-none focus:ring-4 focus:ring-blue-400"
+            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-700 hover:bg-blue-600"
+              }`}
+            disabled={isLoading}
           >
-            เพิ่มเมนู
+            {isLoading ? (
+              <div className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 text-white mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                กำลังบันทึก...
+              </div>
+            ) : (
+              "เพิ่มเมนู"
+            )}
           </button>
         </form>
       </div>

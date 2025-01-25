@@ -118,8 +118,6 @@ const delete_material = async (req, res) => {
 
     const material = materialToDelete[0];
 
-    console.log(material.m_img);
-
     if (material.m_img) {
       const publicId = material.m_img.split('/').slice(-3).join('/').split('.')[0]; // ดึง public_id จาก URL
       console.log(publicId);

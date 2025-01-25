@@ -82,6 +82,7 @@ function Menus() {
       });
 
       if (result.isConfirmed) {
+        setIsLoading(true);
         await axios.delete(`/api/menu/deletemenu/${id}`, {
           headers: {
             Authorization: `Bearer ${authData.token}`,
@@ -102,6 +103,8 @@ function Menus() {
     } catch (error) {
       console.error("Error deleting menu:", error);
       Swal.fire("Error", "Failed to delete menu", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -321,7 +324,7 @@ function Menus() {
                         {menu.menu_img ? (
                           <div className="flex justify-center items-center h-full">
                             <img
-                              src={`${process.env.REACT_APP_NGROK_URL_5000}/uploads/menu/${menu.menu_img}`}
+                              src={`${menu.menu_img}`}
                               alt={menu.menu_name || "Menu image"}
                               className="w-16 h-16 object-cover rounded-lg sm:w-20 sm:h-20"
                             />
@@ -367,11 +370,10 @@ function Menus() {
                                       onClick={() =>
                                         handleEditPrice(menu.menu_id)
                                       }
-                                      className={`block w-full px-4 py-2 text-left text-sm ${
-                                        active
+                                      className={`block w-full px-4 py-2 text-left text-sm ${active
                                           ? "bg-blue-100 text-blue-700"
                                           : "text-gray-700"
-                                      }`}
+                                        }`}
                                     >
                                       แก้ไขราคา
                                     </button>
@@ -381,11 +383,10 @@ function Menus() {
                                   {({ active }) => (
                                     <button
                                       onClick={() => handleEdit(menu.menu_id)}
-                                      className={`block w-full px-4 py-2 text-left text-sm ${
-                                        active
+                                      className={`block w-full px-4 py-2 text-left text-sm ${active
                                           ? "bg-blue-100 text-blue-700"
                                           : "text-gray-700"
-                                      }`}
+                                        }`}
                                     >
                                       แก้ไขเมนู
                                     </button>
@@ -480,56 +481,55 @@ function Menus() {
             </div>
           </div>
         )}
-          
-{currentPage > 1 && (
-   <div className="flex justify-center items-center mt-6">
-          {/* ปุ่มย้อนกลับ */}
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <ChevronLeft />
-          </button>
 
-          {/* ปุ่มเลขหน้า */}
-          <div className="mx-4 flex space-x-1">
-            {generatePaginationButtons(currentPage, totalPages, isMobile).map(
-              (page, index) =>
-                page === "..." ? (
-                  <span key={index} className="px-4 py-2 text-gray-500">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page.key}
-                    onClick={() => paginate(page.value)}
-                    className={`px-4 py-2 rounded-lg ${
-                      currentPage === page.value
-                        ? "bg-blue-700 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                    disabled={page.value === "..."}
-                  >
-                    {page.value}
-                  </button>
-                )
-            )}
+        {currentPage > 1 && (
+          <div className="flex justify-center items-center mt-6">
+            {/* ปุ่มย้อนกลับ */}
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <ChevronLeft />
+            </button>
+
+            {/* ปุ่มเลขหน้า */}
+            <div className="mx-4 flex space-x-1">
+              {generatePaginationButtons(currentPage, totalPages, isMobile).map(
+                (page, index) =>
+                  page === "..." ? (
+                    <span key={index} className="px-4 py-2 text-gray-500">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page.key}
+                      onClick={() => paginate(page.value)}
+                      className={`px-4 py-2 rounded-lg ${currentPage === page.value
+                          ? "bg-blue-700 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      disabled={page.value === "..."}
+                    >
+                      {page.value}
+                    </button>
+                  )
+              )}
+            </div>
+
+            {/* ปุ่มไปข้างหน้า */}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <ChevronRight />
+            </button>
           </div>
+        )}
 
-          {/* ปุ่มไปข้างหน้า */}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-)}
-       
       </div>
     </div>
   );

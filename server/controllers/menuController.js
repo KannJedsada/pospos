@@ -2,39 +2,7 @@ const menu = require("../models/menuModel");
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
-
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../uploads/menu");
-
-    // Ensure directory exists
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
-  },
-});
-
-// Initialize multer with storage configuration
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const allowedExts = [".png", ".jpg", ".jpeg", ".gif"];
-
-    // Allow only image files
-    if (!allowedExts.includes(ext)) {
-      return cb(new Error("Only images are allowed"), false);
-    }
-    cb(null, true);
-  },
-  // limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
-});
+const cloudinary = require("../config/cloudinary");
 
 const get_menucategory = async (req, res) => {
   try {
@@ -155,7 +123,7 @@ const add_status = async (req, res) => {
 const add_menu = async (req, res) => {
   try {
     const { name, category, ingredients, menutype } = req.body;
-    const img = req.file ? req.file.filename : null; // Get uploaded file name
+    const img = req.file ? req.file.path : null; // Get uploaded file name
 
     // Validation
     if (!name || !category || !ingredients || !img) {
@@ -188,15 +156,7 @@ const edit_menu = async (req, res) => {
   try {
     const id = req.params.id;
     const { menu_name, menu_category, ingredients } = req.body;
-    const img = req.file ? req.file.filename : null;
-
-    // // ตรวจสอบข้อมูลที่ได้รับ
-    // console.log("Request body:", {
-    //   menu_name,
-    //   menu_category,
-    //   ingredients,
-    // });
-    // console.log("Uploaded file:", img);
+    const img = req.file ? req.file.path : null;
 
     // Fetch existing menu
     const menuToEdit = await menu.get_menu_byid(id);
@@ -204,8 +164,9 @@ const edit_menu = async (req, res) => {
       return res.status(404).json({ message: "Menu not found" });
     }
 
+    const menu = menuToEdit[0]
     // If no new image is uploaded, keep the old one
-    const updatedImg = img || menuToEdit.menu_img;
+    const updatedImg = img || menu.menu_img;
 
     // Validate required fields
     if (!menu_name || !menu_category || !ingredients) {
@@ -226,19 +187,18 @@ const edit_menu = async (req, res) => {
       img: updatedImg,
     });
 
-    if (img && menuToEdit.menu_img) {
-      const oldFilePath = path.join(
-        __dirname,
-        "../uploads/menu",
-        menuToEdit.menu_img
-      );
-      fs.unlink(oldFilePath, (err) => {
-        if (err) {
-          console.error("Error deleting old file:", err);
-        } else {
-          console.log("Old file deleted successfully");
-        }
-      });
+    if (img && menu.menu_img) {
+      const publicId = menu.m_img.split('/').slice(-3).join('/').split('.')[0];
+      console.log("Public ID for deletion:", publicId);
+
+      try {
+        // ลบรูปภาพเก่าจาก Cloudinary
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log("Old image deleted from Cloudinary successfully:", result);
+      } catch (err) {
+        console.error("Error deleting image from Cloudinary:", err.message);
+        return res.status(500).json({ message: "Error deleting image from Cloudinary" });
+      }
     }
 
     res
@@ -265,20 +225,18 @@ const delete_menu = async (req, res) => {
     // Delete the menu
     await menu.delete_menu(id);
 
+    const menuImg = menuToDelete[0];
+
     // If the menu has an associated image, delete it from the server
-    if (menuToDelete.menu_img) {
-      const filePath = path.join(
-        __dirname,
-        "../uploads/menu",
-        menuToDelete.menu_img
-      );
-      fs.unlink(filePath, (err) => {
-        if (err) {
-          console.error("Error deleting file:", err);
-          return res.status(500).json({ message: "Error deleting image file" });
-        }
-        console.log("File deleted successfully");
-      });
+    if (menuImg.menu_img) {
+      const publicId = menuImg.menu_img.split('/').slice(-3).join('/').split('.')[0]; // ดึง public_id จาก URL
+      try {
+        await cloudinary.uploader.destroy(publicId); // ลบรูปภาพ
+        console.log("Image deleted from Cloudinary successfully");
+      } catch (err) {
+        console.error("Error deleting image from Cloudinary:", err.message);
+        return res.status(500).json({ message: "Error deleting image from Cloudinary" });
+      }
     }
 
     // Send a success response
@@ -390,7 +348,6 @@ const get_recommend = async (req, res) => {
 };
 
 module.exports = {
-  upload,
   get_menucategory,
   get_price,
   get_pricebyid,

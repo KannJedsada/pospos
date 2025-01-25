@@ -3,19 +3,19 @@ const router = express.Router();
 const menuController = require("../controllers/menuController");
 const authenticateToken = require("../middlewares/authMiddleware");
 const multer = require("multer");
-const path = require("path");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary"); 
 
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads/menu"));
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+// ตั้งค่า Storage ของ Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "upload/menu", 
+    allowed_formats: ["jpeg", "png", "jpg", "gif"],
   },
 });
 
-// Initialize multer with the storage configuration
+// สร้าง middleware สำหรับอัปโหลดไฟล์
 const upload = multer({ storage });
 
 // ดึงข้อมูล

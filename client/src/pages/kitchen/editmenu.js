@@ -87,7 +87,7 @@ function Editmenu() {
       };
       setData(menuData);
       if (item.menu_img) {
-        setPreviewImage(`http://localhost:5000/uploads/menu/${item.menu_img}`);
+        setPreviewImage(`${item.menu_img}`);
       }
     } catch (error) {
       console.error("Error fetching menu data:", error);
@@ -161,10 +161,7 @@ function Editmenu() {
     }
 
     try {
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-      }
-
+      setIsLoading(true);
       await axios.put(`/api/menu/editmenu/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
@@ -179,6 +176,8 @@ function Editmenu() {
         error.response ? error.response.data : error.message
       );
       Swal.fire("Error", "เกิดข้อผิดพลาดในการอัปเดต", "error");
+    }finally{
+      setIsLoading(false);
     }
   };
 
