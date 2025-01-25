@@ -59,6 +59,7 @@ const Checkin = () => {
 
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
+        stopScanner();
         setIsProcessing(true);
         try {
             if (!authData || !authData.token) {
@@ -70,7 +71,6 @@ const Checkin = () => {
             }
 
             // หยุด Scanner เพื่อไม่ให้เกิดการอ่านซ้ำ
-            stopScanner();
 
             // ส่งข้อมูลไปที่ API
             const response = await axios.post(
