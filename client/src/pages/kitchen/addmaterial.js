@@ -143,6 +143,7 @@ function Addmaterial() {
     }
 
     try {
+      setIsLoading(true);
       const formData = new FormData();
       formData.append("m_name", data.m_name);
       formData.append("unit", data.unit);
@@ -194,6 +195,8 @@ function Addmaterial() {
     } catch (error) {
       setErrorMessage("เกิดข้อผิดพลาดในการบันทึก");
       console.error("Error submitting data:", error);
+    }finally{
+      setIsLoading(false);
     }
   };
 

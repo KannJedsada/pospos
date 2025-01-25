@@ -46,7 +46,6 @@ function MaterialPage() {
 
   const handleDelete = async (id) => {
     try {
-      setIsLoading(true);
       const mat = await axios.get(`/api/material/${id}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
@@ -64,8 +63,9 @@ function MaterialPage() {
         confirmButtonColor: "#f44336",
         reverseButtons: true,
       });
-
+      
       if (result.isConfirmed) {
+        setIsLoading(true);
         await axios.delete(`/api/material/delete/${id}`, {
           headers: {
             Authorization: `Bearer ${authData.token}`,
