@@ -163,7 +163,7 @@ const edit_menu = async (req, res) => {
     if (!menuToEdit) {
       return res.status(404).json({ message: "Menu not found" });
     }
-
+    console.log(menuToEdit[0]);
     const menuImg = menuToEdit[0];
     console.log(menuImg);
     // If no new image is uploaded, keep the old one
