@@ -46,6 +46,7 @@ function MaterialPage() {
 
   const handleDelete = async (id) => {
     try {
+      setIsLoading(true);
       const mat = await axios.get(`/api/material/${id}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
@@ -84,6 +85,8 @@ function MaterialPage() {
     } catch (error) {
       console.error("Error deleting material:", error);
       Swal.fire("Error", "Failed to delete material", "error");
+    }finally{
+      setIsLoading(false);
     }
   };
 

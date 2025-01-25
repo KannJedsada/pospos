@@ -116,11 +116,12 @@ const delete_material = async (req, res) => {
       return res.status(404).json({ message: "Material not found" });
     }
 
-    await Material.delete_material(id);
-    console.log(materialToDelete.m_img);
+    const material = materialToDelete[0];
 
-    if (materialToDelete.m_img) {
-      const publicId = materialToDelete.m_img.split('/').slice(-3).join('/').split('.')[0]; // ดึง public_id จาก URL
+    console.log(material.m_img);
+
+    if (material.m_img) {
+      const publicId = material.m_img.split('/').slice(-3).join('/').split('.')[0]; // ดึง public_id จาก URL
       console.log(publicId);
       try {
         await cloudinary.uploader.destroy(publicId); // ลบรูปภาพ
@@ -131,6 +132,7 @@ const delete_material = async (req, res) => {
       }
     }
 
+    await Material.delete_material(id);
     res.status(200).json({ message: "Material deleted successfully" });
   } catch (error) {
     console.error("Error deleting material:", error);

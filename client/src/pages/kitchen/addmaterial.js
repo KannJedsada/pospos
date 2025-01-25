@@ -30,6 +30,8 @@ function Addmaterial() {
     { material_id: "", quantity_used: "", unit_id: "" },
   ]);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const fetchUnits = async () => {
     try {
       const res = await axios.get("/api/unit");
@@ -230,6 +232,7 @@ function Addmaterial() {
               name="m_name"
               value={data.m_name}
               onChange={handleChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {errors.m_name && (
@@ -245,6 +248,7 @@ function Addmaterial() {
               name="m_img"
               accept="image/*"
               onChange={handleChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             />
             {previewImage ? (
@@ -275,6 +279,7 @@ function Addmaterial() {
               name="unit"
               value={data.unit}
               onChange={handleChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">เลือกหน่วย</option>
@@ -296,6 +301,7 @@ function Addmaterial() {
               name="material_category"
               value={data.material_category}
               onChange={handleChange}
+              disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
             >
               <option value="">เลือกหมวดหมู่</option>
@@ -337,6 +343,7 @@ function Addmaterial() {
                   <select
                     name="material_id"
                     value={subMaterial.material_id}
+                    disabled={isLoading}
                     onChange={(e) => handleSubMaterialChange(index, e)}
                     className="px-4 py-2 border border-gray-300 rounded-md w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-700"
                   >
@@ -350,6 +357,7 @@ function Addmaterial() {
                   <input
                     type="text"
                     name="quantity_used"
+                    disabled={isLoading}
                     value={subMaterial.quantity_used}
                     onChange={(e) => handleSubMaterialChange(index, e)}
                     placeholder="ปริมาณ"
@@ -357,6 +365,7 @@ function Addmaterial() {
                   />
                   <select
                     name="unit_id"
+                    disabled={isLoading}
                     value={subMaterial.unit_id}
                     onChange={(e) => handleSubMaterialChange(index, e)}
                     className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
@@ -380,6 +389,7 @@ function Addmaterial() {
               <button
                 type="button"
                 onClick={addSubMaterial}
+                disabled={isLoading}
                 className="px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-600 mt-2 shadow"
               >
                 เพิ่มวัตถุดิบย่อย
@@ -388,10 +398,41 @@ function Addmaterial() {
           )}
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 shadow-md"
+            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-700 hover:bg-blue-600"
+              }`}
+            disabled={isLoading}
           >
-            บันทึก
+            {isLoading ? (
+              <div className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 text-white mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                กำลังบันทึก...
+              </div>
+            ) : (
+              "บันทึก"
+            )}
           </button>
+
           {successMessage && (
             <p className="text-green-500 text-sm mt-2">{successMessage}</p>
           )}
