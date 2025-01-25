@@ -45,8 +45,7 @@ function Editmenuprice() {
   const handleAddNewPrice = async (e) => {
     e.preventDefault();
     try {
-      console.log(id);
-      console.log(data);
+      setIsLoading(true)
       await axios.post(`/api/menu/new-price/${id}`, data, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
@@ -58,10 +57,12 @@ function Editmenuprice() {
         showConfirmButton: false,
         timer: 1000,
       });
-      navigate("/menus");
     } catch (error) {
       console.error("Error Insert data", error);
       Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
+    }finally{
+      setIsLoading(false);
+      navigate("/menus");
     }
   };
 
