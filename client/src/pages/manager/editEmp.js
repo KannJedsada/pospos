@@ -111,7 +111,7 @@ const Editemp = () => {
     };
 
     fetchEmployeeData();
-  }, []);
+  }, );
 
   // Fetch provinces once on component mount
   useEffect(() => {
