@@ -157,9 +157,10 @@ const edit_menu = async (req, res) => {
     const id = req.params.id;
     const { menu_name, menu_category, ingredients } = req.body;
     const img = req.file ? req.file.path : null;
+    console.log()
 
     // Fetch existing menu
-    const menuToEdit = await menu.get_menu_byid(id);
+    const menuToEdit = await menu.get_menu_id(id);
     if (!menuToEdit) {
       return res.status(404).json({ message: "Menu not found" });
     }

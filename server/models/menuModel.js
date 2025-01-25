@@ -68,6 +68,11 @@ class Menu {
     return res.rows;
   }
 
+  static async get_menu_id(id) {
+    const res = await pool.query(`SELECT * FROM menus WHERE menu_id = $1`, [id]);
+    return res.rows[0];
+  }
+
   static async get_menu_byid(id) {
     const res = await pool.query(
       `SELECT 
