@@ -67,8 +67,8 @@ const edit_materials = async (req, res) => {
     }
 
     const m_img = newImgUrl || materialToEdit.m_img;
-    console.log(m_img);
     console.log(newImgUrl);
+    console.log(materialToEdit.m_img);
 
     if (newImgUrl && materialToEdit.m_img) {
       const publicId = materialToEdit.m_img.split('/').slice(-3).join('/').split('.')[0];
@@ -107,6 +107,7 @@ const delete_material = async (req, res) => {
     }
 
     await Material.delete_material(id);
+    console.log(materialToDelete.m_img);
 
     if (materialToDelete.m_img) {
       const publicId = materialToDelete.m_img.split('/').slice(-3).join('/').split('.')[0]; // ดึง public_id จาก URL
