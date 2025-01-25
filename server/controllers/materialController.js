@@ -68,6 +68,7 @@ const edit_materials = async (req, res) => {
 
     const m_img = newImgUrl || materialToEdit.m_img;
     console.log(m_img);
+    console.log(newImgUrl);
 
     if (newImgUrl && materialToEdit.m_img) {
       const publicId = materialToEdit.m_img.split("/").slice(7).join("/").split(".")[0];
