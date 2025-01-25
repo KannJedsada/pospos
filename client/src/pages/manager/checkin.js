@@ -61,11 +61,11 @@ const Checkin = () => {
     };
 
     // เมื่อ unmount ควรหยุด scanner
-    // useEffect(() => {
-    //     return () => {
-    //         stopScanner();
-    //     };
-    // }, [qrScanner]);
+    useEffect(() => {
+        return () => {
+            stopScanner();
+        };
+    }, [qrScanner]);
 
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
