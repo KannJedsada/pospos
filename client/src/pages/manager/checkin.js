@@ -59,9 +59,10 @@ const Checkin = () => {
 
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
+        console.log(data);
         stopScanner();
-        setIsProcessing(true);
         try {
+            setIsProcessing(true);
             if (!authData || !authData.token) {
                 throw new Error("Authentication data is missing or invalid.");
             }
