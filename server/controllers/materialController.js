@@ -71,8 +71,8 @@ const edit_materials = async (req, res) => {
     console.log(newImgUrl);
 
     if (newImgUrl && materialToEdit.m_img) {
-      const publicId = materialToEdit.m_img.split("/").slice(7).join("/").split(".")[0];
-      console.log(publicId);
+      const publicId = materialToEdit.m_img.split('/').slice(-3).join('/').split('.')[0];
+      console.log("Public ID for deletion:", publicId);
       try {
         await cloudinary.uploader.destroy(publicId); // ลบรูปภาพเก่า
         console.log("Old image deleted from Cloudinary successfully");
@@ -80,7 +80,7 @@ const edit_materials = async (req, res) => {
         console.error("Error deleting image from Cloudinary:", err.message);
         return res.status(500).json({ message: "Error deleting image from Cloudinary" });
       }
-    }
+    }    
 
     const updatedMaterial = await Material.edit_material(id, {
       m_name,
@@ -109,7 +109,7 @@ const delete_material = async (req, res) => {
     await Material.delete_material(id);
 
     if (materialToDelete.m_img) {
-      const publicId = materialToDelete.m_img.split("/").slice(7).join("/").split(".")[0]; // ดึง public_id จาก URL
+      const publicId = materialToDelete.m_img.split('/').slice(-3).join('/').split('.')[0]; // ดึง public_id จาก URL
       console.log(publicId);
       try {
         await cloudinary.uploader.destroy(publicId); // ลบรูปภาพ
