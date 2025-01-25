@@ -60,19 +60,18 @@ const Checkin = () => {
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
         console.log(data);
-        stopScanner();
+    
         try {
-            setIsProcessing(true);
+            setIsProcessing(true); // ตั้งสถานะกำลังประมวลผล
+    
             if (!authData || !authData.token) {
                 throw new Error("Authentication data is missing or invalid.");
             }
-
+    
             if (!data || typeof data !== "string") {
                 throw new Error("Invalid QR Code data.");
             }
-
-            // หยุด Scanner เพื่อไม่ให้เกิดการอ่านซ้ำ
-
+    
             // ส่งข้อมูลไปที่ API
             const response = await axios.post(
                 "/api/ts/checkin",
@@ -83,13 +82,13 @@ const Checkin = () => {
                     },
                 }
             );
-
+    
             if (response.status !== 200) {
                 throw new Error(`Unexpected response: ${response.status}`);
             }
-
+    
             const isLate = response.data.data?.is_late;
-
+    
             // แสดงผลการเช็คอิน
             Swal.fire({
                 title: isLate ? "คุณมาสาย!" : "เช็คอินสำเร็จ",
@@ -97,14 +96,17 @@ const Checkin = () => {
                 icon: isLate ? "warning" : "success",
                 showConfirmButton: false,
                 timer: 1000,
-                willClose: () => startScanner(), // เริ่ม Scanner ใหม่เมื่อ Swal ปิด
+                willClose: () => {
+                    setIsProcessing(false); // เปลี่ยนสถานะให้พร้อมสำหรับสแกนใหม่
+                    startScanner(); // เปิด Scanner ใหม่เมื่อ Swal ปิด
+                },
             });
         } catch (error) {
             console.error("Error during check-in:", error);
-
+    
             const errorMessage =
                 error.response?.data?.message || error.message || "เกิดข้อผิดพลาดในการเช็คอิน";
-
+    
             // แสดงข้อความผิดพลาด
             Swal.fire({
                 title: "เกิดข้อผิดพลาด",
@@ -112,14 +114,14 @@ const Checkin = () => {
                 icon: "error",
                 showConfirmButton: false,
                 timer: 1000,
-                willClose: () => startScanner(), // เริ่ม Scanner ใหม่เมื่อ Swal ปิด
+                willClose: () => {
+                    setIsProcessing(false); // เปลี่ยนสถานะให้พร้อมสำหรับสแกนใหม่
+                    startScanner(); // เปิด Scanner ใหม่เมื่อ Swal ปิด
+                },
             });
-        } finally {
-            setIsProcessing(false);
         }
     };
-
-
+    
     // ฟังก์ชันทดสอบการอ่าน Mock QR Code
     const handleMockScan = () => {
         if (mockData) {
