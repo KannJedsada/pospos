@@ -439,7 +439,7 @@ function Menus() {
                         <img
                           src={
                             menuIng.menu_img
-                              ? `${process.env.REACT_APP_NGROK_URL_5000}/uploads/menu/${menuIng.menu_img}`
+                              ? `${menuIng.menu_img}`
                               : "/path/to/placeholder-image.png"
                           }
                           alt={menuIng.menu_name || "เมนูนี้ไม่มีชื่อ"}
