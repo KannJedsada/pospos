@@ -59,29 +59,36 @@ const edit_materials = async (req, res) => {
   try {
     const id = req.params.id;
     const { m_name, unit, sub_materials, category } = req.body;
-    const newImgUrl = req.file ? req.file.path : null; // ใช้ req.file.path สำหรับ URL
+    const newImgUrl = req.file ? req.file.path : null; // ใช้ URL รูปภาพใหม่ถ้ามีการอัปโหลด
 
+    // ดึงข้อมูล material ปัจจุบันจากฐานข้อมูล
     const materialToEdit = await Material.get_by_id(id);
     if (!materialToEdit) {
       return res.status(404).json({ message: "Material not found" });
     }
 
+    // ใช้ URL ของรูปภาพใหม่หรือใช้รูปภาพเดิมถ้าไม่มีการอัปโหลดใหม่
     const m_img = newImgUrl || materialToEdit.m_img;
-    console.log(newImgUrl);
-    console.log(materialToEdit.m_img);
+    console.log("New Image URL:", newImgUrl);
+    console.log("Old Image URL:", materialToEdit?.m_img);
 
-    if (newImgUrl && materialToEdit.m_img) {
+    // ถ้ามีการอัปโหลดรูปภาพใหม่ และ materialToEdit.m_img มีค่ามาก่อนหน้า
+    if (newImgUrl && materialToEdit?.m_img) {
+      // แยก publicId ของรูปภาพจาก URL เดิม
       const publicId = materialToEdit.m_img.split('/').slice(-3).join('/').split('.')[0];
       console.log("Public ID for deletion:", publicId);
+
       try {
-        await cloudinary.uploader.destroy(publicId); // ลบรูปภาพเก่า
-        console.log("Old image deleted from Cloudinary successfully");
+        // ลบรูปภาพเก่าจาก Cloudinary
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log("Old image deleted from Cloudinary successfully:", result);
       } catch (err) {
         console.error("Error deleting image from Cloudinary:", err.message);
         return res.status(500).json({ message: "Error deleting image from Cloudinary" });
       }
-    }    
+    }
 
+    // อัปเดต material ในฐานข้อมูล
     const updatedMaterial = await Material.edit_material(id, {
       m_name,
       unit,
@@ -90,6 +97,7 @@ const edit_materials = async (req, res) => {
       category,
     });
 
+    // ตอบกลับ client พร้อมข้อมูล material ที่อัปเดตแล้ว
     res.status(200).json({ data: updatedMaterial });
   } catch (error) {
     console.error("Error updating material:", error);
