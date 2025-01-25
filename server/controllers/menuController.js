@@ -166,7 +166,7 @@ const edit_menu = async (req, res) => {
 
     const menuImg = menuToEdit[0]
     // If no new image is uploaded, keep the old one
-    const updatedImg = img || menu.menu_img;
+    const updatedImg = img || menuImg.menu_img;
 
     // Validate required fields
     if (!menu_name || !menu_category || !ingredients) {
