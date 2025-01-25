@@ -30,7 +30,7 @@ const add_material = async (req, res) => {
     const { m_name, unit, composite, composition, category } = req.body;
     const m_img = req.file ? req.file.path : null; // ใช้ req.file.path สำหรับ URL
 
-    console.log("Request body:", { m_name, unit, composite, composition, category });
+    // console.log("Request body:", { m_name, unit, composite, composition, category });
 
     let parsedComposition;
     if (typeof composition === "string") {
@@ -67,9 +67,11 @@ const edit_materials = async (req, res) => {
     }
 
     const m_img = newImgUrl || materialToEdit.m_img;
+    console.log(m_img);
 
     if (newImgUrl && materialToEdit.m_img) {
       const publicId = materialToEdit.m_img.split("/").slice(7).join("/").split(".")[0];
+      console.log(publicId);
       try {
         await cloudinary.uploader.destroy(publicId); // ลบรูปภาพเก่า
         console.log("Old image deleted from Cloudinary successfully");
@@ -106,7 +108,8 @@ const delete_material = async (req, res) => {
     await Material.delete_material(id);
 
     if (materialToDelete.m_img) {
-      const publicId = materialToDelete.m_img.split("/").slice(-1)[0].split(".")[0]; // ดึง public_id จาก URL
+      const publicId = materialToDelete.m_img.split("/").slice(7).join("/").split(".")[0]; // ดึง public_id จาก URL
+      console.log(publicId);
       try {
         await cloudinary.uploader.destroy(publicId); // ลบรูปภาพ
         console.log("Image deleted from Cloudinary successfully");

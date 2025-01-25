@@ -246,7 +246,7 @@ function MaterialPage() {
                       <td className="px-4 py-3 border-b">
                         {material.m_img ? (
                           <img
-                            src={`https://res.cloudinary.com/dquqxt3tl/image/upload/${material.m_img}`}
+                            src={`${material.m_img}`}
                             alt={material.m_name || "Material Image"}
                             className="w-12 h-12 object-cover rounded-md shadow-sm"
                           />
