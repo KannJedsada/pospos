@@ -103,9 +103,9 @@ const Checkin = () => {
 
             // แสดงผลการเช็คอินใหม่
             Swal.fire({
-                title: isLate ? "คุณมาสาย!" : "เช็คอินสำเร็จ",
-                text: isLate ? "คุณได้เช็คอินล่าช้า" : "คุณได้เช็คอินสำเร็จ",
-                icon: isLate ? "warning" : "success",
+                title: is_late ? "คุณมาสาย!" : "เช็คอินสำเร็จ",
+                text: is_late ? "คุณได้เช็คอินล่าช้า" : "คุณได้เช็คอินสำเร็จ",
+                icon: is_late ? "warning" : "success",
                 showConfirmButton: false,
                 timer: 1500,
                 willClose: () => {
