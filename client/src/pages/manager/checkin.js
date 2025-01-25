@@ -30,7 +30,7 @@ const Checkin = () => {
                     onDecodeError: (error) => {
                         console.error("QR Code decode error:", error);
                     },
-                    maxScansPerSecond: 5, // จำกัดจำนวนการสแกนในหนึ่งวินาที
+                    maxScansPerSecond: 1, // จำกัดจำนวนการสแกนในหนึ่งวินาที
                 }
             );
             scanner.start().catch((error) => {
