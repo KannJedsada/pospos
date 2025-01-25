@@ -26,10 +26,10 @@ const EmpManagement = () => {
 
 
   const accessData = async () => {
-      const access = await axios.get(
-        `/api/emp/empdept/${authData.id_card}`
-      );
-      const acc = access?.data?.data?.access;
+    const access = await axios.get(
+      `/api/emp/empdept/${authData.id_card}`
+    );
+    const acc = access?.data?.data?.access;
     setAccData(acc);
   }
   // fetch data emp
@@ -70,7 +70,7 @@ const EmpManagement = () => {
     } catch (error) {
       console.error("Error fetching employees:", error);
       Swal.fire("Error", "Failed to fetch employee data", "error");
-    }finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -130,6 +130,7 @@ const EmpManagement = () => {
         reverseButtons: true,
       }).then(async (result) => {
         if (result.isConfirmed) {
+          setIsLoading(true);
           const res = await axios.delete(`/api/emp/${id_card}`, {
             headers: {
               Authorization: `Bearer ${authData.token}`,
@@ -143,13 +144,13 @@ const EmpManagement = () => {
           });
 
           fetchEmployees();
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          console.log("Deletion cancelled");
         }
       });
     } catch (error) {
       console.error("Error deleting employee:", error);
       Swal.fire("Error", "Failed to delete", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -174,15 +175,15 @@ const EmpManagement = () => {
   };
 
   useEffect(() => {
-      fetchDepartments();
-      fetchPositions();
-      fetchEmployees(selectedDept, selectedPosition);
-      accessData();
+    fetchDepartments();
+    fetchPositions();
+    fetchEmployees(selectedDept, selectedPosition);
+    accessData();
   }, [selectedDept, selectedPosition, authData.token]);
 
   useEffect(() => {
     if (!Array.isArray(employees?.data)) {
-      setFilteredEmployees([]); 
+      setFilteredEmployees([]);
       return;
     }
 
@@ -383,23 +384,21 @@ const EmpManagement = () => {
                         </button>
                         <button
                           onClick={() => handleEdit(employee.id_card)}
-                          className={`px-4 py-1 rounded-lg mt-2 sm:mt-0 sm:ml-2 text-white ${
-                            accData !== 1 && accData !== 0
+                          className={`px-4 py-1 rounded-lg mt-2 sm:mt-0 sm:ml-2 text-white ${accData !== 1 && accData !== 0
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-blue-700 hover:bg-blue-800"
-                          }`}
+                            }`}
                           disabled={accData !== 1 && accData !== 0}
                         >
                           <Pencil />
                         </button>
                         <button
                           onClick={() => handleDelete(employee.id_card)}
-                          className={`px-4 py-1 rounded-lg mt-2 sm:mt-0 sm:ml-2 text-white ${
-                            accData !== 1 && accData !== 0 ||
-                            employee.id_card === authData.id_card
+                          className={`px-4 py-1 rounded-lg mt-2 sm:mt-0 sm:ml-2 text-white ${accData !== 1 && accData !== 0 ||
+                              employee.id_card === authData.id_card
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-red-500 hover:bg-red-600"
-                          }`}
+                            }`}
                           disabled={accData !== 1 && accData !== 0}
                         >
                           <X />
@@ -422,56 +421,55 @@ const EmpManagement = () => {
           </div>
 
           {/* Pagination */}
-{currentPage > 1 && (
-   <div className="flex justify-center items-center mt-6">
-            {/* ปุ่มย้อนกลับ */}
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <ChevronLeft />
-            </button>
+          {currentPage > 1 && (
+            <div className="flex justify-center items-center mt-6">
+              {/* ปุ่มย้อนกลับ */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <ChevronLeft />
+              </button>
 
-            {/* ปุ่มเลขหน้า */}
-            <div className="mx-4 flex space-x-1">
-              {generatePaginationButtons(currentPage, totalPages, isMobile).map(
-                (page, index) =>
-                  page === "..." ? (
-                    <span key={index} className="px-4 py-2 text-gray-500">
-                      ...
-                    </span>
-                  ) : (
-                    <button
-                      key={page.key}
-                      onClick={() => paginate(page.value)}
-                      className={`px-4 py-2 rounded-lg ${
-                        currentPage === page.value
-                          ? "bg-blue-700 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
-                      disabled={page.value === "..."}
-                    >
-                      {page.value}
-                    </button>
-                  )
-              )}
+              {/* ปุ่มเลขหน้า */}
+              <div className="mx-4 flex space-x-1">
+                {generatePaginationButtons(currentPage, totalPages, isMobile).map(
+                  (page, index) =>
+                    page === "..." ? (
+                      <span key={index} className="px-4 py-2 text-gray-500">
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        key={page.key}
+                        onClick={() => paginate(page.value)}
+                        className={`px-4 py-2 rounded-lg ${currentPage === page.value
+                            ? "bg-blue-700 text-white"
+                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          }`}
+                        disabled={page.value === "..."}
+                      >
+                        {page.value}
+                      </button>
+                    )
+                )}
+              </div>
+
+              {/* ปุ่มไปข้างหน้า */}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <ChevronRight />
+              </button>
             </div>
 
-            {/* ปุ่มไปข้างหน้า */}
-            <button
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              disabled={currentPage === totalPages}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <ChevronRight />
-            </button>
-          </div>
+          )}
 
-)}
-         
           <Modal
             isOpen={isModalOpen}
             onRequestClose={closeModal}

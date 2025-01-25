@@ -254,188 +254,224 @@ function Editmaterial() {
             แก้ไขวัตถุดิบ
           </h1>
         </div>
-        {isLoading ? (
-          <div className="flex justify-center items-center min-h-screen">
-            <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
-          </div>
-        ) : (
-          <div>
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-6 bg-white p-6 rounded-lg shadow-md"
-            >
-              <div>
-                <label className="block text-sm font-medium text-blue-700 mb-1">
-                  ชื่อวัตถุดิบ:
-                </label>
-                <input
-                  type="text"
-                  name="m_name"
-                  value={data.m_name}
-                  onChange={handleChange}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
-                />
-                {errors.m_name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.m_name}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-blue-700 mb-1">
-                  เลือกรูปภาพ:
-                </label>
-                <input
-                  type="file"
-                  name="m_img"
-                  accept="image/*"
-                  onChange={handleChange}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
-                />
-                {previewImage && (
-                  <div className="mt-4 flex justify-center">
-                    <img
-                      src={previewImage}
-                      alt="Selected Preview"
-                      className="w-40 h-40 object-cover"
-                    />
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-blue-700 mb-1">
-                  หน่วย:
-                </label>
-                <select
-                  name="unit"
-                  value={data.unit}
-                  onChange={handleChange}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
-                >
-                  <option value="">เลือกหน่วย</option>
-                  {units.map((unit) => (
-                    <option key={unit.id} value={unit.id}>
-                      {unit.u_name}
-                    </option>
-                  ))}
-                </select>
-                {errors.unit && (
-                  <p className="text-red-500 text-sm mt-1">{errors.unit}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-blue-700 mb-1">
-                  หมวดหมู่:
-                </label>
-                <select
-                  name="category"
-                  value={data.category}
-                  onChange={handleChange}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
-                >
-                  <option value="">เลือกหมวดหมู่</option>
-                  {category.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.category_name}
-                    </option>
-                  ))}
-                </select>
 
-                {errors.material_category && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.material_category}
-                  </p>
-                )}
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="composite"
-                  id="isComposite"
-                  checked={data.composite}
-                  onChange={handleChange}
-                  className="mr-2"
-                />
-                <label
-                  htmlFor="isComposite"
-                  className="text-sm font-medium text-blue-700"
-                >
-                  วัตถุดิบนี้เป็นวัตถุดิบผสม (Composite)
-                </label>
-              </div>
-
-              {data.composite && (
-                <div>
-                  <label className="block text-sm font-medium text-blue-700 mb-1">
-                    วัตถุดิบย่อย:
-                  </label>
-                  {data.sub_materials.map((subMaterial, index) => (
-                    <div key={index} className="flex items-center space-x-2 mb-2">
-                      <select
-                        name="material_id"
-                        value={subMaterial.material_id}
-                        onChange={(e) => handleSubMaterialChange(index, e)}
-                        className="px-4 py-2 border border-gray-300 rounded-md w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-700"
-                      >
-                        <option value="">เลือกวัตถุดิบย่อย</option>
-                        {material.map((mat) => (
-                          <option key={mat.id} value={mat.id}>
-                            {mat.m_name}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="text"
-                        name="quantity_used"
-                        value={subMaterial.quantity_used}
-                        onChange={(e) => handleSubMaterialChange(index, e)}
-                        placeholder="ปริมาณ"
-                        className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
-                      />
-                      <select
-                        name="unit_id"
-                        value={subMaterial.unit_id}
-                        onChange={(e) => handleSubMaterialChange(index, e)}
-                        className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
-                      >
-                        <option value="">เลือกหน่วย</option>
-                        {units.map((unit) => (
-                          <option key={unit.id} value={unit.id}>
-                            {unit.u_name}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => removeSubMaterial(index)}
-                        className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-400 shadow"
-                      >
-                        ลบ
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addSubMaterial}
-                    className="px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-600 mt-2 shadow"
-                  >
-                    เพิ่มวัตถุดิบย่อย
-                  </button>
+        <div>
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6 bg-white p-6 rounded-lg shadow-md"
+          >
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                ชื่อวัตถุดิบ:
+              </label>
+              <input
+                type="text"
+                name="m_name"
+                value={data.m_name}
+                disabled={isLoading}
+                onChange={handleChange}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+              />
+              {errors.m_name && (
+                <p className="text-red-500 text-sm mt-1">{errors.m_name}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                เลือกรูปภาพ:
+              </label>
+              <input
+                type="file"
+                name="m_img"
+                accept="image/*"
+                onChange={handleChange}
+                disabled={isLoading}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+              />
+              {previewImage && (
+                <div className="mt-4 flex justify-center">
+                  <img
+                    src={previewImage}
+                    alt="Selected Preview"
+                    className="w-40 h-40 object-cover"
+                  />
                 </div>
               )}
-              <button
-                type="submit"
-                className="px-6 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-600 shadow-md"
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                หน่วย:
+              </label>
+              <select
+                name="unit"
+                value={data.unit}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
               >
-                บันทึก
-              </button>
-              {successMessage && (
-                <p className="text-green-500 text-sm mt-2">{successMessage}</p>
+                <option value="">เลือกหน่วย</option>
+                {units.map((unit) => (
+                  <option key={unit.id} value={unit.id}>
+                    {unit.u_name}
+                  </option>
+                ))}
+              </select>
+              {errors.unit && (
+                <p className="text-red-500 text-sm mt-1">{errors.unit}</p>
               )}
-              {errorMessage && (
-                <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-blue-700 mb-1">
+                หมวดหมู่:
+              </label>
+              <select
+                name="category"
+                value={data.category}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="px-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-blue-700"
+              >
+                <option value="">เลือกหมวดหมู่</option>
+                {category.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.category_name}
+                  </option>
+                ))}
+              </select>
+
+              {errors.material_category && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.material_category}
+                </p>
               )}
-            </form>
-          </div>
-        )}
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="composite"
+                id="isComposite"
+                checked={data.composite}
+                onChange={handleChange}
+                disabled={isLoading}
+                className="mr-2"
+              />
+              <label
+                htmlFor="isComposite"
+                className="text-sm font-medium text-blue-700"
+              >
+                วัตถุดิบนี้เป็นวัตถุดิบผสม (Composite)
+              </label>
+            </div>
+
+            {data.composite && (
+              <div>
+                <label className="block text-sm font-medium text-blue-700 mb-1">
+                  วัตถุดิบย่อย:
+                </label>
+                {data.sub_materials.map((subMaterial, index) => (
+                  <div key={index} className="flex items-center space-x-2 mb-2">
+                    <select
+                      name="material_id"
+                      value={subMaterial.material_id}
+                      onChange={(e) => handleSubMaterialChange(index, e)}
+                      disabled={isLoading}
+                      className="px-4 py-2 border border-gray-300 rounded-md w-1/2 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                    >
+                      <option value="">เลือกวัตถุดิบย่อย</option>
+                      {material.map((mat) => (
+                        <option key={mat.id} value={mat.id}>
+                          {mat.m_name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      name="quantity_used"
+                      value={subMaterial.quantity_used}
+                      onChange={(e) => handleSubMaterialChange(index, e)}
+                      disabled={isLoading}
+                      placeholder="ปริมาณ"
+                      className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                    />
+                    <select
+                      name="unit_id"
+                      value={subMaterial.unit_id}
+                      onChange={(e) => handleSubMaterialChange(index, e)}
+                      disabled={isLoading}
+                      className="px-4 py-2 border border-gray-300 rounded-md w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-700"
+                    >
+                      <option value="">เลือกหน่วย</option>
+                      {units.map((unit) => (
+                        <option key={unit.id} value={unit.id}>
+                          {unit.u_name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => removeSubMaterial(index)}
+                      disabled={isLoading}
+                      className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-400 shadow"
+                    >
+                      ลบ
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addSubMaterial}
+                  disabled={isLoading}
+                  className="px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-600 mt-2 shadow"
+                >
+                  เพิ่มวัตถุดิบย่อย
+                </button>
+              </div>
+            )}
+            <button
+              type="submit"
+              className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-700 hover:bg-blue-600"
+                }`}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center">
+                  <svg
+                    className="animate-spin h-5 w-5 text-white mr-2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
+                  </svg>
+                  กำลังบันทึก...
+                </div>
+              ) : (
+                "บันทึก"
+              )}
+            </button>
+            {successMessage && (
+              <p className="text-green-500 text-sm mt-2">{successMessage}</p>
+            )}
+            {errorMessage && (
+              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            )}
+          </form>
+        </div>
+
       </div>
     </div>
   );

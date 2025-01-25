@@ -166,7 +166,7 @@ function Promotion() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded shadow-lg">
               <h2 className="text-lg font-semibold text-blue-700 mb-4">
-                {editingPromo ? "แก้ไขข้อมูลโต๊ะ" : "เพิ่มโต๊ะใหม่"}
+                {editingPromo ? "แก้ไขข้อมูลโปรโมชัน" : "เพิ่มโปรโชัน"}
               </h2>
 
               {/* ชื่อโปรโมชั่น */}

@@ -127,12 +127,13 @@ const Addemp = () => {
 
         // กรองตำแหน่งตามเงื่อนไข empAccess.access
         const allPositions = positionsRes.data.data;
+        console.log(empAccess.access);
         const filteredPositions =
           empAccess.access === 1 || empAccess.access === 0
             ? allPositions
             : allPositions.filter(
-                (position) => position.dept_id !== 1 && position.dept_id !== 2
-              );
+              (position) => position.dept_id !== 1 && position.dept_id !== 2
+            );
         setPosition(filteredPositions);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -302,6 +303,7 @@ const Addemp = () => {
     };
 
     try {
+      setIsLoading(true);
       await axios.post("/api/emp", postData, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
@@ -315,6 +317,8 @@ const Addemp = () => {
     } catch (error) {
       console.error("There was an error adding the employee!", error);
       alert("Failed to add employee. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -367,10 +371,10 @@ const Addemp = () => {
                 name="id_card"
                 value={formData.id_card}
                 onChange={handleChange}
+                disabled={isLoading}
                 onBlur={handleBlur}
-                className={`w-full px-3 py-2 border ${
-                  errors.id_card ? "border-red-500" : "border-gray-300"
-                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                className={`w-full px-3 py-2 border ${errors.id_card ? "border-red-500" : "border-gray-300"
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                 placeholder="เลขประจำตัวประชาชน 13 หลัก"
                 required
               />
@@ -391,11 +395,11 @@ const Addemp = () => {
                   name="f_name"
                   value={formData.f_name}
                   onChange={handleChange}
+                  disabled={isLoading}
                   onBlur={handleBlur}
                   placeholder="ชื่อจริง"
-                  className={`w-full px-3 py-2 border ${
-                    errors.f_name ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                  className={`w-full px-3 py-2 border ${errors.f_name ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                   required
                 />
                 {errors.f_name && (
@@ -410,11 +414,11 @@ const Addemp = () => {
                   name="l_name"
                   value={formData.l_name}
                   onChange={handleChange}
+                  disabled={isLoading}
                   onBlur={handleBlur}
                   placeholder="นามสกุล"
-                  className={`w-full px-3 py-2 border ${
-                    errors.l_name ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                  className={`w-full px-3 py-2 border ${errors.l_name ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                   required
                 />
                 {errors.l_name && (
@@ -433,10 +437,10 @@ const Addemp = () => {
                   value={formData.mail}
                   placeholder="example@email.com"
                   onChange={handleChange}
+                  disabled={isLoading}
                   onBlur={handleBlur}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    errors.mail ? "border-red-500" : "border-gray-300"
-                  } focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                  className={`w-full px-3 py-2 border rounded-lg ${errors.mail ? "border-red-500" : "border-gray-300"
+                    } focus:outline-none focus:ring-2 focus:ring-blue-300`}
                   required
                 />
                 {errors.mail && (
@@ -452,11 +456,11 @@ const Addemp = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  disabled={isLoading}
                   onBlur={handleBlur}
                   placeholder="เบอร์โทรศัพท์"
-                  className={`w-full px-3 py-2 border ${
-                    errors.phone ? "border-red-500" : "border-gray-300"
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                  className={`w-full px-3 py-2 border ${errors.phone ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                   required
                 />
                 {errors.phone && (
@@ -477,6 +481,7 @@ const Addemp = () => {
                   name="h_number"
                   value={formData.h_number}
                   onChange={handleChange}
+                  disabled={isLoading}
                   placeholder="บ้านเลขที่"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
                   required
@@ -490,6 +495,7 @@ const Addemp = () => {
                   name="road"
                   value={formData.road}
                   onChange={handleChange}
+                  disabled={isLoading}
                   placeholder="ถนน"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
                 />
@@ -507,6 +513,7 @@ const Addemp = () => {
                   name="province"
                   value={formData.province}
                   onChange={handleChange}
+                  disabled={isLoading}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
                 >
@@ -525,6 +532,7 @@ const Addemp = () => {
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
+                  disabled={isLoading}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
                 >
@@ -543,6 +551,7 @@ const Addemp = () => {
                   name="subdistrict"
                   value={formData.subdistrict}
                   onChange={handleChange}
+                  disabled={isLoading}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
                 >
@@ -564,6 +573,7 @@ const Addemp = () => {
                   name="zipcode"
                   value={formData.zipcode}
                   onChange={handleChange}
+                  disabled={isLoading}
                   placeholder="รหัสไปรษณีย์"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                   required
@@ -578,6 +588,7 @@ const Addemp = () => {
                 name="p_id"
                 value={formData.p_id}
                 onChange={handleChange}
+                disabled={isLoading}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                 required
               >
@@ -596,15 +607,46 @@ const Addemp = () => {
               <button
                 type="button"
                 onClick={handleReset}
+                disabled={isLoading}
                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
               >
                 คืนค่า
               </button>
               <button
                 type="submit"
-                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-700 hover:bg-blue-600"
+                  }`}
+                disabled={isLoading}
               >
-                บันทึก
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin h-5 w-5 text-white mr-2"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                      ></path>
+                    </svg>
+                    กำลังบันทึก...
+                  </div>
+                ) : (
+                  "บันทึก"
+                )}
               </button>
             </div>
           </form>

@@ -17,9 +17,11 @@ function Stocks() {
   const [selectedCategory, setSelectedCategory] = useState(""); // แก้ไขจาก selectCategory
   const [currentPage, setCurrentPage] = useState(1);
   const [stockPerPage] = useState(10);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchStock = async (cat_id = "") => {
     try {
+      setIsLoading(true)
       let res;
       if (cat_id) {
         res = await axios.get(`/api/stock/stockbycat/${cat_id}`);
@@ -32,6 +34,8 @@ function Stocks() {
     } catch (error) {
       console.error("Error fetching stocks:", error);
       Swal.fire("Error", "Failed to fetch stocks", "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -176,7 +180,7 @@ function Stocks() {
         <h1 className="text-3xl font-semibold text-blue-700 mb-6">
           คลังวัตถุดิบ
         </h1>
-        
+
         <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
           {/* กลุ่มค้นหา */}
           <div className="flex flex-wrap gap-4 w-full sm:w-auto">
@@ -210,118 +214,121 @@ function Stocks() {
             + เพิ่มสต๊อก
           </button>
         </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
+          </div>) : (
 
-        <div className="overflow-y-auto rounded-lg shadow-lg">
-          <table className="w-full bg-white">
-            <thead>
-              <tr className="bg-gradient-to-r from-blue-700 to-blue-800 text-white">
-                <th className="px-4 py-3 border-b text-left">ลำดับ</th>
-                <th className="px-4 py-3 border-b text-left">ชื่อวัตถุดิบ</th>
-                <th className="px-4 py-3 border-b text-left">จำนวน</th>
-                <th className="px-4 py-3 border-b text-left">
-                  จำนวนที่น้อยที่สุด
-                </th>
-                <th className="px-4 py-3 border-b text-left">หน่วย</th>
-                <th className="px-4 py-3 border-b text-left">หมวดหมู่</th>
-                <th className="px-4 py-3 border-b text-left">ราคา / หน่วย</th>
-                <th className="px-4 py-3 border-b text-left">แก้ไข</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-700">
-              {filteredStocks.length > 0 ? (
-                currentStocks.map((stock, index) => (
-                  <tr
-                    key={stock.material_id}
-                    className={`transition-all duration-300 ${
-                      Number(stock.qty) < Number(stock.min_qty)
+          <div className="overflow-y-auto rounded-lg shadow-lg">
+            <table className="w-full bg-white">
+              <thead>
+                <tr className="bg-gradient-to-r from-blue-700 to-blue-800 text-white">
+                  <th className="px-4 py-3 border-b text-left">ลำดับ</th>
+                  <th className="px-4 py-3 border-b text-left">ชื่อวัตถุดิบ</th>
+                  <th className="px-4 py-3 border-b text-left">จำนวน</th>
+                  <th className="px-4 py-3 border-b text-left">
+                    จำนวนที่น้อยที่สุด
+                  </th>
+                  <th className="px-4 py-3 border-b text-left">หน่วย</th>
+                  <th className="px-4 py-3 border-b text-left">หมวดหมู่</th>
+                  <th className="px-4 py-3 border-b text-left">ราคา / หน่วย</th>
+                  <th className="px-4 py-3 border-b text-left">แก้ไข</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-700">
+                {filteredStocks.length > 0 ? (
+                  currentStocks.map((stock, index) => (
+                    <tr
+                      key={stock.material_id}
+                      className={`transition-all duration-300 ${Number(stock.qty) < Number(stock.min_qty)
                         ? "bg-red-500 text-white hover:bg-red-600"
                         : Number(stock.qty) - Number(stock.min_qty) <= 2
-                        ? "bg-orange-500 text-white hover:bg-orange-600"
-                        : "bg-white hover:bg-blue-50"
-                    }`}
-                  >
-                    <td className="px-4 py-3 border-b">
-                      {indexOfFirstStock + index + 1}
-                    </td>
-                    <td className="px-4 py-3 border-b">{stock.m_name}</td>
-                    <td className="px-4 py-3 border-b">{stock.qty}</td>
-                    <td className="px-4 py-3 border-b">{stock.min_qty}</td>
-                    <td className="px-4 py-3 border-b">{stock.u_name}</td>
-                    <td className="px-4 py-3 border-b">
-                      {stock.category_name}
-                    </td>
-                    <td className="px-4 py-3 border-b">
-                      {stock.price || "0.00"}
-                    </td>
-                    <td className="px-4 py-3 border-b">
-                      <button
-                        className=" hover:underline"
-                        onClick={() => handleEdit(stock.material_id)}
-                      >
-                        แก้ไข
-                      </button>
+                          ? "bg-orange-500 text-white hover:bg-orange-600"
+                          : "bg-white hover:bg-blue-50"
+                        }`}
+                    >
+                      <td className="px-4 py-3 border-b">
+                        {indexOfFirstStock + index + 1}
+                      </td>
+                      <td className="px-4 py-3 border-b">{stock.m_name}</td>
+                      <td className="px-4 py-3 border-b">{stock.qty}</td>
+                      <td className="px-4 py-3 border-b">{stock.min_qty}</td>
+                      <td className="px-4 py-3 border-b">{stock.u_name}</td>
+                      <td className="px-4 py-3 border-b">
+                        {stock.category_name}
+                      </td>
+                      <td className="px-4 py-3 border-b">
+                        {stock.price || "0.00"}
+                      </td>
+                      <td className="px-4 py-3 border-b">
+                        <button
+                          className=" hover:underline"
+                          onClick={() => handleEdit(stock.material_id)}
+                        >
+                          แก้ไข
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className="px-4 py-4 text-gray-700 text-center">
+                      ไม่มีข้อมูล
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="8" className="px-4 py-4 text-gray-700 text-center">
-                    ไม่มีข้อมูล
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-{currentPage > 1 && (
-   <div className="flex justify-center items-center mt-6">
-          {/* ปุ่มย้อนกลับ */}
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <ChevronLeft />
-          </button>
+        {currentPage > 1 && (
+          <div className="flex justify-center items-center mt-6">
+            {/* ปุ่มย้อนกลับ */}
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <ChevronLeft />
+            </button>
 
-          {/* ปุ่มเลขหน้า */}
-          <div className="mx-4 flex space-x-1">
-            {generatePaginationButtons(currentPage, totalPages, isMobile).map(
-              (page, index) =>
-                page === "..." ? (
-                  <span key={index} className="px-4 py-2 text-gray-500">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page.key}
-                    onClick={() => paginate(page.value)}
-                    className={`px-4 py-2 rounded-lg ${
-                      currentPage === page.value
+            {/* ปุ่มเลขหน้า */}
+            <div className="mx-4 flex space-x-1">
+              {generatePaginationButtons(currentPage, totalPages, isMobile).map(
+                (page, index) =>
+                  page === "..." ? (
+                    <span key={index} className="px-4 py-2 text-gray-500">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page.key}
+                      onClick={() => paginate(page.value)}
+                      className={`px-4 py-2 rounded-lg ${currentPage === page.value
                         ? "bg-blue-700 text-white"
                         : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                    disabled={page.value === "..."}
-                  >
-                    {page.value}
-                  </button>
-                )
-            )}
-          </div>
+                        }`}
+                      disabled={page.value === "..."}
+                    >
+                      {page.value}
+                    </button>
+                  )
+              )}
+            </div>
 
-          {/* ปุ่มไปข้างหน้า */}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-      )}     
+            {/* ปุ่มไปข้างหน้า */}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <ChevronRight />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

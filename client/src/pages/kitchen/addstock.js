@@ -15,6 +15,7 @@ function Addstock() {
   const [units, setUnits] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchMaterials();
@@ -160,6 +161,7 @@ function Addstock() {
     }
 
     try {
+      setIsLoading(true);
       const response = await axios.post("/api/stock/new_stock", data, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
@@ -179,6 +181,8 @@ function Addstock() {
         "Error:",
         error.response ? error.response.data : error.message
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -216,6 +220,7 @@ function Addstock() {
                   name="material_id"
                   value={material.material_id || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
@@ -230,6 +235,7 @@ function Addstock() {
                   name="qty"
                   value={material.qty || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
                   placeholder="ปริมาณ"
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/6 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -237,6 +243,7 @@ function Addstock() {
                   name="unit_id"
                   value={material.unit_id || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/6 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกหน่วย</option>
@@ -251,6 +258,7 @@ function Addstock() {
                   name="price"
                   value={material.price || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
                   placeholder="ราคา"
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -258,6 +266,7 @@ function Addstock() {
                   name="category_id"
                   value={material.category_id || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/6 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">หมวดหมู่</option>
@@ -270,6 +279,7 @@ function Addstock() {
                 <button
                   type="button"
                   onClick={() => removeMaterial(index)}
+                  disabled={isLoading}
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-all focus:outline-none focus:ring-2 focus:ring-red-400"
                 >
                   ลบ
@@ -279,6 +289,7 @@ function Addstock() {
             <button
               type="button"
               onClick={addMaterial}
+              disabled={isLoading}
               className="px-4 py-2 bg-blue-400 text-white rounded-md hover:bg-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               +
@@ -288,9 +299,39 @@ function Addstock() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full md:w-auto bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-all focus:outline-none focus:ring-4 focus:ring-blue-400"
+            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-700 hover:bg-blue-600"
+              }`}
+            disabled={isLoading}
           >
-            บันทึกการสต๊อก
+            {isLoading ? (
+              <div className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 text-white mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                กำลังบันทึก...
+              </div>
+            ) : (
+              "บันทึก"
+            )}
           </button>
         </form>
       </div>

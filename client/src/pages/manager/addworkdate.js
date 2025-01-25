@@ -12,6 +12,7 @@ const Addworkdate = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedEmployees, setSelectedEmployees] = useState([]);
   const { authData } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchEmp = async () => {
     try {
@@ -58,6 +59,7 @@ const Addworkdate = () => {
 
     const formattedDate = formatDate(selectedDate);
     try {
+      setIsLoading(true);
       for (const id_card of selectedEmployees) {
         const response = await axios.post(
           "/api/ws/add",
@@ -71,7 +73,6 @@ const Addworkdate = () => {
             },
           }
         );
-        console.log(response.data); // ตรวจสอบการตอบกลับ
       }
       Swal.fire({
         icon: "success",
@@ -88,6 +89,8 @@ const Addworkdate = () => {
         title: "Error",
         text: "Failed to assign work dates.",
       });
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -148,6 +151,7 @@ const Addworkdate = () => {
           <DatePicker
             selected={selectedDate}
             onChange={handleDateChange}
+            disabled={isLoading}
             dateFormat="dd/MM/yyyy"
             className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             minDate={minDate}
@@ -163,6 +167,7 @@ const Addworkdate = () => {
             </label>
             <button
               onClick={toggleSelectAll}
+              disabled={isLoading}
               className="bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               {isAllSelected ? "ยกเลิกเลือกทั้งหมด" : "เลือกทั้งหมด"}
@@ -176,6 +181,7 @@ const Addworkdate = () => {
                   value={employee.id_card}
                   checked={selectedEmployees.includes(employee.id_card)}
                   onChange={() => handleEmployeeSelect(employee.id_card)}
+                  disabled={isLoading}
                   className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <span className="text-gray-800">
@@ -188,11 +194,41 @@ const Addworkdate = () => {
 
         {/* Submit Button */}
         <div className="flex justify-end">
-          <button
-            onClick={handleSubmit}
-            className="bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-300"
+        <button
+            type="submit"
+            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-700 hover:bg-blue-600"
+              }`}
+            disabled={isLoading}
           >
-            บันทึกวันทำงาน
+            {isLoading ? (
+              <div className="flex items-center">
+                <svg
+                  className="animate-spin h-5 w-5 text-white mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                กำลังบันทึก...
+              </div>
+            ) : (
+              "บันทึก"
+            )}
           </button>
         </div>
       </div>

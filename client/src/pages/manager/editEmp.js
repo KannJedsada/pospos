@@ -93,7 +93,7 @@ const Editemp = () => {
   const [position, setPosition] = useState([]);
   const { authData } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [empAccess, setEmpAccess] = useState([]);
 
   // Fetch provinces once on component mount
@@ -200,7 +200,6 @@ const Editemp = () => {
           },
         });
         const employeeData = response.data.data;
-        console.log(employeeData);
 
         const province = provinces.find(
           (p) => p.name_th === employeeData.province
@@ -273,7 +272,7 @@ const Editemp = () => {
     }
   }, [id_card, authData.token, provinces]);
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
         setIsLoading(true);
@@ -296,12 +295,13 @@ const Editemp = () => {
       try {
         const positionsRes = await axios.get("/api/pos");
         const allPositions = positionsRes.data.data;
+        console.log(empAccess.access);
         const filteredPositions =
           empAccess.access === 1 || empAccess.access === 0
             ? allPositions
             : allPositions.filter(
-                (position) => position.dept_id !== 1 && position.dept_id !== 2
-              );
+              (position) => position.dept_id !== 1 && position.dept_id !== 2
+            );
         setPosition(filteredPositions);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -391,6 +391,7 @@ const Editemp = () => {
       subdistrict: formData.subdistrictName,
     };
     try {
+      setIsLoading(true);
       await axios.put(`/api/emp/${id_card}`, postData, {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
@@ -404,6 +405,8 @@ const Editemp = () => {
     } catch (error) {
       console.error("There was an error adding the employee!", error);
       alert("Failed to add employee. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -445,9 +448,8 @@ const Editemp = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="ชื่อจริง"
-                    className={`w-full px-3 py-2 border ${
-                      errors.f_name ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                    className={`w-full px-3 py-2 border ${errors.f_name ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                     required
                   />
                   {errors.f_name && (
@@ -466,9 +468,8 @@ const Editemp = () => {
                     onBlur={handleBlur}
                     onChange={handleChange}
                     placeholder="นามสกุล"
-                    className={`w-full px-3 py-2 border ${
-                      errors.l_name ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                    className={`w-full px-3 py-2 border ${errors.l_name ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                     required
                   />
                   {errors.l_name && (
@@ -490,9 +491,8 @@ const Editemp = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="example@email.com"
-                    className={`w-full px-4 py-2 border ${
-                      errors.mail ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
+                    className={`w-full px-4 py-2 border ${errors.mail ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
                     required
                   />
                   {errors.mail && (
@@ -511,9 +511,8 @@ const Editemp = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="เบอร์โทรศัทพ์"
-                    className={`w-full px-4 py-2 border ${
-                      errors.phone ? "border-red-500" : "border-gray-300"
-                    } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
+                    className={`w-full px-4 py-2 border ${errors.phone ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
                     required
                   />
                   {errors.phone && (
