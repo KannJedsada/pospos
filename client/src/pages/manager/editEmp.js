@@ -111,7 +111,7 @@ const Editemp = () => {
 
   useEffect(()=> {
     fetchEmployeeData();
-  },[])
+  },[]);
 
 
   // Fetch provinces once on component mount
@@ -312,7 +312,7 @@ const Editemp = () => {
     };
 
     fetchPos();
-  }, []);
+  }, [empAccess]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
