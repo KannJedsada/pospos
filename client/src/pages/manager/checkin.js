@@ -20,8 +20,10 @@ const Checkin = () => {
                 videoRef.current,
                 async (result) => {
                     if (!isProcessing && result.data && result.data !== lastScanned) {
+                        setIsProcessing(true); // ตั้งสถานะกำลังประมวลผล
                         setLastScanned(result.data); // เก็บ QR Code ล่าสุดที่อ่าน
-                        await handleScan(result.data); // รอผลการสแกน
+                        stopScanner(); // หยุดการทำงานของ Scanner ทันที
+                        await handleScan(result.data); // ส่งข้อมูลไปประมวลผล
                     }
                 },
                 {
@@ -37,6 +39,7 @@ const Checkin = () => {
             setQrScanner(scanner);
         }
     };
+
 
     // หยุดการสแกน
     const stopScanner = () => {
@@ -57,12 +60,16 @@ const Checkin = () => {
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
         setIsProcessing(true);
-        console.log(data);
         try {
             if (!authData || !authData.token) {
                 throw new Error("Authentication data is missing or invalid.");
             }
 
+            if (!data || typeof data !== "string") {
+                throw new Error("Invalid QR Code data.");
+            }
+
+            // หยุด Scanner เพื่อไม่ให้เกิดการอ่านซ้ำ
             stopScanner();
 
             // ส่งข้อมูลไปที่ API
@@ -76,7 +83,11 @@ const Checkin = () => {
                 }
             );
 
-            const isLate = response.data.data.is_late;
+            if (response.status !== 200) {
+                throw new Error(`Unexpected response: ${response.status}`);
+            }
+
+            const isLate = response.data.data?.is_late;
 
             // แสดงผลการเช็คอิน
             Swal.fire({
@@ -89,8 +100,9 @@ const Checkin = () => {
             });
         } catch (error) {
             console.error("Error during check-in:", error);
+
             const errorMessage =
-                error.response?.data?.message || "เกิดข้อผิดพลาดในการเช็คอิน";
+                error.response?.data?.message || error.message || "เกิดข้อผิดพลาดในการเช็คอิน";
 
             // แสดงข้อความผิดพลาด
             Swal.fire({
@@ -105,6 +117,7 @@ const Checkin = () => {
             setIsProcessing(false);
         }
     };
+
 
     // ฟังก์ชันทดสอบการอ่าน Mock QR Code
     const handleMockScan = () => {
