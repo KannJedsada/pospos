@@ -67,15 +67,17 @@ const edit_materials = async (req, res) => {
       return res.status(404).json({ message: "Material not found" });
     }
 
+    const material = materialToEdit[0];
+
     // ใช้ URL ของรูปภาพใหม่หรือใช้รูปภาพเดิมถ้าไม่มีการอัปโหลดใหม่
     const m_img = newImgUrl || materialToEdit.m_img;
     console.log("New Image URL:", newImgUrl);
-    console.log("Old Image URL:", materialToEdit);
+    console.log("Old Image URL:", material.m_img);
 
     // ถ้ามีการอัปโหลดรูปภาพใหม่ และ materialToEdit.m_img มีค่ามาก่อนหน้า
-    if (newImgUrl && materialToEdit?.m_img) {
+    if (newImgUrl && material.m_img) {
       // แยก publicId ของรูปภาพจาก URL เดิม
-      const publicId = materialToEdit.m_img.split('/').slice(-3).join('/').split('.')[0];
+      const publicId = material.m_img.split('/').slice(-3).join('/').split('.')[0];
       console.log("Public ID for deletion:", publicId);
 
       try {
