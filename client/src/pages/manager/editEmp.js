@@ -95,20 +95,22 @@ const Editemp = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [empAccess, setEmpAccess] = useState([]);
-  
+
   useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
         setIsLoading(true);
         const access = await axios.get(`/api/emp/empdept/${authData.id_card}`);
+        console.log("Response from API:", access); // ตรวจสอบ Response ทั้งหมด
         const empData = access?.data?.data;
         setEmpAccess(empData); // อัปเดต State
-        console.log(empData);
+        console.log("Employee Data:", empData); // ตรวจสอบค่า empData
       } catch (error) {
         console.error("Error fetching employee data:", error);
       } finally {
         setIsLoading(false);
       }
+
     };
 
     fetchEmployeeData();
@@ -157,7 +159,7 @@ const Editemp = () => {
 
     fetchAmphures();
   }, [formData.province]);
-  
+
   // fetch tambons
   useEffect(() => {
     const fetchTambons = async () => {
