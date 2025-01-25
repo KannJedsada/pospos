@@ -76,11 +76,13 @@ const edit_materials = async (req, res) => {
 
     // If a new file is uploaded, use it; otherwise, keep the old image
     const m_img = req.file ? `${img}` : materialToEdit.m_img;
+    console.log("new_img",m_img);
 
     // If a new image is uploaded and there is an old image, delete the old image from Cloudinary
     if (req.file && materialToEdit.m_img) {
       const publicId = materialToEdit.m_img;
       // .split("/").slice(7).join("/").split(".")[0]; // Extract publicId from old image URL
+      console.log("img_to_delete",publicId);
 
       try {
         // Delete the old image from Cloudinary
@@ -97,7 +99,7 @@ const edit_materials = async (req, res) => {
       m_name,
       unit,
       m_img,
-      sub_materials, // Send sub_materials
+      sub_materials, 
       category,
     });
 
