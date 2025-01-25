@@ -165,6 +165,7 @@ const edit_menu = async (req, res) => {
     }
 
     const menuImg = menuToEdit[0];
+    console.log(menuImg);
     // If no new image is uploaded, keep the old one
     const updatedImg = img || menuImg.menu_img;
 
