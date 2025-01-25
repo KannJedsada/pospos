@@ -70,7 +70,7 @@ const edit_materials = async (req, res) => {
     // ใช้ URL ของรูปภาพใหม่หรือใช้รูปภาพเดิมถ้าไม่มีการอัปโหลดใหม่
     const m_img = newImgUrl || materialToEdit.m_img;
     console.log("New Image URL:", newImgUrl);
-    console.log("Old Image URL:", materialToEdit?.m_img);
+    console.log("Old Image URL:", materialToEdit);
 
     // ถ้ามีการอัปโหลดรูปภาพใหม่ และ materialToEdit.m_img มีค่ามาก่อนหน้า
     if (newImgUrl && materialToEdit?.m_img) {
