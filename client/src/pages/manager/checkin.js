@@ -151,20 +151,21 @@ const Checkin = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { authData } = useContext(AuthContext);
 
+  // เริ่มการสแกน QR
   const startScanner = () => {
     if (videoRef.current) {
       const scanner = new QrScanner(
         videoRef.current,
         async (result) => {
           if (!isProcessing && result.data) {
-            await handleScan(result.data);
+            await handleScan(result.data); // รอผลการสแกน
           }
         },
         {
           onDecodeError: (error) => {
             console.error("QR Code decode error:", error);
           },
-          maxScansPerSecond: 5, // ลดความถี่การสแกนเพื่อเพิ่มประสิทธิภาพ
+          maxScansPerSecond: 5, // จำกัดจำนวนการสแกนในหนึ่งวินาที
         }
       );
       scanner.start().catch((error) => {
@@ -174,6 +175,7 @@ const Checkin = () => {
     }
   };
 
+  // หยุดการสแกน
   const stopScanner = () => {
     if (qrScanner) {
       qrScanner.stop();
@@ -182,15 +184,16 @@ const Checkin = () => {
     }
   };
 
+  // เมื่อ unmount ควรหยุด scanner
   useEffect(() => {
     return () => {
-      // Cleanup scanner on unmount
       stopScanner();
     };
   }, [qrScanner]);
 
+  // ฟังก์ชันจัดการการสแกน
   const handleScan = async (data) => {
-    if (isProcessing) return; // ป้องกันการสแกนซ้ำ
+    if (isProcessing) return; // ป้องกันการทำงานซ้ำ
     setIsProcessing(true);
 
     try {
@@ -198,8 +201,9 @@ const Checkin = () => {
         throw new Error("Authentication data is missing or invalid.");
       }
 
-      stopScanner(); // หยุดกล้องชั่วคราวระหว่างประมวลผล
+      stopScanner();
 
+      // ส่งข้อมูลไปที่ API
       const response = await axios.post(
         "/api/ts/checkin",
         { id_card: data },
@@ -212,26 +216,28 @@ const Checkin = () => {
 
       const isLate = response.data.data.is_late;
 
+      // แสดงผลการเช็คอิน
       Swal.fire({
         title: isLate ? "คุณมาสาย!" : "เช็คอินสำเร็จ",
         text: isLate ? "คุณได้เช็คอินล่าช้า" : "คุณได้เช็คอินสำเร็จ",
         icon: isLate ? "warning" : "success",
         showConfirmButton: false,
         timer: 1000,
-        willClose: () => startScanner(), // เริ่มกล้องใหม่ทันทีหลัง Swal ปิด
+        willClose: () => startScanner(), // เริ่ม Scanner ใหม่เมื่อ Swal ปิด
       });
     } catch (error) {
       console.error("Error during check-in:", error);
       const errorMessage =
         error.response?.data?.message || "เกิดข้อผิดพลาดในการเช็คอิน";
 
+      // แสดงข้อความผิดพลาด
       Swal.fire({
         title: "เกิดข้อผิดพลาด",
         text: errorMessage,
         icon: "error",
         showConfirmButton: false,
         timer: 1000,
-        willClose: () => startScanner(), // เริ่มกล้องใหม่ทันทีหลัง Swal ปิด
+        willClose: () => startScanner(), // เริ่ม Scanner ใหม่เมื่อ Swal ปิด
       });
     } finally {
       setIsProcessing(false);
@@ -268,7 +274,7 @@ const Checkin = () => {
             )}
           </div>
           {isProcessing && (
-            <div className="text-center text-blue-600 mt-4">
+            <div className="loading-spinner mt-4 text-center">
               <p>กำลังประมวลผล...</p>
             </div>
           )}
@@ -279,4 +285,5 @@ const Checkin = () => {
 };
 
 export default Checkin;
+
 
