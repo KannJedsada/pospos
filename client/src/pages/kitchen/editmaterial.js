@@ -78,7 +78,7 @@ function Editmaterial() {
 
         if (materialData.m_img) {
           setPreviewImage(
-            `${materialData.m_img}`
+            `https://res.cloudinary.com/dquqxt3tl/image/upload/${materialData.m_img}`
           );
         }
       } else {
