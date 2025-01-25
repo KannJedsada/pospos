@@ -103,7 +103,7 @@ const Editemp = () => {
         const access = await axios.get(`/api/emp/empdept/${authData.id_card}`);
         const empData = access?.data?.data;
         setEmpAccess(empData); // อัปเดต State
-        console.log(access.data.data);
+        console.log(empData);
       } catch (error) {
         console.error("Error fetching employee data:", error);
       } finally {
