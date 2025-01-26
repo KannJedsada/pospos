@@ -32,6 +32,7 @@ const Checkin = () => {
                 videoRef.current,
                 async (result) => {
                     if (!isProcessing && result.data) {
+                        stopScanner();
                         setIsProcessing(true);
                         await handleScan(result.data);
                     }
@@ -61,6 +62,8 @@ const Checkin = () => {
 
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
+        console.log(data);
+
         try {
             setIsProcessing(true);
 

@@ -31,6 +31,7 @@ const Checkout = () => {
         videoRef.current,
         async (result) => {
           if (!isProcessing && result.data) {
+            stopScanner();
             setIsProcessing(true);
             await handleScan(result.data);
           }
@@ -58,6 +59,7 @@ const Checkout = () => {
   };
 
   const handleScan = async (data) => {
+    console.log(data);
     try {
       setIsProcessing(true);
       if (!authData || !authData.token) {
