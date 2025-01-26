@@ -59,7 +59,6 @@ const Checkout = () => {
   };
 
   const handleScan = async (data) => {
-    console.log(data);
     try {
       setIsProcessing(true);
       if (!authData || !authData.token) {

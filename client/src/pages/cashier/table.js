@@ -11,7 +11,6 @@ import Modal from "react-modal";
 
 function Table() {
   const currentUrl = window.location.href;
-  console.log(currentUrl);
   const [isQRCodeVisible, setIsQRCodeVisible] = useState(false);
   const [menus, setMenus] = useState([]);
   const [selectedTab, setSelectedTab] = useState(0); // ใช้สำหรับบันทึกแท็บที่เลือก
@@ -57,7 +56,7 @@ function Table() {
       const res = await axios.get(`/api/menu/menu-recom`);
       setRecommended(res.data.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 

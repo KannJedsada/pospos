@@ -66,8 +66,6 @@ function Position() {
         });
 
         fetchPosition();
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        console.log("Deletion cancelled");
       }
     } catch (error) {
       console.error("Error deleting menu:", error);

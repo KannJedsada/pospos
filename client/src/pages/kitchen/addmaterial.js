@@ -126,7 +126,6 @@ function Addmaterial() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("category :", data.material_category);
     const newErrors = {};
     Object.keys(data).forEach((key) => {
       validateField(key, data[key]);

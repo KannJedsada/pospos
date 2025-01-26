@@ -57,7 +57,6 @@ function Order() {
 
   const fetchReceipt = async (table_id) => {
     const res = await axios.get(`/api/receipt/get-receipt-detail/${table_id}`);
-    console.log(res.data.data);
     setReceipt(res.data.data);
   };
 

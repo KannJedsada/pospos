@@ -128,7 +128,6 @@ function Menucategory() {
   const handleSubmit = async () => {
     try {
       if (currentEditData) {
-        console.log(currentEditData.id);
         if (modalType === "menucategory") {
           await axios.put(`/api/menu/edit-cat/${currentEditData.id}`, formData);
         } else if (modalType === "menutype") {

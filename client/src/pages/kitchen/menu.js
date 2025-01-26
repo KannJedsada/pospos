@@ -97,9 +97,7 @@ function Menus() {
         });
 
         fetchMenus();
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        console.log("Deletion cancelled");
-      }
+      } 
     } catch (error) {
       console.error("Error deleting menu:", error);
       Swal.fire("Error", "Failed to delete menu", "error");
@@ -131,7 +129,7 @@ function Menus() {
       });
       setMenuIng(res.data.data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsloadingModal(false);
     }

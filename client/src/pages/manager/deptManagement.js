@@ -86,7 +86,6 @@ function DeptManagement() {
     try {
       const deptRes = await axios.get(`/api/dept/${id}`);
       const dept_name = deptRes.data.data.dept_name;
-      console.log(dept_name);
       const result = await Swal.fire({
         icon: "warning",
         title: "คุณต้องการลบหรือไม่?",

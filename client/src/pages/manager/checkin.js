@@ -73,8 +73,6 @@ const Checkin = () => {
 
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
-        console.log(data);
-
         try {
             setIsProcessing(true);
 

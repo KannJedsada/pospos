@@ -179,7 +179,6 @@ function Editmaterial() {
       sub_materials: updatedSubMaterials,
     }));
 
-    console.log("Updated Sub Materials:", updatedSubMaterials);
   };
 
   const addSubMaterial = () => {
@@ -203,7 +202,6 @@ function Editmaterial() {
     e.preventDefault();
 
     const updateData = { ...data };
-    console.log(updateData);
     try {
       setIsLoading(true);
       await axios.put(`/api/material/edit/${id}`, updateData, {
