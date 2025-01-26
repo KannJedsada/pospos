@@ -24,7 +24,7 @@ const Checkout = () => {
 
     return `${hours}:${minutes}`; // คืนค่าเวลาที่แปลงแล้ว
   };
-
+  
   const startScanner = () => {
     if (videoRef.current) {
       const scanner = new QrScanner(
@@ -80,7 +80,7 @@ const Checkout = () => {
 
       if (already_checked_out) {
         Swal.fire({
-          title: "คุณได้เช็คอินแล้ววันนี้!",
+          title: "คุณได้เช็คเอาท์แล้ววันนี้!",
           text: `เวลาเช็คอินก่อนหน้านี้: ${formatTimeToThai(existing_checkout.check_out)}`,
           icon: "info",
           showConfirmButton: false,
