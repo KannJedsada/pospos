@@ -12,17 +12,28 @@ const Checkout = () => {
   const { authData } = useContext(AuthContext);
 
   const formatTimeToThai = (timeString) => {
-    // สร้าง Date object จากเวลา UTC
-    const utcDate = new Date(`1970-01-01T${timeString}Z`);
+    try {
+      // สร้าง Date object จากเวลา input (timeString)
+      const [hours, minutes, seconds] = timeString.split(":").map(Number);
 
-    // เพิ่มเวลา 7 ชั่วโมงสำหรับประเทศไทย
-    const thaiDate = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
+      // สร้าง Date object ในเวลาปัจจุบัน
+      const now = new Date();
 
-    // ดึงชั่วโมงและนาทีออกมา
-    const hours = String(thaiDate.getHours()).padStart(2, "0"); // เติม 0 ด้านหน้า (ถ้าจำเป็น)
-    const minutes = String(thaiDate.getMinutes()).padStart(2, "0");
+      // ตั้งค่าเวลาเป็นเวลาที่ได้รับจาก input
+      now.setHours(hours, minutes, seconds);
 
-    return `${hours}:${minutes}`; // คืนค่าเวลาที่แปลงแล้ว
+      // เพิ่มเวลา 7 ชั่วโมงสำหรับ Time Zone ประเทศไทย
+      now.setHours(now.getHours() + 7);
+
+      // ดึงชั่วโมงและนาทีหลังจากปรับโซนเวลา
+      const thaiHours = String(now.getHours()).padStart(2, "0");
+      const thaiMinutes = String(now.getMinutes()).padStart(2, "0");
+
+      return `${thaiHours}:${thaiMinutes}`; // คืนค่าชั่วโมงและนาทีในรูปแบบ HH:mm
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return "เวลาไม่ถูกต้อง"; // คืนค่าข้อความกรณีเกิดข้อผิดพลาด
+    }
   };
 
   const startScanner = () => {
