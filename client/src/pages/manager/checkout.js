@@ -11,12 +11,28 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { authData } = useContext(AuthContext);
 
+  const formatTimeToThai = (timeString) => {
+    // สร้าง Date object จากเวลา UTC
+    const utcDate = new Date(`1970-01-01T${timeString}Z`);
+
+    // เพิ่มเวลา 7 ชั่วโมงสำหรับประเทศไทย
+    const thaiDate = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
+
+    // ดึงชั่วโมงและนาทีออกมา
+    const hours = String(thaiDate.getHours()).padStart(2, "0"); // เติม 0 ด้านหน้า (ถ้าจำเป็น)
+    const minutes = String(thaiDate.getMinutes()).padStart(2, "0");
+
+    return `${hours}:${minutes}`; // คืนค่าเวลาที่แปลงแล้ว
+  };
+
   const startScanner = () => {
     if (videoRef.current) {
       const scanner = new QrScanner(
         videoRef.current,
         async (result) => {
           if (!isProcessing && result.data) {
+            stopScanner();
+            setIsProcessing(true);
             await handleScan(result.data);
           }
         },
@@ -24,6 +40,7 @@ const Checkout = () => {
           onDecodeError: (error) => {
             console.error("QR Code decode error:", error);
           },
+          maxScansPerSecond: 1,
         }
       );
       scanner.start().catch((error) => {
@@ -41,16 +58,9 @@ const Checkout = () => {
     }
   };
 
-  useEffect(() => {
-    return () => {
-      // Cleanup scanner on unmount
-      stopScanner();
-    };
-  }, [qrScanner]);
-
   const handleScan = async (data) => {
-    setIsProcessing(true);
     try {
+      setIsProcessing(true);
       if (!authData || !authData.token) {
         throw new Error("Authentication data is missing or invalid.");
       }
@@ -65,12 +75,33 @@ const Checkout = () => {
         }
       );
 
+      const { already_checked_out, existing_checkout, new_checkout } = response.data.data;
+
+      if (already_checked_out) {
+        Swal.fire({
+          title: "คุณได้เช็คอินแล้ววันนี้!",
+          text: `เวลาเช็คอินก่อนหน้านี้: ${formatTimeToThai(existing_checkout.check_out)}`,
+          icon: "info",
+          showConfirmButton: false,
+          timer: 1500,
+          willClose: () => {
+            setIsProcessing(false); 
+            startScanner(); 
+          },
+        });
+        return;
+      }
+
       Swal.fire({
         title: "เช็คเอาท์สำเร็จ",
         text: "คุณได้เช็คเอาท์สำเร็จ",
         icon: "success",
         showConfirmButton: false,
-        timer: 1000,
+        timer: 1500,
+        willClose: () => {
+          setIsProcessing(false); 
+          startScanner(); 
+        },
       });
     } catch (error) {
       console.error("Error during check-out:", error);

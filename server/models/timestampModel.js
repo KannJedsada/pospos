@@ -64,7 +64,6 @@ class Timestamp {
     };
   }
 
-
   static async checkout(data) {
     const { id_card } = data;
 
@@ -89,6 +88,10 @@ class Timestamp {
 
     if (existing_checkout.rows.length > 0) {
       throw new Error("User has already checked out today.");
+      return {
+        already_checked_out: true,
+        existing_checkout: existing_checkout.rows[0],
+      };
     }
 
     const check_out_res = await pool.query(
@@ -100,7 +103,11 @@ class Timestamp {
       [id_card]
     );
 
-    return check_out_res.rows[0];
+    // return check_out_res.rows[0];
+    return {
+      already_checked_out: false,
+      new_checkout: check_out_res.rows[0]
+    }
   }
 
   static async check_late() {

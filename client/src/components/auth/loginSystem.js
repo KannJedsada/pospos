@@ -11,7 +11,6 @@ const LoginSystem = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    console.log(idCard, email)
     e.preventDefault();
     try {
       const response = await axios.post("/api/login", {

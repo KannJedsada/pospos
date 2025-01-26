@@ -11,6 +11,20 @@ const Checkin = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const { authData } = useContext(AuthContext);
 
+    const formatTimeToThai = (timeString) => {
+        // สร้าง Date object จากเวลา UTC
+        const utcDate = new Date(`1970-01-01T${timeString}Z`);
+
+        // เพิ่มเวลา 7 ชั่วโมงสำหรับประเทศไทย
+        const thaiDate = new Date(utcDate.getTime() + 7 * 60 * 60 * 1000);
+
+        // ดึงชั่วโมงและนาทีออกมา
+        const hours = String(thaiDate.getHours()).padStart(2, "0"); // เติม 0 ด้านหน้า (ถ้าจำเป็น)
+        const minutes = String(thaiDate.getMinutes()).padStart(2, "0");
+
+        return `${hours}:${minutes}`; // คืนค่าเวลาที่แปลงแล้ว
+    };
+
     // เริ่มการสแกน QR
     const startScanner = () => {
         if (videoRef.current) {
@@ -18,17 +32,16 @@ const Checkin = () => {
                 videoRef.current,
                 async (result) => {
                     if (!isProcessing && result.data) {
-                        // ตรวจสอบว่าซ้ำกับ QR Code ล่าสุดหรือไม่
                         stopScanner();
-                        setIsProcessing(true); // ตั้งสถานะกำลังประมวลผล
-                        await handleScan(result.data); // ส่งข้อมูลไปประมวลผล
+                        setIsProcessing(true);
+                        await handleScan(result.data);
                     }
                 },
                 {
                     onDecodeError: (error) => {
                         console.error("QR Code decode error:", error);
                     },
-                    maxScansPerSecond: 1, // จำกัดจำนวนการสแกนในหนึ่งวินาที
+                    maxScansPerSecond: 1,
                 }
             );
             scanner.start().catch((error) => {
@@ -49,10 +62,8 @@ const Checkin = () => {
 
     // ฟังก์ชันจัดการการสแกน
     const handleScan = async (data) => {
-        console.log(data);
-
         try {
-            setIsProcessing(true); // ตั้งสถานะกำลังประมวลผล
+            setIsProcessing(true);
 
             if (!authData || !authData.token) {
                 throw new Error("Authentication data is missing or invalid.");
@@ -76,8 +87,6 @@ const Checkin = () => {
             if (response.status !== 200) {
                 throw new Error(`Unexpected response: ${response.status}`);
             }
-            
-            console.log(response.data.data);
 
             const { already_checked_in, existing_checkin, new_checkin, is_late } = response.data.data;
 
@@ -85,7 +94,7 @@ const Checkin = () => {
                 // แสดงแจ้งเตือนว่าเคยเช็คอินแล้ว
                 Swal.fire({
                     title: "คุณได้เช็คอินแล้ววันนี้!",
-                    text: `เวลาเช็คอินก่อนหน้านี้: ${existing_checkin.check_in}`,
+                    text: `เวลาเช็คอินก่อนหน้านี้: ${formatTimeToThai(existing_checkin.check_in)}`,
                     icon: "info",
                     showConfirmButton: false,
                     timer: 1500,
@@ -129,7 +138,6 @@ const Checkin = () => {
             });
         }
     };
-
 
     return (
         <div className="wrapper bg-blue-50 min-h-screen">

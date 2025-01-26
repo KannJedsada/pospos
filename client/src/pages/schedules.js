@@ -14,7 +14,6 @@ const Schedules = () => {
   const [personalInfo, setPersonalInfo] = useState({});
   const [qrcodeValue, setQrcodeValue] = useState(null);
   const [isQrExpired, setIsQrExpired] = useState(false);
-  const [qrCodeTimer, setQrCodeTimer] = useState(null);
 
   const fetchSchedules = useCallback(async () => {
     try {
