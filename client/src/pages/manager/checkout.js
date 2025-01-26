@@ -31,8 +31,6 @@ const Checkout = () => {
         videoRef.current,
         async (result) => {
           if (!isProcessing && result.data) {
-            qrScanner.stop();
-            qrScanner.destroy();
             setIsProcessing(true);
             await handleScan(result.data);
           }
