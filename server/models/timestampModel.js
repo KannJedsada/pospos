@@ -74,9 +74,9 @@ class Timestamp {
       [id_card]
     );
 
-    if (check_time.rows.length === 0) {
-      throw new Error("User has not checked in today.");
-    }
+    // if (check_time.rows.length === 0) {
+    //   throw new Error("User has not checked in today.");
+    // }
 
     const existing_checkout = await pool.query(
       `SELECT * FROM timestamps 
@@ -87,7 +87,7 @@ class Timestamp {
     );
 
     if (existing_checkout.rows.length > 0) {
-      throw new Error("User has already checked out today.");
+      // throw new Error("User has already checked out today.");
       return {
         already_checked_out: true,
         existing_checkout: existing_checkout.rows[0],

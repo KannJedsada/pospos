@@ -31,7 +31,8 @@ const Checkout = () => {
         videoRef.current,
         async (result) => {
           if (!isProcessing && result.data) {
-            stopScanner();
+            qrScanner.stop();
+            qrScanner.destroy();
             setIsProcessing(true);
             await handleScan(result.data);
           }
@@ -85,8 +86,8 @@ const Checkout = () => {
           showConfirmButton: false,
           timer: 1500,
           willClose: () => {
-            setIsProcessing(false); 
-            startScanner(); 
+            setIsProcessing(false);
+            startScanner();
           },
         });
         return;
@@ -99,8 +100,8 @@ const Checkout = () => {
         showConfirmButton: false,
         timer: 1500,
         willClose: () => {
-          setIsProcessing(false); 
-          startScanner(); 
+          setIsProcessing(false);
+          startScanner();
         },
       });
     } catch (error) {
@@ -148,6 +149,11 @@ const Checkout = () => {
               </button>
             )}
           </div>
+          {isProcessing && (
+            <div className="loading-spinner mt-4 text-center">
+              <p>กำลังประมวลผล...</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
