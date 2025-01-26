@@ -32,12 +32,30 @@ const LoginSystem = () => {
         navigate("/order");
       }
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "เข้าสู่ระบบล้มเหลว",
-        text: "อีเมลหรือเลขประจำตัวไม่ถูกต้อง",
-      });
-      console.error("Login failed", error.response?.data || error.message);
+      if (error.response) {
+        Swal.fire({
+          icon: "error",
+          title: "เข้าสู่ระบบล้มเหลว",
+          text: "อีเมลหรือเลขประจำตัวไม่ถูกต้อง",
+        });
+        console.error("Login failed", error.response.data);
+      } else if (error.request) {
+        // แจ้งเตือนเมื่อไม่มีการตอบกลับจากเซิร์ฟเวอร์
+        Swal.fire({
+          icon: "error",
+          title: "ข้อผิดพลาด",
+          text: "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้",
+        });
+        console.error("Login failed", error.request);
+      } else {
+        // แจ้งเตือนข้อผิดพลาดทั่วไป
+        Swal.fire({
+          icon: "error",
+          title: "ข้อผิดพลาด",
+          text: "เกิดปัญหาที่ไม่ทราบสาเหตุ",
+        });
+        console.error("Login failed", error.message);
+      }
     }
   };
 
