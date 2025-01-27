@@ -334,7 +334,7 @@ function Order() {
               <div class="receipt">
                 <h1 class="title">RMUTI POS</h1>
                 <h2 class="title">โต๊ะ: ${table}</h2>
-                <p class="timestamp">เวลา: ${formatThaiDate(date)}</p>
+                <p class="timestamp">${formatThaiDate(date)}</p>
                 <div class="qr-container">
                   <img src="${qrDataUrl}" class="qr-code" />
                 </div>

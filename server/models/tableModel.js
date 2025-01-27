@@ -55,27 +55,26 @@ class Tables {
 
   static async edit_table(id, data) {
     const { t_name, status_id } = data;
-
-    // ตรวจสอบว่าชื่อซ้ำหรือไม่ (ยกเว้นตัวเอง)
+  
+    // ตรวจสอบว่าชื่อซ้ำหรือไม่ (ยกเว้น id ของตัวเอง)
     const checkTableQuery = `SELECT * FROM tables WHERE t_name = $1 AND id != $2`;
     const existingTable = await pool.query(checkTableQuery, [t_name, id]);
-
+  
     if (existingTable.rows.length > 0) {
       throw new Error("Table name already exists. Please choose a different name.");
     }
-
+  
     // อัปเดตข้อมูลในตาราง
     const updateQuery = `UPDATE tables SET t_name = $1, status_id = $2 WHERE id = $3 RETURNING *`;
     const res = await pool.query(updateQuery, [t_name, status_id, id]);
-
+  
     if (res.rowCount === 0) {
       throw new Error("Table not found or failed to update.");
     }
-
+  
     return res.rows[0];
   }
-
-
+  
   static async change_status(id, data) {
     const { status_id } = data;
     const res = await pool.query(
