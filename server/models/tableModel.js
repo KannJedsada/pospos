@@ -71,6 +71,7 @@ class Tables {
     if (res.rowCount === 0) {
       throw new Error("Table not found or failed to update.");
     }
+    console.log(res.rows[0]);
   
     return res.rows[0];
   }
