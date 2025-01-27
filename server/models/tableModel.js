@@ -61,7 +61,7 @@ class Tables {
     const existingTable = await pool.query(checkTableQuery, [t_name, id]);
   
     if (existingTable.rows.length > 0) {
-      throw new Error("Table name already exists. Please choose a different name.");
+      throw new Error("Table name already exists.");
     }
   
     // อัปเดตข้อมูลในตาราง

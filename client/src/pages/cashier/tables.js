@@ -63,7 +63,7 @@ function Tables() {
 
       if (
         error.response &&
-        error.response.data.message === "Table name already exists. Please choose a different name."
+        error.response.data.message === "Table name already exists."
       ) {
         Swal.fire("Error", "ชื่อโต๊ะนี้มีอยู่แล้ว", "error");
       } else {
