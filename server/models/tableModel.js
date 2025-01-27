@@ -56,10 +56,16 @@ class Tables {
   static async edit_table(id, data) {
     const { t_name, status_id } = data;
   
-    // ตรวจสอบว่าชื่อซ้ำหรือไม่ (ยกเว้น id ของตัวเอง)
+    // ตรวจสอบว่า ID มีอยู่จริงหรือไม่
+    const checkIdQuery = `SELECT * FROM tables WHERE id = $1`;
+    const idExists = await pool.query(checkIdQuery, [id]);
+    if (idExists.rows.length === 0) {
+      throw new Error("Table ID not found.");
+    }
+  
+    // ตรวจสอบชื่อซ้ำ (ยกเว้น ID ที่กำลังแก้ไข)
     const checkTableQuery = `SELECT * FROM tables WHERE t_name = $1 AND id != $2`;
     const existingTable = await pool.query(checkTableQuery, [t_name, id]);
-  
     if (existingTable.rows.length > 0) {
       throw new Error("Table name already exists.");
     }
@@ -71,10 +77,10 @@ class Tables {
     if (res.rowCount === 0) {
       throw new Error("Table not found or failed to update.");
     }
-    console.log(res.rows[0]);
   
     return res.rows[0];
   }
+  
   
   static async change_status(id, data) {
     const { status_id } = data;
