@@ -56,7 +56,11 @@ export const AuthProvider = ({ children }) => {
     const id_card = localStorage.getItem("id_card");
     return token && id_card ? { token, id_card } : {};
   });
-  const [access, setAccess] = useState(null);
+
+  const [access, setAccess] = useState(() => {
+    const savedAccess = localStorage.getItem("access");
+    return savedAccess ? JSON.parse(savedAccess) : null; // ดึงค่า access จาก localStorage
+  });
 
   useEffect(() => {
     const checkTokenExpiration = () => {
@@ -88,9 +92,14 @@ export const AuthProvider = ({ children }) => {
               Authorization: `Bearer ${authData.token}`,
             },
           });
-          setAccess(res.data.data[0].access);
+          const fetchedAccess = res.data.data[0].access;
+
+          // บันทึก access ลง localStorage
+          setAccess(fetchedAccess);
+          localStorage.setItem("access", JSON.stringify(fetchedAccess));
         } catch (error) {
           console.error("Failed to fetch access data", error);
+          logout(); // logout หากไม่สามารถดึงข้อมูลได้
         }
       }
     };
@@ -106,6 +115,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("id_card");
+    localStorage.removeItem("access");
     setAuthData({});
     setAccess(null);
   };
