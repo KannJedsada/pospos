@@ -15,23 +15,43 @@ const LoginSystem = () => {
     e.preventDefault();
     try {
       setIsLoading(true);
+
+      // ส่งข้อมูลการเข้าสู่ระบบ
       const response = await axios.post("/api/login", {
         id: idCard,
         email: email,
       });
-      login(response.data.token, response.data.id_card);
 
+      // ทำการล็อกอิน
+      await login(response.data.token, response.data.id_card);
+
+      // ดึงข้อมูล access level
       const access = await axios.get(
         `/api/emp/empdept/${response.data.id_card}`
       );
-      // console.log(access.data.data);
+
       const acc = access?.data?.data?.access;
-      if (acc === 2 || acc === 1 || acc === 0) {
-        navigate("/manager");
-      } else if (acc === 3) {
-        navigate("/kitchen");
-      } else if (acc === 4) {
-        navigate("/order");
+
+      // ใช้ switch-case สำหรับ navigation
+      switch (acc) {
+        case 0:
+        case 1:
+        case 2:
+          navigate("/manager");
+          break;
+        case 3:
+          navigate("/kitchen");
+          break;
+        case 4:
+          navigate("/order");
+          break;
+        default:
+          Swal.fire({
+            icon: "warning",
+            title: "ข้อผิดพลาด",
+            text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
+          });
+          break;
       }
     } catch (error) {
       if (error.response) {
@@ -42,7 +62,6 @@ const LoginSystem = () => {
         });
         console.error("Login failed", error.response.data);
       } else if (error.request) {
-        // แจ้งเตือนเมื่อไม่มีการตอบกลับจากเซิร์ฟเวอร์
         Swal.fire({
           icon: "error",
           title: "ข้อผิดพลาด",
@@ -50,7 +69,6 @@ const LoginSystem = () => {
         });
         console.error("Login failed", error.request);
       } else {
-        // แจ้งเตือนข้อผิดพลาดทั่วไป
         Swal.fire({
           icon: "error",
           title: "ข้อผิดพลาด",
@@ -104,7 +122,7 @@ const LoginSystem = () => {
           </div>
           <button
             type="submit"
-            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+            className={`px-6 py-2 text-white w-100 rounded-lg shadow-md ${isLoading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-700 hover:bg-blue-600"
               }`}
