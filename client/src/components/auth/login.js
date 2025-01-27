@@ -7,12 +7,14 @@ import Swal from "sweetalert2";
 const Login = () => {
   const [idCard, setIdCard] = useState("");
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      setIsLoading(true);
       const response = await axios.post("/api/login", {
         id: idCard,
         email: email,
@@ -44,6 +46,8 @@ const Login = () => {
         });
         console.error("Login failed", error.message);
       }
+    }finally {
+      setIsLoading(false);
     }
   };
 
