@@ -122,7 +122,7 @@ const LoginSystem = () => {
           </div>
           <button
             type="submit"
-            className={`px-6 py-2 text-white w-100 rounded-lg shadow-md ${isLoading
+            className={`px-6 py-2 text-white w-100 rounded-lg shadow-md flex items-center justify-center ${isLoading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-700 hover:bg-blue-600"
               }`}

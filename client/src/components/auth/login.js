@@ -92,7 +92,7 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className={`px-6 py-2 text-white rounded-lg w-100 shadow-md ${isLoading
+            className={`px-6 py-2 text-white rounded-lg flex items-center justify-center shadow-md ${isLoading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-700 hover:bg-blue-600"
               }`}
