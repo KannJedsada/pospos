@@ -40,10 +40,10 @@ function Tables() {
   const handleUpdateStatus = async (tableId, data) => {
     try {
       setIsLoading(true);
-  
+
       // ส่งคำขอแก้ไขข้อมูลโต๊ะ
       await axios.put(`/api/table/edit_table/${tableId}`, data);
-  
+
       // แจ้งเตือนผู้ใช้เมื่อแก้ไขสำเร็จ
       Swal.fire({
         icon: "success",
@@ -51,24 +51,23 @@ function Tables() {
         showConfirmButton: false,
         timer: 1000,
       });
-  
+
       // ปิด Modal และรีเซ็ตข้อมูลที่เกี่ยวข้อง
       closeModal();
       setEditingTableId(null);
-  
+
       // โหลดข้อมูลโต๊ะใหม่
       fetchTable();
     } catch (error) {
       console.error("Error updating table status:", error);
-  
-      // จัดการข้อผิดพลาดตามประเภท
-      const errorMessage =
-        error.response?.data?.message || "เกิดข้อผิดพลาดในการแก้ไข";
-  
-      if (errorMessage.includes("Table name already exists")) {
+
+      if (
+        error.response &&
+        error.response.data.message === "Table name already exists. Please choose a different name."
+      ) {
         Swal.fire("Error", "ชื่อโต๊ะนี้มีอยู่แล้ว", "error");
       } else {
-        Swal.fire("Error", errorMessage, "error");
+        Swal.fire("Error", "เกิดข้อผิดพลาดในการแก้ไข", "error");
       }
     } finally {
       // รีเซ็ตฟอร์มหลังแก้ไขเสร็จ
@@ -78,7 +77,7 @@ function Tables() {
       });
       setIsLoading(false);
     }
-  };  
+  };
 
   useEffect(() => {
     fetchTable();
