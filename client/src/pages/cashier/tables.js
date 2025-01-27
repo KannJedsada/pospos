@@ -58,18 +58,29 @@ function Tables() {
 
       // โหลดข้อมูลโต๊ะใหม่
       fetchTable();
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error updating table status:", error);
 
-      if (
-        error.response &&
-        error.response.data.message === "Table name already exists."
-      ) {
-        Swal.fire("Error", "ชื่อโต๊ะนี้มีอยู่แล้ว", "error");
+      if (error.response) {
+        console.error("Error response:", error.response);
+
+        // ตรวจสอบข้อความ Error
+        const { message } = error.response.data;
+        if (message === "Table name already exists.") {
+          Swal.fire("Error", "ชื่อโต๊ะนี้มีอยู่แล้ว", "error");
+        } else if (message === "Table ID not found.") {
+          Swal.fire("Error", "ไม่พบโต๊ะที่ต้องการแก้ไข", "error");
+        } else {
+          Swal.fire("Error", "เกิดข้อผิดพลาดในการแก้ไข", "error");
+        }
       } else {
-        Swal.fire("Error", "เกิดข้อผิดพลาดในการแก้ไข", "error");
+        // กรณีไม่มี Response
+        Swal.fire("Error", "ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้", "error");
       }
-    } finally {
+    }
+
+    finally {
       // รีเซ็ตฟอร์มหลังแก้ไขเสร็จ
       setFormData({
         t_name: "",
