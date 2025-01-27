@@ -120,7 +120,7 @@ const LoginSystem = () => {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
-          <div className="flex items-center justify-center min-h-screen bg-gray-100">
+          <div className="flex items-center justify-center">
             <button
               type="submit"
               className={`px-6 py-2 text-white rounded-lg flex items-center justify-center shadow-md ${isLoading
