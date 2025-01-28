@@ -286,9 +286,11 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       [menu_id]
     );
 
+    
     let totalcost = 0;
     const menus = menures.rows;
-
+    console.log(menus)
+    
     for (const menu of menus) {
       let cost = 0;
 
@@ -307,7 +309,7 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       totalcost += cost; // สะสมค่าต้นทุนรวม
     }
 
-    const menuName = menus[0].menu_name;
+    const menuName = menus.menu_name;
     return { menuName, totalcost };
   }
 
