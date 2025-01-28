@@ -87,11 +87,11 @@ function Workdate() {
           <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
         </div>
       ) : (
-        <div className="container p-4 flex justify-center">
+        <div className="container p-4">
           {Object.keys(workdate).map((date) => (
             <div
               key={date}
-              className="mb-6 bg-white p-6 rounded-lg shadow-lg border border-blue-200"
+              className="mb-6 bg-white p-6 rounded-lg shadow-lg border border-blue-200 "
             >
               <h2 className="text-xl font-semibold text-blue-700 mb-4">
                 {new Intl.DateTimeFormat("th-TH", { dateStyle: "full" }).format(
