@@ -22,7 +22,7 @@ const Addworkdate = () => {
         },
       });
       const filterDept = res.data.data.filter(
-        (emp) => emp.dept_id !== 1 && emp.dept_id !== 5
+        (emp) => emp.dept_id !== 1 && emp.dept_id !== 2
       );
       // console.log(filterDept);
       setData(filterDept);
