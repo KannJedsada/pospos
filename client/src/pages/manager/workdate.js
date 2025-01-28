@@ -87,7 +87,7 @@ function Workdate() {
           <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
         </div>
       ) : (
-        <div className="container p-4">
+        <div className="container p-4 w-full">
           {Object.keys(workdate).map((date) => (
             <div
               key={date}
