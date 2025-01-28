@@ -24,6 +24,7 @@ function Editmenuprice() {
 
   const fetchData = async () => {
     try {
+      console.log(id);
       setIsLoading(true);
       const menuPriceRes = await axios.get(`/api/menu/menuprice/${id}`);
       setMenuPrices(menuPriceRes.data.data);

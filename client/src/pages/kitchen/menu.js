@@ -112,6 +112,7 @@ function Menus() {
 
   const handleEditPrice = (id) => {
     navigate(`/editprice`, { state: { id } });
+    console.log(id);
   };
 
   const handleAddMenu = () => {
