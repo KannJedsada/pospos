@@ -632,7 +632,7 @@ function Table() {
                       }}
                     >
                       <img
-                        src={`${process.env.REACT_APP_NGROK_URL_5000}/uploads/menu/${menu.menu_img}`}
+                        src={`${menu.menu_img}`}
                         alt={menu.menu_name || "Menu image"}
                         className="w-40 h-40 object-cover"
                       />
