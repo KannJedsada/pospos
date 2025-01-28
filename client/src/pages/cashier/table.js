@@ -662,7 +662,7 @@ function Table() {
                   >
                     <div className="flex items-center text-gray-700 font-medium">
                       <img
-                        src={`${process.env.REACT_APP_NGROK_URL_5000}/uploads/menu/${cartItem.menu_img}`}
+                        src={`${cartItem.menu_img}`}
                         alt={cartItem.menu_name || "Menu image"}
                         className="w-10 h-10 object-cover mr-3"
                       />
