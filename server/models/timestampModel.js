@@ -46,9 +46,35 @@ class Timestamp {
 
     const checkin_time = checkin_res.rows[0].check_in;
 
-    // คำนวณเวลาที่มาช้า (หน่วยวินาที)
+    const formatTimeToThai = (timeString) => {
+      try {
+        // สร้าง Date object จากเวลา input (timeString)
+        const [hours, minutes, seconds] = timeString.split(":").map(Number);
+
+        // สร้าง Date object ในเวลาปัจจุบัน
+        const now = new Date();
+
+        // ตั้งค่าเวลาเป็นเวลาที่ได้รับจาก input
+        now.setHours(hours, minutes, seconds);
+
+        // เพิ่มเวลา 7 ชั่วโมงสำหรับ Time Zone ประเทศไทย
+        now.setHours(now.getHours() + 7);
+
+        // ดึงชั่วโมงและนาทีหลังจากปรับโซนเวลา
+        const thaiHours = String(now.getHours()).padStart(2, "0");
+        const thaiMinutes = String(now.getMinutes()).padStart(2, "0");
+
+        return `${thaiHours}:${thaiMinutes}`; // คืนค่าชั่วโมงและนาทีในรูปแบบ HH:mm
+      } catch (error) {
+        console.error("Error formatting time:", error);
+        return "เวลาไม่ถูกต้อง"; // คืนค่าข้อความกรณีเกิดข้อผิดพลาด
+      }
+    };
+
+    const timeCheck = formatTimeToThai(checkin_time)
+
     const time_difference_seconds = Math.floor(
-      (new Date(`1970-01-01T${checkin_time}Z`) -
+      (new Date(`1970-01-01T${timeCheck}Z`) -
         new Date(`1970-01-01T${start_time}Z`)) /
       1000
     );
