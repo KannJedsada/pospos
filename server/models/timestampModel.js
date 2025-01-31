@@ -53,6 +53,8 @@ class Timestamp {
       1000
     );
 
+    console.log(time_difference_seconds)
+
     // เช็คว่ามาช้าหรือไม่ (เกิน 120 วินาทีถือว่ามาช้า)
     const is_late = time_difference_seconds > 120;
     console.log(is_late);
