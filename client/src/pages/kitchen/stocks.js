@@ -240,7 +240,7 @@ function Stocks() {
                   currentStocks.map((stock, index) => (
                     <tr
                       key={stock.material_id}
-                      className={`transition-all duration-300 ${Number(stock.qty) < Number(stock.min_qty)
+                      className={`transition-all duration-300 ${Number(stock.qty) === 0
                         ? "bg-red-500 text-white hover:bg-red-600"
                         : Number(stock.qty) - Number(stock.min_qty) <= 2
                           ? "bg-orange-500 text-white hover:bg-orange-600"
