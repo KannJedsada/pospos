@@ -55,6 +55,7 @@ class Timestamp {
 
     // เช็คว่ามาช้าหรือไม่ (เกิน 120 วินาทีถือว่ามาช้า)
     const is_late = time_difference_seconds > 120;
+    console.log(is_late);
 
     // ส่งข้อมูลการเช็คอินกลับไป
     return {
