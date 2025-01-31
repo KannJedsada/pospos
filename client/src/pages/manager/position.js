@@ -39,11 +39,12 @@ function Position() {
   const handleDeletePos = async (id) => {
     try {
       const pos = await axios.get(`/api/pos/getpos/${id}`);
-      const p_name = pos.data.data;
+      const p_NName = pos.data.data;
+      const pName = p_NName.p_name;
       const result = await Swal.fire({
         icon: "warning",
         title: "คุณต้องการลบหรือไม่?",
-        text: `ต้องการลบตำแหน่ง ${p_name} หรือไม่?`,
+        text: `ต้องการลบตำแหน่ง ${pName} หรือไม่?`,
         showCancelButton: true,
         confirmButtonText: "ลบ",
         confirmButtonColor: "#f44336",
