@@ -48,6 +48,7 @@ function Kitchen() {
         const groupedByTable = ordersToUpdate.reduce((acc, order) => {
           const tableName = order.t_name;
           const menuName = order.menu_name;
+          const qty = order.qty;
         
           if (!acc[tableName]) {
             acc[tableName] = {};
@@ -55,9 +56,10 @@ function Kitchen() {
         
           if (!acc[tableName][menuName]) {
             acc[tableName][menuName] = 0;
+
           }
         
-          acc[tableName][menuName] += order.qty;
+         acc[tableName][menuName] += Number(qty);
         
           return acc;
         }, {});
