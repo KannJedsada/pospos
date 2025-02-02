@@ -45,10 +45,25 @@ function Kitchen() {
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
       if (newStatus === 3) {
-        // console.log(ordersToUpdate?.t_name)
-        // console.log(ordersToUpdate?.menu_name)
-        // console.log(ordersToUpdate?.qty)
-        console.log(ordersToUpdate);
+        const groupedByTable = ordersToUpdate.reduce((acc, order) => {
+          const tableName = order.t_name;
+          const menuName = order.menu_name;
+        
+          if (!acc[tableName]) {
+            acc[tableName] = {};
+          }
+        
+          if (!acc[tableName][menuName]) {
+            acc[tableName][menuName] = 0;
+          }
+        
+          acc[tableName][menuName] += order.qty;
+        
+          return acc;
+        }, {});
+        
+        console.log(groupedByTable);
+        
       }
 
       // await Promise.all(
