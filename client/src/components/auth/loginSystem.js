@@ -35,14 +35,18 @@ const LoginSystem = () => {
       console.log(acc);
 
       if (acc !== null) {
-        if (acc === 0 || acc === 1 || acc === 2) {
+        if (acc === 0) {
           console.log(1)
-          navigate("/manager" , { replace: true });
+          navigate("/manager", { replace: true });
+        } else if (acc === 1) {
+          navigate("/manager", { replace: true });
+        } else if (acc === 2) {
+          navigate("/manager", { replace: true });
         } else if (acc === 3) {
-          navigate("/kitchen" , { replace: true });
+          navigate("/kitchen", { replace: true });
         } else if (acc === 4) {
           console.log(4)
-          navigate("/order" , { replace: true });
+          navigate("/order", { replace: true });
         } else {
           Swal.fire({
             icon: "warning",
