@@ -1,4 +1,4 @@
-import React, { useState, useContext,useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../../utils/axiosInstance";
 import AuthContext from "./authcontext";
@@ -34,28 +34,8 @@ const LoginSystem = () => {
       const acc = access?.data?.data?.access;
 
       console.log(acc);
-      setAccessLevel(acc); 
-      // ใช้ switch-case สำหรับ navigation
-      // switch (acc) {
-      //   case 0:
-      //   case 1:
-      //   case 2:
-      //     navigate("/manager");
-      //     break;
-      //   case 3:
-      //     navigate("/kitchen");
-      //     break;
-      //   case 4:
-      //     navigate("/order");
-      //     break;
-      //   default:
-      //     Swal.fire({
-      //       icon: "warning",
-      //       title: "ข้อผิดพลาด",
-      //       text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
-      //     });
-      //     break;
-      // }
+      setAccessLevel(acc);
+
     } catch (error) {
       if (error.response) {
         Swal.fire({
@@ -85,27 +65,27 @@ const LoginSystem = () => {
   };
 
   useEffect(() => {
-    if (accessLevel !== null) {
-      switch (accessLevel) {
-        case 0:
-        case 1:
-        case 2:
-          navigate("/manager");
-          break;
-        case 3:
-          navigate("/kitchen");
-          break;
-        case 4:
-          navigate("/order");
-          break;
-        default:
-          Swal.fire({
-            icon: "warning",
-            title: "ข้อผิดพลาด",
-            text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
-          });
-          break;
-      }
+
+    switch (accessLevel) {
+      case 0:
+      case 1:
+      case 2:
+        navigate("/manager");
+        break;
+      case 3:
+        navigate("/kitchen");
+        break;
+      case 4:
+        navigate("/order");
+        break;
+      default:
+        Swal.fire({
+          icon: "warning",
+          title: "ข้อผิดพลาด",
+          text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
+        });
+        break;
+
     }
   }, [accessLevel, navigate]);
 
