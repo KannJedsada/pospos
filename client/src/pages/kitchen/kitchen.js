@@ -56,13 +56,18 @@ function Kitchen() {
         iframeDoc.open();
 
         // Loop ผ่านทุกโต๊ะใน groupedByTable
-        Object.entries(groupedByTable).forEach(([tableName, menu]) => {
+        Object.entries(groupedByTable).forEach(([tableName, menu], index) => {
+          // เริ่มหน้าใหม่สำหรับแต่ละโต๊ะ
+          if (index > 0) {
+            iframeDoc.write("<div style='page-break-before: always'></div>");
+          }
+
           iframeDoc.write(`
             <html>
               <head>
                 <style>
                   @page {
-                    size: 80mm 90mm;
+                    size: 80mm 40mm;
                     margin: 0;
                   }
                   @media print {
@@ -70,7 +75,7 @@ function Kitchen() {
                       margin: 0;
                       padding: 0;
                       width: 80mm;
-                      height: 80mm;
+                      height: 30mm;
                       overflow: hidden;
                     }
                     body * {
@@ -84,7 +89,7 @@ function Kitchen() {
                       top: 30;
                       left: 0;
                       width: 80mm;
-                      height: 40mm;
+                      height: 30mm;
                       padding: 4px;
                       font-family: Arial, sans-serif;
                     }
