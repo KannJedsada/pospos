@@ -35,7 +35,7 @@ const LoginSystem = () => {
       console.log(acc)
 
       // ใช้ switch-case สำหรับ navigation
-      switch (acc !== undefined) {
+      switch (acc) {
         case 0:
         case 1:
         case 2:
