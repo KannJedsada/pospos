@@ -32,7 +32,8 @@ function Kitchen() {
         }
         if (newStatus === 3) {
           // จาก "รอคิว" (สถานะ 1) หรือ "กำลังทำ" (สถานะ 2) ไป "จัดเสิร์ฟ" (สถานะ 3)
-          console.log(menu);
+          const fliterName = order.menu_name === menuName && order.dish_status === 2 && menu.menu_name === order.menu_name
+          console.log(fliterName);
           // return order.menu_name === menuName && order.dish_status === 2;
         }
         return false; // ถ้าสถานะใหม่ไม่ตรงกับกรณีที่กล่าวถึง
