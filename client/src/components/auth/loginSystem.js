@@ -66,26 +66,28 @@ const LoginSystem = () => {
 
   useEffect(() => {
     console.log(accessLevel)
-    switch (accessLevel) {
-      case 0:
-      case 1:
-      case 2:
-        navigate("/manager");
-        break;
-      case 3:
-        navigate("/kitchen");
-        break;
-      case 4:
-        navigate("/order");
-        break;
-      default:
-        Swal.fire({
-          icon: "warning",
-          title: "ข้อผิดพลาด",
-          text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
-        });
-        break;
+    if (accessLevel !== null) {
+      switch (accessLevel) {
+        case 0:
+        case 1:
+        case 2:
+          navigate("/manager");
+          break;
+        case 3:
+          navigate("/kitchen");
+          break;
+        case 4:
+          navigate("/order");
+          break;
+        default:
+          Swal.fire({
+            icon: "warning",
+            title: "ข้อผิดพลาด",
+            text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
+          });
+          break;
 
+      }
     }
   }, [accessLevel, navigate]);
 
