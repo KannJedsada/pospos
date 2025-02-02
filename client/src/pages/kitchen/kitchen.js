@@ -44,126 +44,126 @@ function Kitchen() {
         return;
       }
 
-      const generateBill = (groupedByTable) => {
-        const iframe = document.createElement("iframe");
-        iframe.style.position = "absolute";
-        iframe.style.top = "-10000px";
-        iframe.style.left = "-10000px";
+      // const generateBill = (groupedByTable) => {
+      //   const iframe = document.createElement("iframe");
+      //   iframe.style.position = "absolute";
+      //   iframe.style.top = "-10000px";
+      //   iframe.style.left = "-10000px";
         
-        document.body.appendChild(iframe);
+      //   document.body.appendChild(iframe);
         
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-        iframeDoc.open();
+      //   const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      //   iframeDoc.open();
       
-        // Loop ผ่านทุกโต๊ะใน groupedByTable
-        Object.entries(groupedByTable).forEach(([tableName, menu], index) => {
-          // ถ้าไม่ใช่โต๊ะแรก ให้เพิ่มการตัดหน้าก่อน (สร้างหน้าใหม่)
-          if (index > 0) {
-            iframeDoc.write("<div style='page-break-before: always'></div>");
-          }
+      //   // Loop ผ่านทุกโต๊ะใน groupedByTable
+      //   Object.entries(groupedByTable).forEach(([tableName, menu], index) => {
+      //     // ถ้าไม่ใช่โต๊ะแรก ให้เพิ่มการตัดหน้าก่อน (สร้างหน้าใหม่)
+      //     if (index > 0) {
+      //       iframeDoc.write("<div style='page-break-before: always'></div>");
+      //     }
       
-          // เขียนข้อมูลในเอกสาร
-          iframeDoc.write(`
-            <html>
-              <head>
-                <style>
-                  @page {
-                    size: 80mm 40mm;
-                    margin: 0;
-                  }
-                  @media print {
-                    html, body {
-                      margin: 0;
-                      padding: 0;
-                      width: 80mm;
-                      height: 30mm;
-                      overflow: hidden;
-                    }
-                    body * {
-                      visibility: hidden;
-                    }
-                    .receipt, .receipt * {
-                      visibility: visible;
-                    }
-                    .receipt {
-                      position: absolute;
-                      top: 30;
-                      left: 0;
-                      width: 80mm;
-                      height: 30mm;
-                      padding: 4px;
-                      font-family: Arial, sans-serif;
-                    }
-                    .title {
-                      font-size: 16px;
-                      margin: 4px 0;
-                      text-align: center;
-                    }
-                    .tName {
-                      font-size: 14px;
-                      margin: 4px;
-                    }
-                    p {
-                      font-size: 14px;
-                    }
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="receipt">
-                  <h1 class="title">RMUTI POS</h1>
-                  <h2 class="tName">โต๊ะ: ${tableName}</h2>
-                  <p class="menu">
-                    ${Object.entries(menu).map(([menuName, qty]) => `${menuName} X ${qty} จำนวน`).join('<br />')}
-                  </p>
-                </div>
-              </body>
-            </html>
-          `);
-        });
+      //     // เขียนข้อมูลในเอกสาร
+      //     iframeDoc.write(`
+      //       <html>
+      //         <head>
+      //           <style>
+      //             @page {
+      //               size: 80mm 40mm;
+      //               margin: 0;
+      //             }
+      //             @media print {
+      //               html, body {
+      //                 margin: 0;
+      //                 padding: 0;
+      //                 width: 80mm;
+      //                 height: 30mm;
+      //                 overflow: hidden;
+      //               }
+      //               body * {
+      //                 visibility: hidden;
+      //               }
+      //               .receipt, .receipt * {
+      //                 visibility: visible;
+      //               }
+      //               .receipt {
+      //                 position: absolute;
+      //                 top: 30;
+      //                 left: 0;
+      //                 width: 80mm;
+      //                 height: 30mm;
+      //                 padding: 4px;
+      //                 font-family: Arial, sans-serif;
+      //               }
+      //               .title {
+      //                 font-size: 16px;
+      //                 margin: 4px 0;
+      //                 text-align: center;
+      //               }
+      //               .tName {
+      //                 font-size: 14px;
+      //                 margin: 4px;
+      //               }
+      //               p {
+      //                 font-size: 14px;
+      //               }
+      //             }
+      //           </style>
+      //         </head>
+      //         <body>
+      //           <div class="receipt">
+      //             <h1 class="title">RMUTI POS</h1>
+      //             <h2 class="tName">โต๊ะ: ${tableName}</h2>
+      //             <p class="menu">
+      //               ${Object.entries(menu).map(([menuName, qty]) => `${menuName} X ${qty} จำนวน`).join('<br />')}
+      //             </p>
+      //           </div>
+      //         </body>
+      //       </html>
+      //     `);
+      //   });
       
-        // หลังจาก loop เสร็จเรียบร้อยแล้วปิด document
-        iframeDoc.close();
+      //   // หลังจาก loop เสร็จเรียบร้อยแล้วปิด document
+      //   iframeDoc.close();
       
-        // ให้เวลานิดหน่อยก่อนที่จะเรียก print
-        setTimeout(() => {
-          iframe.contentWindow.focus();
-          iframe.contentWindow.print();
-          document.body.removeChild(iframe);
-        }, 500);
-      };
-      if (newStatus === 3) {
-        const groupedByTable = ordersToUpdate.reduce((acc, order) => {
-          const tableName = order.t_name;
-          const menuName = order.menu_name;
-          const qty = order.qty;
+      //   // ให้เวลานิดหน่อยก่อนที่จะเรียก print
+      //   setTimeout(() => {
+      //     iframe.contentWindow.focus();
+      //     iframe.contentWindow.print();
+      //     document.body.removeChild(iframe);
+      //   }, 500);
+      // };
+      // if (newStatus === 3) {
+      //   const groupedByTable = ordersToUpdate.reduce((acc, order) => {
+      //     const tableName = order.t_name;
+      //     const menuName = order.menu_name;
+      //     const qty = order.qty;
 
-          if (!acc[tableName]) {
-            acc[tableName] = {};
-          }
+      //     if (!acc[tableName]) {
+      //       acc[tableName] = {};
+      //     }
 
-          if (!acc[tableName][menuName]) {
-            acc[tableName][menuName] = 0;
-          }
+      //     if (!acc[tableName][menuName]) {
+      //       acc[tableName][menuName] = 0;
+      //     }
 
-          acc[tableName][menuName] += Number(qty);
+      //     acc[tableName][menuName] += Number(qty);
 
-          return acc;
-        }, {});
+      //     return acc;
+      //   }, {});
 
-        console.log(groupedByTable);
-        generateBill(groupedByTable);
-      }
+      //   console.log(groupedByTable);
+      //   generateBill(groupedByTable);
+      // }
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
-      // await Promise.all(
-      //   ordersToUpdate.map((order) =>
-      //     axios.put("/api/order/change_dish", {
-      //       order_id: order.id,
-      //       new_status: newStatus,
-      //     })
-      //   )
-      // );
+      await Promise.all(
+        ordersToUpdate.map((order) =>
+          axios.put("/api/order/change_dish", {
+            order_id: order.id,
+            new_status: newStatus,
+          })
+        )
+      );
 
       // อัปเดตข้อมูลใหม่
       fetchOrderDetail();
