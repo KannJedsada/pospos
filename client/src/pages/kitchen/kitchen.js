@@ -44,9 +44,8 @@ function Kitchen() {
       }
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
-      if (ordersToUpdate.dish_status === 2) {
         console.log(ordersToUpdate);
-      }
+
       // await Promise.all(
       //   ordersToUpdate.map((order) =>
       //     axios.put("/api/order/change_dish", {
