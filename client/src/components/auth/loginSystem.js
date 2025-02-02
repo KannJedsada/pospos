@@ -34,7 +34,22 @@ const LoginSystem = () => {
       const acc = access?.data?.data?.access;
 
       console.log(acc);
-      setAccessLevel(acc);
+
+      if (acc !== null) {
+        if (acc === 0 || acc === 1 || acc === 2) {
+          navigate("/manager");
+        } else if (acc === 3) {
+          navigate("/kitchen");
+        } else if (acc === 4) {
+          navigate("/order");
+        } else {
+          Swal.fire({
+            icon: "warning",
+            title: "ข้อผิดพลาด",
+            text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
+          });
+        }
+      }
 
     } catch (error) {
       if (error.response) {
@@ -63,25 +78,6 @@ const LoginSystem = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log(accessLevel)
-    if (accessLevel !== null) {
-      if (accessLevel === 0 || accessLevel === 1 || accessLevel === 2) {
-        navigate("/manager");
-      } else if (accessLevel === 3) {
-        navigate("/kitchen");
-      } else if (accessLevel === 4) {
-        navigate("/order");
-      } else {
-        Swal.fire({
-          icon: "warning",
-          title: "ข้อผิดพลาด",
-          text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
-        });
-      }
-    }
-  }, [accessLevel, navigate]);
 
   return (
     <div className="flex items-center  justify-center min-h-screen bg-blue-50">
