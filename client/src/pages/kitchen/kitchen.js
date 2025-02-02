@@ -45,10 +45,10 @@ function Kitchen() {
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
       if (newStatus === 3) {
-        console.log(ordersToUpdate?.t_name)
-        console.log(ordersToUpdate?.menu_name)
-        console.log(ordersToUpdate?.qty)
-        // console.log(ordersToUpdate);
+        // console.log(ordersToUpdate?.t_name)
+        // console.log(ordersToUpdate?.menu_name)
+        // console.log(ordersToUpdate?.qty)
+        console.log(ordersToUpdate);
       }
 
       // await Promise.all(
