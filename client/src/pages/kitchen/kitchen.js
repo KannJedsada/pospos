@@ -31,10 +31,9 @@ function Kitchen() {
           return order.menu_name === menuName && order.dish_status === 1;
         }
         if (newStatus === 3) {
-          // จาก "รอคิว" (สถานะ 1) หรือ "กำลังทำ" (สถานะ 2) ไป "จัดเสิร์ฟ" (สถานะ 3)
-          const fliterName = order.menu_name === menuName && order.dish_status === 2 && menu.menu_name === order.menu_name
-          console.log(fliterName);
-          // return order.menu_name === menuName && order.dish_status === 2;
+          // // จาก "รอคิว" (สถานะ 1) หรือ "กำลังทำ" (สถานะ 2) ไป "จัดเสิร์ฟ" (สถานะ 3)
+          // console.log(menu);
+          return order.menu_name === menuName && order.dish_status === 2;
         }
         return false; // ถ้าสถานะใหม่ไม่ตรงกับกรณีที่กล่าวถึง
       });
@@ -45,14 +44,15 @@ function Kitchen() {
       }
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
-      await Promise.all(
-        ordersToUpdate.map((order) =>
-          axios.put("/api/order/change_dish", {
-            order_id: order.id,
-            new_status: newStatus,
-          })
-        )
-      );
+      console.log(ordersToUpdate);
+      // await Promise.all(
+      //   ordersToUpdate.map((order) =>
+      //     axios.put("/api/order/change_dish", {
+      //       order_id: order.id,
+      //       new_status: newStatus,
+      //     })
+      //   )
+      // );
 
       // อัปเดตข้อมูลใหม่
       fetchOrderDetail();
