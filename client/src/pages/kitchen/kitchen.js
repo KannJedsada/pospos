@@ -52,70 +52,69 @@ function Kitchen() {
 
         document.body.appendChild(iframe);
 
-        const tableName = Object.keys(groupedByTable)[0];
-        const menu = groupedByTable[tableName];
-
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         iframeDoc.open();
 
-        iframeDoc.write(`
-          <html>
-            <head>
-              <style>
-                @page {
-                  size: 80mm 90mm;
-                  margin: 0;
-                }
-                @media print {
-                  html, body {
+        // Loop ผ่านทุกโต๊ะใน groupedByTable
+        Object.entries(groupedByTable).forEach(([tableName, menu]) => {
+          iframeDoc.write(`
+            <html>
+              <head>
+                <style>
+                  @page {
+                    size: 80mm 90mm;
                     margin: 0;
-                    padding: 0;
-                    width: 80mm;
-                    height: 80mm;
-                    overflow: hidden;
                   }
-                  body * {
-                    visibility: hidden;
+                  @media print {
+                    html, body {
+                      margin: 0;
+                      padding: 0;
+                      width: 80mm;
+                      height: 80mm;
+                      overflow: hidden;
+                    }
+                    body * {
+                      visibility: hidden;
+                    }
+                    .receipt, .receipt * {
+                      visibility: visible;
+                    }
+                    .receipt {
+                      position: absolute;
+                      top: 30;
+                      left: 0;
+                      width: 80mm;
+                      height: 40mm;
+                      padding: 4px;
+                      font-family: Arial, sans-serif;
+                    }
+                    .title {
+                      font-size: 16px;
+                      margin: 4px 0;
+                      text-align: center;
+                    }
+                    .tName {
+                      font-size: 14px;
+                      margin: 4px;
+                    }
+                    p {
+                      font-size: 14px;
+                    }
                   }
-                  .receipt, .receipt * {
-                    visibility: visible;
-                  }
-                  .receipt {
-                    position: absolute;
-                    top: 30;
-                    left: 0;
-                    width: 80mm;
-                    height: 40mm;
-                    padding: 4px;
-                    font-family: Arial, sans-serif;
-                    
-                  }
-                  .title {
-                    font-size: 16px;
-                    margin: 4px 0;
-                    text-align: center;
-                  }
-                  .tName {
-                    font-size: 14px;
-                    margin: 4px;
-                  }
-                  p {
-                    font-size: 14px;
-                  }
-                }
-              </style>
-            </head>
-            <body>
-              <div class="receipt">
-                <h1 class="title">RMUTI POS</h1>
-                <h2 class="tName">โต๊ะ: ${tableName}</h2>
-                <p class>
-                  ${Object.entries(menu).map(([menuName, qty]) => `${menuName} X ${qty} จำนวน`).join('<br />')}
-                </p>
-              </div>
-            </body>
-          </html>
-        `);
+                </style>
+              </head>
+              <body>
+                <div class="receipt">
+                  <h1 class="title">RMUTI POS</h1>
+                  <h2 class="tName">โต๊ะ: ${tableName}</h2>
+                  <p class="menu">
+                    ${Object.entries(menu).map(([menuName, qty]) => `${menuName} X ${qty} จำนวน`).join('<br />')}
+                  </p>
+                </div>
+              </body>
+            </html>
+          `);
+        });
 
         iframeDoc.close();
 
