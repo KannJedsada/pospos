@@ -85,32 +85,22 @@ function Kitchen() {
                     top: 30;
                     left: 0;
                     width: 80mm;
-                    height: 80mm;
+                    height: 40mm;
                     padding: 4px;
                     font-family: Arial, sans-serif;
-                    text-align: center;
+                    
                   }
                   .title {
                     font-size: 16px;
                     margin: 4px 0;
+                    text-align: center;
                   }
-                  .timestamp {
-                    font-size: 12px;
-                    margin: 4px 0;
+                  .tName {
+                    font-size: 14px;
+                    margin: 4px;
                   }
-                  .qr-container {
-                    display: flex;
-                    justify-content: center;
-                    margin: 4px 0;
-                  }
-                  .qr-code {
-                    width: auto;
-                    max-width: 60mm;
-                    height: auto;
-                  }
-                  .footer {
-                    font-size: 12px;
-                    margin: 4px 0;
+                  p {
+                    font-size: 14px;
                   }
                 }
               </style>
@@ -118,9 +108,9 @@ function Kitchen() {
             <body>
               <div class="receipt">
                 <h1 class="title">RMUTI POS</h1>
-                <h2 class="title">โต๊ะ: ${tableName}</h2>
-                <p>
-                  ${Object.entries(menu).map(([menuName, qty]) => `${menuName}: ${qty} จาน`).join('<br />')}
+                <h2 class="tName">โต๊ะ: ${tableName}</h2>
+                <p class>
+                  ${Object.entries(menu).map(([menuName, qty]) => `${menuName} X ${qty} จำนวน`).join('<br />')}
                 </p>
               </div>
             </body>
