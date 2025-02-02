@@ -44,7 +44,7 @@ function Kitchen() {
       }
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
-      if (ordersToUpdate.menu_status === 2) {
+      if (ordersToUpdate.dish_status === 2) {
         console.log(ordersToUpdate);
       }
       // await Promise.all(
