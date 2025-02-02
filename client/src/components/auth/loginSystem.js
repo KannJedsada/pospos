@@ -37,10 +37,13 @@ const LoginSystem = () => {
 
       if (acc !== null) {
         if (acc === 0 || acc === 1 || acc === 2) {
+          console.log(1)
           navigate("/manager");
         } else if (acc === 3) {
+          console.log(3)
           navigate("/kitchen");
         } else if (acc === 4) {
+          console.log(4)
           navigate("/order");
         } else {
           Swal.fire({
