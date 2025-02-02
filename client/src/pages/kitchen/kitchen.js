@@ -57,7 +57,8 @@ function Kitchen() {
 
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         iframeDoc.open();
-        iframe.writingSuggestions(`
+
+        iframeDoc.write(`
           <html>
             <head>
               <style>
@@ -119,13 +120,15 @@ function Kitchen() {
                 <h1 class="title">RMUTI POS</h1>
                 <h2 class="title">โต๊ะ: ${tableName}</h2>
                 <p>
-                  ${Object.keys(menu)[0]}: ${menu[Object.keys(menu)[0]]}
+                  ${Object.entries(menu).map(([menuName, qty]) => `${menuName}: ${qty} จาน`).join('<br />')}
                 </p>
               </div>
             </body>
           </html>
-          `);
-        iframe.closest();
+        `);
+
+        iframeDoc.close();
+
         setTimeout(() => {
           iframe.contentWindow.focus();
           iframe.contentWindow.print();
