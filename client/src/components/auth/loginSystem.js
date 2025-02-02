@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from 'react-router-dom';
 import axios from "../../utils/axiosInstance";
 import AuthContext from "./authcontext";
 import Swal from "sweetalert2";
@@ -9,8 +9,6 @@ const LoginSystem = () => {
   const [email, setEmail] = useState("");
   const { login } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const [accessLevel, setAccessLevel] = useState(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -38,13 +36,12 @@ const LoginSystem = () => {
       if (acc !== null) {
         if (acc === 0 || acc === 1 || acc === 2) {
           console.log(1)
-          navigate("/manager");
+          return <Navigate to="/manager" replace />;
         } else if (acc === 3) {
-          console.log(3)
-          navigate("/kitchen");
+          return <Navigate to="/kitchen" replace />;
         } else if (acc === 4) {
           console.log(4)
-          navigate("/order");
+          return <Navigate to="/order" replace />;
         } else {
           Swal.fire({
             icon: "warning",
