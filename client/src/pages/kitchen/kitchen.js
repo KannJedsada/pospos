@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Menubar from "../../components/menuBar";
 import axios from "../../utils/axiosInstance";
 import socket from "../../utils/socket";
+import { jsPDF } from "jspdf";
 
 function Kitchen() {
   const [orderDetail, setOrderDetail] = useState([]);
@@ -43,6 +44,29 @@ function Kitchen() {
         return;
       }
 
+      const generateBill = (groupedByTable) => {
+        const doc = new jsPDF();
+      
+        let yPosition = 10;  // ตำแหน่งเริ่มต้นของข้อความ
+      
+        // Loop ผ่านโต๊ะและรายการเมนู
+        Object.entries(groupedByTable).forEach(([table, menus]) => {
+          doc.text(`โต๊ะ: ${table}`, 10, yPosition);
+          yPosition += 10; // เพิ่มช่องว่างหลังจากชื่อโต๊ะ
+      
+          // Loop ผ่านเมนูในแต่ละโต๊ะ
+          Object.entries(menus).forEach(([menu, qty]) => {
+            doc.text(`- ${menu}: ${qty} จาน`, 10, yPosition);
+            yPosition += 10; // เพิ่มช่องว่างหลังจากแต่ละเมนู
+          });
+      
+          yPosition += 10; // เพิ่มช่องว่างระหว่างโต๊ะ
+        });
+      
+        // บันทึกบิลเป็นไฟล์ PDF
+        doc.save('bill.pdf');
+      };
+
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
       if (newStatus === 3) {
         const groupedByTable = ordersToUpdate.reduce((acc, order) => {
@@ -65,7 +89,7 @@ function Kitchen() {
         }, {});
         
         console.log(groupedByTable);
-        
+        generateBill(groupedByTable);
       }
 
       // await Promise.all(
