@@ -65,7 +65,7 @@ const LoginSystem = () => {
   };
 
   useEffect(() => {
-
+    console.log(accessLevel)
     switch (accessLevel) {
       case 0:
       case 1:
