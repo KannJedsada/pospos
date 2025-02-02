@@ -67,26 +67,18 @@ const LoginSystem = () => {
   useEffect(() => {
     console.log(accessLevel)
     if (accessLevel !== null) {
-      switch (accessLevel) {
-        case 0:
-        case 1:
-        case 2:
-          navigate("/manager");
-          break;
-        case 3:
-          navigate("/kitchen");
-          break;
-        case 4:
-          navigate("/order");
-          break;
-        default:
-          Swal.fire({
-            icon: "warning",
-            title: "ข้อผิดพลาด",
-            text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
-          });
-          break;
-
+      if (accessLevel === 0 || accessLevel === 1 || accessLevel === 2) {
+        navigate("/manager");
+      } else if (accessLevel === 3) {
+        navigate("/kitchen");
+      } else if (accessLevel === 4) {
+        navigate("/order");
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: "ข้อผิดพลาด",
+          text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
+        });
       }
     }
   }, [accessLevel, navigate]);
