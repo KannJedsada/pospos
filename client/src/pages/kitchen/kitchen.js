@@ -149,7 +149,7 @@ function Kitchen() {
                           ? "bg-gray-400 cursor-not-allowed"
                           : "bg-blue-500 hover:bg-blue-600"
                       }`}
-                      onClick={() => updateMenuStatus(menu.menu_name, 3, menu)} // เปลี่ยนเป็น "เสร็จสิ้น"
+                      onClick={() => updateMenuStatus(menu.menu_name, 3, menu.orders)} 
                       disabled={menu.orders.some(
                         (order) => order.dish_status === 1
                       )}
