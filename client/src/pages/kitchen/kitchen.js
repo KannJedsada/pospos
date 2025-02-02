@@ -44,7 +44,9 @@ function Kitchen() {
       }
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
-      console.log(ordersToUpdate);
+      if (ordersToUpdate.menu_status === 2) {
+        console.log(ordersToUpdate);
+      }
       // await Promise.all(
       //   ordersToUpdate.map((order) =>
       //     axios.put("/api/order/change_dish", {
@@ -131,11 +133,10 @@ function Kitchen() {
                   <div className="space-x-4">
                     {/* ปุ่มรวมสถานะสำหรับทั้งเมนู */}
                     <button
-                      className={`px-4 py-2 text-white rounded-lg shadow-md ${
-                        menu.orders.some((order) => order.dish_status === 2)
+                      className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.orders.some((order) => order.dish_status === 2)
                           ? "bg-gray-400 cursor-not-allowed"
                           : "bg-orange-500 hover:bg-orange-600"
-                      }`}
+                        }`}
                       onClick={() => updateMenuStatus(menu.menu_name, 2)}
                       disabled={menu.orders.some(
                         (order) => order.dish_status === 2
@@ -145,12 +146,11 @@ function Kitchen() {
                     </button>
 
                     <button
-                      className={`px-4 py-2 text-white rounded-lg shadow-md ${
-                        menu.orders.some((order) => order.dish_status === 1)
+                      className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.orders.some((order) => order.dish_status === 1)
                           ? "bg-gray-400 cursor-not-allowed"
                           : "bg-blue-500 hover:bg-blue-600"
-                      }`}
-                      onClick={() => updateMenuStatus(menu.menu_name, 3, menu.orders)} 
+                        }`}
+                      onClick={() => updateMenuStatus(menu.menu_name, 3, menu.orders)}
                       disabled={menu.orders.some(
                         (order) => order.dish_status === 1
                       )}
@@ -194,8 +194,8 @@ function Kitchen() {
                           {order.dish_status === 1
                             ? "รอคิว"
                             : order.dish_status === 2
-                            ? "กำลังทำ"
-                            : "จัดเสิร์ฟ"}
+                              ? "กำลังทำ"
+                              : "จัดเสิร์ฟ"}
                         </span>
                       </div>
                     </div>
