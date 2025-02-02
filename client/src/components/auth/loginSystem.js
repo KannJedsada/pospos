@@ -33,7 +33,7 @@ const LoginSystem = () => {
       const acc = access?.data?.data?.access;
 
       // ใช้ switch-case สำหรับ navigation
-      switch (acc) {
+      switch (acc !== undefined) {
         case 0:
         case 1:
         case 2:
