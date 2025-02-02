@@ -49,19 +49,20 @@ function Kitchen() {
         iframe.style.position = "absolute";
         iframe.style.top = "-10000px";
         iframe.style.left = "-10000px";
-
+        
         document.body.appendChild(iframe);
-
+        
         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
         iframeDoc.open();
-
+      
         // Loop ผ่านทุกโต๊ะใน groupedByTable
         Object.entries(groupedByTable).forEach(([tableName, menu], index) => {
-          // เริ่มหน้าใหม่สำหรับแต่ละโต๊ะ
+          // ถ้าไม่ใช่โต๊ะแรก ให้เพิ่มการตัดหน้าก่อน (สร้างหน้าใหม่)
           if (index > 0) {
             iframeDoc.write("<div style='page-break-before: always'></div>");
           }
-
+      
+          // เขียนข้อมูลในเอกสาร
           iframeDoc.write(`
             <html>
               <head>
@@ -120,9 +121,11 @@ function Kitchen() {
             </html>
           `);
         });
-
+      
+        // หลังจาก loop เสร็จเรียบร้อยแล้วปิด document
         iframeDoc.close();
-
+      
+        // ให้เวลานิดหน่อยก่อนที่จะเรียก print
         setTimeout(() => {
           iframe.contentWindow.focus();
           iframe.contentWindow.print();
