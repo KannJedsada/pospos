@@ -46,52 +46,58 @@ function Kitchen() {
 
       const generateBill = (groupedByTable) => {
         const doc = new jsPDF();
-      
+
         let yPosition = 10;  // ตำแหน่งเริ่มต้นของข้อความ
-      
+
         // Loop ผ่านโต๊ะและรายการเมนู
         Object.entries(groupedByTable).forEach(([table, menus]) => {
           doc.text(`โต๊ะ: ${table}`, 10, yPosition);
           yPosition += 10; // เพิ่มช่องว่างหลังจากชื่อโต๊ะ
-      
+
           // Loop ผ่านเมนูในแต่ละโต๊ะ
           Object.entries(menus).forEach(([menu, qty]) => {
             doc.text(`- ${menu}: ${qty} จาน`, 10, yPosition);
             yPosition += 10; // เพิ่มช่องว่างหลังจากแต่ละเมนู
           });
-      
+
           yPosition += 10; // เพิ่มช่องว่างระหว่างโต๊ะ
         });
-      
-        // บันทึกบิลเป็นไฟล์ PDF
-        doc.save('bill.pdf');
+
+        // แปลง PDF เป็น base64 string
+        const pdfOutput = doc.output('datauristring');
+
+        // แสดง PDF ใน iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = pdfOutput;
+        iframe.width = '100%';
+        iframe.height = '600px'; // ปรับขนาด iframe ตามต้องการ
+        document.body.appendChild(iframe);
       };
 
-      // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
       if (newStatus === 3) {
         const groupedByTable = ordersToUpdate.reduce((acc, order) => {
           const tableName = order.t_name;
           const menuName = order.menu_name;
           const qty = order.qty;
-        
+
           if (!acc[tableName]) {
             acc[tableName] = {};
           }
-        
+
           if (!acc[tableName][menuName]) {
             acc[tableName][menuName] = 0;
-
           }
-        
-         acc[tableName][menuName] += Number(qty);
-        
+
+          acc[tableName][menuName] += Number(qty);
+
           return acc;
         }, {});
-        
+
         console.log(groupedByTable);
         generateBill(groupedByTable);
       }
 
+      // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
       // await Promise.all(
       //   ordersToUpdate.map((order) =>
       //     axios.put("/api/order/change_dish", {
