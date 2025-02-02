@@ -10,6 +10,7 @@ const LoginSystem = () => {
   const { login } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const [accessLevel, setAccessLevel] = useState(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,29 +33,29 @@ const LoginSystem = () => {
 
       const acc = access?.data?.data?.access;
 
-      console.log(acc)
-
+      console.log(acc);
+      setAccessLevel(acc); 
       // ใช้ switch-case สำหรับ navigation
-      switch (acc) {
-        case 0:
-        case 1:
-        case 2:
-          navigate("/manager");
-          break;
-        case 3:
-          navigate("/kitchen");
-          break;
-        case 4:
-          navigate("/order");
-          break;
-        default:
-          Swal.fire({
-            icon: "warning",
-            title: "ข้อผิดพลาด",
-            text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
-          });
-          break;
-      }
+      // switch (acc) {
+      //   case 0:
+      //   case 1:
+      //   case 2:
+      //     navigate("/manager");
+      //     break;
+      //   case 3:
+      //     navigate("/kitchen");
+      //     break;
+      //   case 4:
+      //     navigate("/order");
+      //     break;
+      //   default:
+      //     Swal.fire({
+      //       icon: "warning",
+      //       title: "ข้อผิดพลาด",
+      //       text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
+      //     });
+      //     break;
+      // }
     } catch (error) {
       if (error.response) {
         Swal.fire({
@@ -82,6 +83,31 @@ const LoginSystem = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (accessLevel !== null) {
+      switch (accessLevel) {
+        case 0:
+        case 1:
+        case 2:
+          navigate("/manager");
+          break;
+        case 3:
+          navigate("/kitchen");
+          break;
+        case 4:
+          navigate("/order");
+          break;
+        default:
+          Swal.fire({
+            icon: "warning",
+            title: "ข้อผิดพลาด",
+            text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
+          });
+          break;
+      }
+    }
+  }, [accessLevel, navigate]);
 
   return (
     <div className="flex items-center  justify-center min-h-screen bg-blue-50">
