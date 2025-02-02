@@ -45,33 +45,92 @@ function Kitchen() {
       }
 
       const generateBill = (groupedByTable) => {
-        const doc = new jsPDF();
+        const iframe = document.createElement("iframe");
+        iframe.style.position = "absolute";
+        iframe.style.top = "-10000px";
+        iframe.style.left = "-10000px";
 
-        let yPosition = 10;  // ตำแหน่งเริ่มต้นของข้อความ
-
-        // Loop ผ่านโต๊ะและรายการเมนู
-        Object.entries(groupedByTable).forEach(([table, menus]) => {
-          doc.text(`โต๊ะ: ${table}`, 10, yPosition);
-          yPosition += 10; // เพิ่มช่องว่างหลังจากชื่อโต๊ะ
-
-          // Loop ผ่านเมนูในแต่ละโต๊ะ
-          Object.entries(menus).forEach(([menu, qty]) => {
-            doc.text(`- ${menu}: ${qty} จาน`, 10, yPosition);
-            yPosition += 10; // เพิ่มช่องว่างหลังจากแต่ละเมนู
-          });
-
-          yPosition += 10; // เพิ่มช่องว่างระหว่างโต๊ะ
-        });
-
-        // แปลง PDF เป็น base64 string
-        const pdfOutput = doc.output('datauristring');
-
-        // แสดง PDF ใน iframe
-        const iframe = document.createElement('iframe');
-        iframe.src = pdfOutput;
-        iframe.width = '100%';
-        iframe.height = '600px'; // ปรับขนาด iframe ตามต้องการ
         document.body.appendChild(iframe);
+
+        const tableName = Object.keys(groupedByTable)[0];
+        const menu = groupedByTable[tableName];
+
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        iframeDoc.open();
+        iframe.writingSuggestions(`
+          <html>
+            <head>
+              <style>
+                @page {
+                  size: 80mm 90mm;
+                  margin: 0;
+                }
+                @media print {
+                  html, body {
+                    margin: 0;
+                    padding: 0;
+                    width: 80mm;
+                    height: 80mm;
+                    overflow: hidden;
+                  }
+                  body * {
+                    visibility: hidden;
+                  }
+                  .receipt, .receipt * {
+                    visibility: visible;
+                  }
+                  .receipt {
+                    position: absolute;
+                    top: 30;
+                    left: 0;
+                    width: 80mm;
+                    height: 80mm;
+                    padding: 4px;
+                    font-family: Arial, sans-serif;
+                    text-align: center;
+                  }
+                  .title {
+                    font-size: 16px;
+                    margin: 4px 0;
+                  }
+                  .timestamp {
+                    font-size: 12px;
+                    margin: 4px 0;
+                  }
+                  .qr-container {
+                    display: flex;
+                    justify-content: center;
+                    margin: 4px 0;
+                  }
+                  .qr-code {
+                    width: auto;
+                    max-width: 60mm;
+                    height: auto;
+                  }
+                  .footer {
+                    font-size: 12px;
+                    margin: 4px 0;
+                  }
+                }
+              </style>
+            </head>
+            <body>
+              <div class="receipt">
+                <h1 class="title">RMUTI POS</h1>
+                <h2 class="title">โต๊ะ: ${tableName}</h2>
+                <p>
+                  ${Object.keys(menu)[0]}: ${menu[Object.keys(menu)[0]]}
+                </p>
+              </div>
+            </body>
+          </html>
+          `);
+        iframe.closest();
+        setTimeout(() => {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          document.body.removeChild(iframe);
+        }, 500);
       };
 
       if (newStatus === 3) {
