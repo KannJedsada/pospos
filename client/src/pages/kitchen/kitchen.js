@@ -22,7 +22,7 @@ function Kitchen() {
   };
 
   // ฟังก์ชันสำหรับเปลี่ยนสถานะของเมนูทั้งหมด
-  const updateMenuStatus = async (menuName, newStatus) => {
+  const updateMenuStatus = async (menuName, newStatus, menu) => {
     try {
       // กรองเฉพาะออร์เดอร์ที่ต้องการเปลี่ยนสถานะ
       const ordersToUpdate = orderDetail.filter((order) => {
@@ -32,7 +32,8 @@ function Kitchen() {
         }
         if (newStatus === 3) {
           // จาก "รอคิว" (สถานะ 1) หรือ "กำลังทำ" (สถานะ 2) ไป "จัดเสิร์ฟ" (สถานะ 3)
-          return order.menu_name === menuName && order.dish_status === 2;
+          console.log(menu);
+          // return order.menu_name === menuName && order.dish_status === 2;
         }
         return false; // ถ้าสถานะใหม่ไม่ตรงกับกรณีที่กล่าวถึง
       });
@@ -148,7 +149,7 @@ function Kitchen() {
                           ? "bg-gray-400 cursor-not-allowed"
                           : "bg-blue-500 hover:bg-blue-600"
                       }`}
-                      onClick={() => updateMenuStatus(menu.menu_name, 3)} // เปลี่ยนเป็น "เสร็จสิ้น"
+                      onClick={() => updateMenuStatus(menu.menu_name, 3, menu)} // เปลี่ยนเป็น "เสร็จสิ้น"
                       disabled={menu.orders.some(
                         (order) => order.dish_status === 1
                       )}
