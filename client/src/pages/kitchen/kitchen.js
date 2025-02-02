@@ -132,7 +132,6 @@ function Kitchen() {
           document.body.removeChild(iframe);
         }, 500);
       };
-
       if (newStatus === 3) {
         const groupedByTable = ordersToUpdate.reduce((acc, order) => {
           const tableName = order.t_name;
