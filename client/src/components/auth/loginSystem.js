@@ -32,6 +32,8 @@ const LoginSystem = () => {
 
       const acc = access?.data?.data?.access;
 
+      console.log(acc)
+
       // ใช้ switch-case สำหรับ navigation
       switch (acc !== undefined) {
         case 0:
