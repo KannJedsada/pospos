@@ -44,7 +44,9 @@ function Kitchen() {
       }
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
+      if (newStatus === 3) {
         console.log(ordersToUpdate);
+      }
 
       // await Promise.all(
       //   ordersToUpdate.map((order) =>
@@ -133,8 +135,8 @@ function Kitchen() {
                     {/* ปุ่มรวมสถานะสำหรับทั้งเมนู */}
                     <button
                       className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.orders.some((order) => order.dish_status === 2)
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-orange-500 hover:bg-orange-600"
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-orange-500 hover:bg-orange-600"
                         }`}
                       onClick={() => updateMenuStatus(menu.menu_name, 2)}
                       disabled={menu.orders.some(
@@ -146,8 +148,8 @@ function Kitchen() {
 
                     <button
                       className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.orders.some((order) => order.dish_status === 1)
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-blue-500 hover:bg-blue-600"
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600"
                         }`}
                       onClick={() => updateMenuStatus(menu.menu_name, 3, menu.orders)}
                       disabled={menu.orders.some(
