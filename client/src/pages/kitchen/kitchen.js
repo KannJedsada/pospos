@@ -24,153 +24,43 @@ function Kitchen() {
 
   // ฟังก์ชันสำหรับเปลี่ยนสถานะของเมนูทั้งหมด
   const updateMenuStatus = async (menuName, newStatus, menu) => {
-    try {
-      // กรองเฉพาะออร์เดอร์ที่ต้องการเปลี่ยนสถานะ
-      const ordersToUpdate = orderDetail.filter((order) => {
-        if (newStatus === 2) {
-          // จาก "รอคิว" (สถานะ 1) ไป "กำลังทำ" (สถานะ 2)
-          return order.menu_name === menuName && order.dish_status === 1;
-        }
-        if (newStatus === 3) {
-          // // จาก "รอคิว" (สถานะ 1) หรือ "กำลังทำ" (สถานะ 2) ไป "จัดเสิร์ฟ" (สถานะ 3)
-          // console.log(menu);
-          return order.menu_name === menuName && order.dish_status === 2;
-        }
-        return false; // ถ้าสถานะใหม่ไม่ตรงกับกรณีที่กล่าวถึง
-      });
+    console.log(menuName, newStatus, menu)
+    // try {
+    //   // กรองเฉพาะออร์เดอร์ที่ต้องการเปลี่ยนสถานะ
+    //   const ordersToUpdate = orderDetail.filter((order) => {
+    //     if (newStatus === 2) {
+    //       // จาก "รอคิว" (สถานะ 1) ไป "กำลังทำ" (สถานะ 2)
+    //       return order.menu_name === menuName && order.dish_status === 1;
+    //     }
+    //     if (newStatus === 3) {
+    //       // // จาก "รอคิว" (สถานะ 1) หรือ "กำลังทำ" (สถานะ 2) ไป "จัดเสิร์ฟ" (สถานะ 3)
+    //       // console.log(menu);
+    //       return order.menu_name === menuName && order.dish_status === 2;
+    //     }
+    //     return false; // ถ้าสถานะใหม่ไม่ตรงกับกรณีที่กล่าวถึง
+    //   });
 
-      if (ordersToUpdate.length === 0) {
-        alert("ไม่มีออร์เดอร์ที่สามารถเปลี่ยนสถานะได้");
-        return;
-      }
+    //   if (ordersToUpdate.length === 0) {
+    //     alert("ไม่มีออร์เดอร์ที่สามารถเปลี่ยนสถานะได้");
+    //     return;
+    //   }
 
-      // const generateBill = (groupedByTable) => {
-      //   const iframe = document.createElement("iframe");
-      //   iframe.style.position = "absolute";
-      //   iframe.style.top = "-10000px";
-      //   iframe.style.left = "-10000px";
+    //   // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
+    //   // await Promise.all(
+    //   //   ordersToUpdate.map((order) =>
+    //   //     axios.put("/api/order/change_dish", {
+    //   //       order_id: order.id,
+    //   //       new_status: newStatus,
+    //   //     })
+    //   //   )
+    //   // );
 
-      //   document.body.appendChild(iframe);
-
-      //   const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      //   iframeDoc.open();
-
-      //   // Loop ผ่านทุกโต๊ะใน groupedByTable
-      //   Object.entries(groupedByTable).forEach(([tableName, menu], index) => {
-      //     // ถ้าไม่ใช่โต๊ะแรก ให้เพิ่มการตัดหน้าก่อน (สร้างหน้าใหม่)
-      //     if (index > 0) {
-      //       iframeDoc.write("<div style='page-break-before: always'></div>");
-      //     }
-
-      //     // เขียนข้อมูลในเอกสาร
-      //     iframeDoc.write(`
-      //       <html>
-      //         <head>
-      //           <style>
-      //             @page {
-      //               size: 80mm 40mm;
-      //               margin: 0;
-      //             }
-      //             @media print {
-      //               html, body {
-      //                 margin: 0;
-      //                 padding: 0;
-      //                 width: 80mm;
-      //                 height: 30mm;
-      //                 overflow: hidden;
-      //               }
-      //               body * {
-      //                 visibility: hidden;
-      //               }
-      //               .receipt, .receipt * {
-      //                 visibility: visible;
-      //               }
-      //               .receipt {
-      //                 position: absolute;
-      //                 top: 30;
-      //                 left: 0;
-      //                 width: 80mm;
-      //                 height: 30mm;
-      //                 padding: 4px;
-      //                 font-family: Arial, sans-serif;
-      //               }
-      //               .title {
-      //                 font-size: 16px;
-      //                 margin: 4px 0;
-      //                 text-align: center;
-      //               }
-      //               .tName {
-      //                 font-size: 14px;
-      //                 margin: 4px;
-      //               }
-      //               p {
-      //                 font-size: 14px;
-      //               }
-      //             }
-      //           </style>
-      //         </head>
-      //         <body>
-      //           <div class="receipt">
-      //             <h1 class="title">RMUTI POS</h1>
-      //             <h2 class="tName">โต๊ะ: ${tableName}</h2>
-      //             <p class="menu">
-      //               ${Object.entries(menu).map(([menuName, qty]) => `${menuName} X ${qty} จำนวน`).join('<br />')}
-      //             </p>
-      //           </div>
-      //         </body>
-      //       </html>
-      //     `);
-      //   });
-
-      //   // หลังจาก loop เสร็จเรียบร้อยแล้วปิด document
-      //   iframeDoc.close();
-
-      //   // ให้เวลานิดหน่อยก่อนที่จะเรียก print
-      //   setTimeout(() => {
-      //     iframe.contentWindow.focus();
-      //     iframe.contentWindow.print();
-      //     document.body.removeChild(iframe);
-      //   }, 500);
-      // };
-      // if (newStatus === 3) {
-      //   const groupedByTable = ordersToUpdate.reduce((acc, order) => {
-      //     const tableName = order.t_name;
-      //     const menuName = order.menu_name;
-      //     const qty = order.qty;
-
-      //     if (!acc[tableName]) {
-      //       acc[tableName] = {};
-      //     }
-
-      //     if (!acc[tableName][menuName]) {
-      //       acc[tableName][menuName] = 0;
-      //     }
-
-      //     acc[tableName][menuName] += Number(qty);
-
-      //     return acc;
-      //   }, {});
-
-      //   console.log(groupedByTable);
-      //   generateBill(groupedByTable);
-      // }
-
-      // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
-      await Promise.all(
-        ordersToUpdate.map((order) =>
-          axios.put("/api/order/change_dish", {
-            order_id: order.id,
-            new_status: newStatus,
-          })
-        )
-      );
-
-      // อัปเดตข้อมูลใหม่
-      fetchOrderDetail();
-    } catch (error) {
-      console.error("Error updating menu status:", error.message);
-      alert("เกิดข้อผิดพลาดในการอัปเดตสถานะเมนู");
-    }
+    //   // อัปเดตข้อมูลใหม่
+    //   fetchOrderDetail();
+    // } catch (error) {
+    //   console.error("Error updating menu status:", error.message);
+    //   alert("เกิดข้อผิดพลาดในการอัปเดตสถานะเมนู");
+    // }
   };
 
   const groupedByMenu = (orderDetail || [])
@@ -270,26 +160,23 @@ function Kitchen() {
           รายการคำสั่งอาหาร
         </h1>
 
-        {groupedByMenu.length > 0 ? (
+        {groupedByTable.length > 0 ? (
           <div className="space-y-6">
-            {groupedByMenu.map((table, tableIndex) => (
+            {groupedByTable.map((table, tableIndex) => (
               <div key={tableIndex} className="p-6 bg-white rounded-lg shadow-lg">
-                {/* ชื่อโต๊ะ */}
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                   โต๊ะ: {table.t_name}
                 </h2>
 
-                {/* เมนูในโต๊ะ */}
-                {table.menus.map((menu, menuIndex) => (
+                {/* ตรวจสอบว่า menus เป็นอาร์เรย์ก่อนใช้ map */}
+                {Array.isArray(table.menus) && table.menus.map((menu, menuIndex) => (
                   <div key={menuIndex} className="mb-6 p-4 bg-gray-100 rounded-md shadow-sm">
-                    {/* ชื่อเมนูและปุ่ม */}
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-xl font-semibold text-gray-700">
                         เมนู: {menu.menu_name}
                       </h3>
 
                       <div className="space-x-4">
-                        {/* ปุ่ม 'กำลังทำ' */}
                         <button
                           className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 2
                               ? "bg-gray-400 cursor-not-allowed"
@@ -301,7 +188,6 @@ function Kitchen() {
                           กำลังทำ
                         </button>
 
-                        {/* ปุ่ม 'จัดเสิร์ฟ' */}
                         <button
                           className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 3
                               ? "bg-gray-400 cursor-not-allowed"
@@ -315,9 +201,9 @@ function Kitchen() {
                       </div>
                     </div>
 
-                    {/* รายการสั่งซื้อในเมนูนี้ */}
+                    {/* ตรวจสอบว่า orders เป็นอาร์เรย์ก่อนใช้ map */}
                     <div className="space-y-2">
-                      {menu.orders.map((order, orderIndex) => (
+                      {Array.isArray(menu.orders) && menu.orders.map((order, orderIndex) => (
                         <div
                           key={orderIndex}
                           className="flex justify-between items-center p-3 bg-white rounded-md shadow-sm"
@@ -338,7 +224,6 @@ function Kitchen() {
                             </p>
                           </div>
 
-                          {/* สถานะของเมนู */}
                           <span className="text-sm font-medium text-gray-700">
                             {order.dish_status === 1
                               ? "รอคิว"
