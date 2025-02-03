@@ -163,30 +163,16 @@ function Kitchen() {
         {groupedByMenu.length > 0 ? (
           <div className="space-y-6">
             {groupedByMenu.map((table, tableIndex) => {
-              // คำนวณจำนวนรวมของทุกเมนูในโต๊ะนี้
-              const totalItemsInTable = table.menus.reduce((sum, menu) => {
-                const menuTotal = Array.isArray(menu.orders)
-                  ? menu.orders.reduce((menuSum, order) => menuSum + order.qty, 0)
-                  : 0;
-                return sum + menuTotal;
-              }, 0);
 
               return (
                 <div key={tableIndex} className="p-6 bg-white rounded-lg shadow-lg">
                   <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                     โต๊ะ: {table.t_name}
                   </h2>
-                  <p className="text-gray-600 mb-4">
-                    <span className="font-semibold">จำนวนทั้งหมด:</span> {totalItemsInTable} รายการ
-                  </p>
 
                   {/* ตรวจสอบว่า menus เป็นอาร์เรย์ก่อนใช้ map */}
                   {Array.isArray(table.menus) &&
                     table.menus.map((menu, menuIndex) => {
-                      // คำนวณจำนวนรวมของเมนูนี้ในโต๊ะ
-                      const totalMenuQty = Array.isArray(menu.orders)
-                        ? menu.orders.reduce((sum, order) => sum + order.qty, 0)
-                        : 0;
 
                       return (
                         <div
@@ -213,7 +199,7 @@ function Kitchen() {
                               </button>
 
                               <button
-                                className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 3
+                                className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 1
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : "bg-blue-500 hover:bg-blue-600"
                                   }`}
