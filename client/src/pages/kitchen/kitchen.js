@@ -174,39 +174,77 @@ function Kitchen() {
   };
 
   const groupedByMenu = (orderDetail || [])
-    .reduce((acc, curr) => {
-      // ตรวจสอบว่ามีรายการ menu_name และ dish_status นี้อยู่ใน acc แล้วหรือไม่
-      const existingGroup = acc.find(
-        (group) =>
-          group.menu_name === curr.menu_name &&
-          group.dish_status === curr.dish_status
-      );
+  .reduce((acc, curr) => {
+    // ตรวจสอบว่ามีโต๊ะนี้ (t_name) อยู่ใน acc หรือยัง
+    let tableGroup = acc.find((group) => group.t_name === curr.t_name);
 
-      if (existingGroup) {
-        // ตรวจหาว่าใน orders มี t_name เดียวกันหรือไม่
-        const existingOrder = existingGroup.orders.find(
-          (order) => order.t_name === curr.t_name
-        );
+    if (!tableGroup) {
+      // ถ้าไม่มี ให้สร้างกลุ่มใหม่สำหรับโต๊ะนี้
+      tableGroup = {
+        t_name: curr.t_name,
+        menus: [],
+      };
+      acc.push(tableGroup);
+    }
 
-        if (existingOrder) {
-          // ถ้าพบ t_name เดียวกัน เพิ่มจำนวน qty
-          existingOrder.qty += curr.qty;
-        } else {
-          // ถ้า t_name ไม่ตรงกัน เพิ่มเป็น order ใหม่ในกลุ่มเดิม
-          existingGroup.orders.push({ ...curr });
-        }
-      } else {
-        // ถ้ายังไม่มี menu_name และ dish_status นี้ใน acc ให้สร้างกลุ่มใหม่
-        acc.push({
-          menu_name: curr.menu_name,
-          dish_status: curr.dish_status,
-          orders: [{ ...curr }],
-        });
-      }
+    // ตรวจสอบว่ามีเมนูนี้ (menu_name) และสถานะ (dish_status) ในโต๊ะนี้หรือยัง
+    let menuGroup = tableGroup.menus.find(
+      (menu) =>
+        menu.menu_name === curr.menu_name &&
+        menu.dish_status === curr.dish_status
+    );
 
-      return acc;
-    }, [])
-    .reverse();
+    if (menuGroup) {
+      // ถ้ามีเมนูนี้แล้ว ให้เพิ่ม qty
+      menuGroup.qty += curr.qty;
+    } else {
+      // ถ้ายังไม่มี ให้เพิ่มเมนูใหม่
+      tableGroup.menus.push({
+        menu_name: curr.menu_name,
+        dish_status: curr.dish_status,
+        qty: curr.qty,
+      });
+    }
+
+    return acc;
+  }, [])
+  .reverse();
+
+
+  // const groupedByMenu = (orderDetail || [])
+  //   .reduce((acc, curr) => {
+  //     // ตรวจสอบว่ามีรายการ menu_name และ dish_status นี้อยู่ใน acc แล้วหรือไม่
+  //     const existingGroup = acc.find(
+  //       (group) =>
+  //         group.menu_name === curr.menu_name &&
+  //         group.dish_status === curr.dish_status
+  //     );
+
+  //     if (existingGroup) {
+  //       // ตรวจหาว่าใน orders มี t_name เดียวกันหรือไม่
+  //       const existingOrder = existingGroup.orders.find(
+  //         (order) => order.t_name === curr.t_name
+  //       );
+
+  //       if (existingOrder) {
+  //         // ถ้าพบ t_name เดียวกัน เพิ่มจำนวน qty
+  //         existingOrder.qty += curr.qty;
+  //       } else {
+  //         // ถ้า t_name ไม่ตรงกัน เพิ่มเป็น order ใหม่ในกลุ่มเดิม
+  //         existingGroup.orders.push({ ...curr });
+  //       }
+  //     } else {
+  //       // ถ้ายังไม่มี menu_name และ dish_status นี้ใน acc ให้สร้างกลุ่มใหม่
+  //       acc.push({
+  //         menu_name: curr.menu_name,
+  //         dish_status: curr.dish_status,
+  //         orders: [{ ...curr }],
+  //       });
+  //     }
+
+  //     return acc;
+  //   }, [])
+  //   .reverse();
 
   useEffect(() => {
     fetchOrderDetail();
