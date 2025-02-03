@@ -54,18 +54,17 @@ function Kitchen() {
       console.log(ordersToUpdate);
 
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่ต้องการเปลี่ยนสถานะ
-      // await Promise.all(
-      //   ordersToUpdate.map((order) =>
-      //     axios.put("/api/order/change_dish", {
-      //       order_id: order.id,
-      //       new_status: newStatus,
-      //     })
-      //   )
-      // );
+      await Promise.all(
+        ordersToUpdate.map((order) =>
+          axios.put("/api/order/change_dish", {
+            order_id: order.id,
+            new_status: newStatus,
+          })
+        )
+      );
 
       // เมื่ออัปเดตเสร็จ โหลดข้อมูลใหม่
       fetchOrderDetail();
-      alert("อัปเดตสถานะสำเร็จ!");
     } catch (error) {
       console.error("Error updating menu status:", error.message);
       alert("เกิดข้อผิดพลาดในการอัปเดตสถานะเมนู");
