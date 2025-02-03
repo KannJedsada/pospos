@@ -51,6 +51,8 @@ function Kitchen() {
         return;
       }
 
+      console.log(ordersToUpdate);
+
       // ส่งคำขอ PUT สำหรับออร์เดอร์ที่ต้องการเปลี่ยนสถานะ
       // await Promise.all(
       //   ordersToUpdate.map((order) =>
