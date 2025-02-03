@@ -23,44 +23,51 @@ function Kitchen() {
   };
 
   // ฟังก์ชันสำหรับเปลี่ยนสถานะของเมนูทั้งหมด
-  const updateMenuStatus = async (menuName, newStatus, menu) => {
-    console.log(menuName, newStatus, menu)
-    // try {
-    //   // กรองเฉพาะออร์เดอร์ที่ต้องการเปลี่ยนสถานะ
-    //   const ordersToUpdate = orderDetail.filter((order) => {
-    //     if (newStatus === 2) {
-    //       // จาก "รอคิว" (สถานะ 1) ไป "กำลังทำ" (สถานะ 2)
-    //       return order.menu_name === menuName && order.dish_status === 1;
-    //     }
-    //     if (newStatus === 3) {
-    //       // // จาก "รอคิว" (สถานะ 1) หรือ "กำลังทำ" (สถานะ 2) ไป "จัดเสิร์ฟ" (สถานะ 3)
-    //       // console.log(menu);
-    //       return order.menu_name === menuName && order.dish_status === 2;
-    //     }
-    //     return false; // ถ้าสถานะใหม่ไม่ตรงกับกรณีที่กล่าวถึง
-    //   });
+  const updateMenuStatus = async (menuName, newStatus, tname) => {
+    console.log(`Updating status for: ${menuName}, Status: ${newStatus}, Table: ${tname}`);
 
-    //   if (ordersToUpdate.length === 0) {
-    //     alert("ไม่มีออร์เดอร์ที่สามารถเปลี่ยนสถานะได้");
-    //     return;
-    //   }
+    try {
+      // กรองเฉพาะออร์เดอร์ที่ต้องการเปลี่ยนสถานะและตรงกับโต๊ะ
+      const ordersToUpdate = orderDetail.filter((order) => {
+        const isSameMenu = order.menu_name === menuName;
+        const isSameTable = order.t_name === tname;
 
-    //   // ส่งคำขอ PUT สำหรับออร์เดอร์ที่กรองมา
-    //   // await Promise.all(
-    //   //   ordersToUpdate.map((order) =>
-    //   //     axios.put("/api/order/change_dish", {
-    //   //       order_id: order.id,
-    //   //       new_status: newStatus,
-    //   //     })
-    //   //   )
-    //   // );
+        if (newStatus === 2) {
+          // เปลี่ยนจาก "รอคิว" (1) เป็น "กำลังทำ" (2)
+          return isSameMenu && isSameTable && order.dish_status === 1;
+        }
 
-    //   // อัปเดตข้อมูลใหม่
-    //   fetchOrderDetail();
-    // } catch (error) {
-    //   console.error("Error updating menu status:", error.message);
-    //   alert("เกิดข้อผิดพลาดในการอัปเดตสถานะเมนู");
-    // }
+        if (newStatus === 3) {
+          // เปลี่ยนจาก "กำลังทำ" (2) เป็น "จัดเสิร์ฟ" (3)
+          return isSameMenu && isSameTable && order.dish_status === 2;
+        }
+
+        return false; // กรณีที่ไม่ตรงกับสถานะที่ต้องการเปลี่ยน
+      });
+
+      // ถ้าไม่มีออร์เดอร์ที่สามารถเปลี่ยนสถานะได้
+      if (ordersToUpdate.length === 0) {
+        alert("ไม่มีออร์เดอร์ที่สามารถเปลี่ยนสถานะได้");
+        return;
+      }
+
+      // ส่งคำขอ PUT สำหรับออร์เดอร์ที่ต้องการเปลี่ยนสถานะ
+      // await Promise.all(
+      //   ordersToUpdate.map((order) =>
+      //     axios.put("/api/order/change_dish", {
+      //       order_id: order.id,
+      //       new_status: newStatus,
+      //     })
+      //   )
+      // );
+
+      // เมื่ออัปเดตเสร็จ โหลดข้อมูลใหม่
+      fetchOrderDetail();
+      alert("อัปเดตสถานะสำเร็จ!");
+    } catch (error) {
+      console.error("Error updating menu status:", error.message);
+      alert("เกิดข้อผิดพลาดในการอัปเดตสถานะเมนู");
+    }
   };
 
   const groupedByMenu = (orderDetail || [])
@@ -187,8 +194,8 @@ function Kitchen() {
                             <div className="space-x-4">
                               <button
                                 className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 2
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-orange-500 hover:bg-orange-600"
+                                  ? "bg-gray-400 cursor-not-allowed"
+                                  : "bg-orange-500 hover:bg-orange-600"
                                   }`}
                                 onClick={() =>
                                   updateMenuStatus(menu.menu_name, 2, table.t_name)
@@ -200,8 +207,8 @@ function Kitchen() {
 
                               <button
                                 className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 1
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-blue-500 hover:bg-blue-600"
+                                  ? "bg-gray-400 cursor-not-allowed"
+                                  : "bg-blue-500 hover:bg-blue-600"
                                   }`}
                                 onClick={() =>
                                   updateMenuStatus(menu.menu_name, 3, table.t_name)
