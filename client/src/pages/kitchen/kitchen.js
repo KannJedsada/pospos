@@ -160,9 +160,9 @@ function Kitchen() {
           รายการคำสั่งอาหาร
         </h1>
 
-        {groupedByTable.length > 0 ? (
+        {groupedByMenu.length > 0 ? (
           <div className="space-y-6">
-            {groupedByTable.map((table, tableIndex) => (
+            {groupedByMenu.map((table, tableIndex) => (
               <div key={tableIndex} className="p-6 bg-white rounded-lg shadow-lg">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                   โต๊ะ: {table.t_name}
