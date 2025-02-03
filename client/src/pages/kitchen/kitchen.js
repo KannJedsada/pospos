@@ -210,6 +210,8 @@ function Kitchen() {
     }, [])
     .reverse();
 
+  console.log(groupedByMenu);
+
 
   // const groupedByMenu = (orderDetail || [])
   //   .reduce((acc, curr) => {
