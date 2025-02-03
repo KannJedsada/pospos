@@ -49,19 +49,19 @@ function Kitchen() {
       //   iframe.style.position = "absolute";
       //   iframe.style.top = "-10000px";
       //   iframe.style.left = "-10000px";
-        
+
       //   document.body.appendChild(iframe);
-        
+
       //   const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       //   iframeDoc.open();
-      
+
       //   // Loop ผ่านทุกโต๊ะใน groupedByTable
       //   Object.entries(groupedByTable).forEach(([tableName, menu], index) => {
       //     // ถ้าไม่ใช่โต๊ะแรก ให้เพิ่มการตัดหน้าก่อน (สร้างหน้าใหม่)
       //     if (index > 0) {
       //       iframeDoc.write("<div style='page-break-before: always'></div>");
       //     }
-      
+
       //     // เขียนข้อมูลในเอกสาร
       //     iframeDoc.write(`
       //       <html>
@@ -121,10 +121,10 @@ function Kitchen() {
       //       </html>
       //     `);
       //   });
-      
+
       //   // หลังจาก loop เสร็จเรียบร้อยแล้วปิด document
       //   iframeDoc.close();
-      
+
       //   // ให้เวลานิดหน่อยก่อนที่จะเรียก print
       //   setTimeout(() => {
       //     iframe.contentWindow.focus();
@@ -174,41 +174,41 @@ function Kitchen() {
   };
 
   const groupedByMenu = (orderDetail || [])
-  .reduce((acc, curr) => {
-    // ตรวจสอบว่ามีโต๊ะนี้ (t_name) อยู่ใน acc หรือยัง
-    let tableGroup = acc.find((group) => group.t_name === curr.t_name);
+    .reduce((acc, curr) => {
+      // ตรวจสอบว่ามีโต๊ะนี้ (t_name) อยู่ใน acc หรือยัง
+      let tableGroup = acc.find((group) => group.t_name === curr.t_name);
 
-    if (!tableGroup) {
-      // ถ้าไม่มี ให้สร้างกลุ่มใหม่สำหรับโต๊ะนี้
-      tableGroup = {
-        t_name: curr.t_name,
-        menus: [],
-      };
-      acc.push(tableGroup);
-    }
+      if (!tableGroup) {
+        // ถ้าไม่มี ให้สร้างกลุ่มใหม่สำหรับโต๊ะนี้
+        tableGroup = {
+          t_name: curr.t_name,
+          menus: [],
+        };
+        acc.push(tableGroup);
+      }
 
-    // ตรวจสอบว่ามีเมนูนี้ (menu_name) และสถานะ (dish_status) ในโต๊ะนี้หรือยัง
-    let menuGroup = tableGroup.menus.find(
-      (menu) =>
-        menu.menu_name === curr.menu_name &&
-        menu.dish_status === curr.dish_status
-    );
+      // ตรวจสอบว่ามีเมนูนี้ (menu_name) และสถานะ (dish_status) ในโต๊ะนี้หรือยัง
+      let menuGroup = tableGroup.menus.find(
+        (menu) =>
+          menu.menu_name === curr.menu_name &&
+          menu.dish_status === curr.dish_status
+      );
 
-    if (menuGroup) {
-      // ถ้ามีเมนูนี้แล้ว ให้เพิ่ม qty
-      menuGroup.qty += curr.qty;
-    } else {
-      // ถ้ายังไม่มี ให้เพิ่มเมนูใหม่
-      tableGroup.menus.push({
-        menu_name: curr.menu_name,
-        dish_status: curr.dish_status,
-        qty: curr.qty,
-      });
-    }
+      if (menuGroup) {
+        // ถ้ามีเมนูนี้แล้ว ให้เพิ่ม qty
+        menuGroup.qty += curr.qty;
+      } else {
+        // ถ้ายังไม่มี ให้เพิ่มเมนูใหม่
+        tableGroup.menus.push({
+          menu_name: curr.menu_name,
+          dish_status: curr.dish_status,
+          qty: curr.qty,
+        });
+      }
 
-    return acc;
-  }, [])
-  .reverse();
+      return acc;
+    }, [])
+    .reverse();
 
 
   // const groupedByMenu = (orderDetail || [])
@@ -268,6 +268,95 @@ function Kitchen() {
           รายการคำสั่งอาหาร
         </h1>
 
+        {groupedByTable.length > 0 ? (
+          <div className="space-y-6">
+            {groupedByTable.map((table, tableIndex) => (
+              <div key={tableIndex} className="p-6 bg-white rounded-lg shadow-lg">
+                {/* ชื่อโต๊ะ */}
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                  โต๊ะ: {table.t_name}
+                </h2>
+
+                {/* เมนูในโต๊ะ */}
+                {table.menus.map((menu, menuIndex) => (
+                  <div key={menuIndex} className="mb-6 p-4 bg-gray-100 rounded-md shadow-sm">
+                    {/* ชื่อเมนูและปุ่ม */}
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold text-gray-700">
+                        เมนู: {menu.menu_name}
+                      </h3>
+
+                      <div className="space-x-4">
+                        {/* ปุ่ม 'กำลังทำ' */}
+                        <button
+                          className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 2
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-orange-500 hover:bg-orange-600"
+                            }`}
+                          onClick={() => updateMenuStatus(menu.menu_name, 2, table.t_name)}
+                          disabled={menu.dish_status === 2}
+                        >
+                          กำลังทำ
+                        </button>
+
+                        {/* ปุ่ม 'จัดเสิร์ฟ' */}
+                        <button
+                          className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.dish_status === 3
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-blue-500 hover:bg-blue-600"
+                            }`}
+                          onClick={() => updateMenuStatus(menu.menu_name, 3, table.t_name)}
+                          disabled={menu.dish_status === 3}
+                        >
+                          จัดเสิร์ฟ
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* รายการสั่งซื้อในเมนูนี้ */}
+                    <div className="space-y-2">
+                      {menu.orders.map((order, orderIndex) => (
+                        <div
+                          key={orderIndex}
+                          className="flex justify-between items-center p-3 bg-white rounded-md shadow-sm"
+                        >
+                          <div>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-semibold">เวลา:</span>{" "}
+                              {new Date(order.time_ordered).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}{" "}
+                              น.
+                            </p>
+                            <p className="text-sm text-gray-700">
+                              <span className="font-semibold">จำนวน:</span> {order.qty}{" "}
+                              {order.menu_type !== 5 ? "จาน" : "แก้ว"}
+                            </p>
+                          </div>
+
+                          {/* สถานะของเมนู */}
+                          <span className="text-sm font-medium text-gray-700">
+                            {order.dish_status === 1
+                              ? "รอคิว"
+                              : order.dish_status === 2
+                                ? "กำลังทำ"
+                                : "จัดเสิร์ฟ"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center mt-8">ยังไม่มีคำสั่ง</p>
+        )}
+
+        {/*  
         {groupedByMenu.length > 0 ? (
           <div className="space-y-6">
             {groupedByMenu.map((menu, index) => (
@@ -278,7 +367,6 @@ function Kitchen() {
                   </h2>
 
                   <div className="space-x-4">
-                    {/* ปุ่มรวมสถานะสำหรับทั้งเมนู */}
                     <button
                       className={`px-4 py-2 text-white rounded-lg shadow-md ${menu.orders.some((order) => order.dish_status === 2)
                         ? "bg-gray-400 cursor-not-allowed"
@@ -307,7 +395,6 @@ function Kitchen() {
                   </div>
                 </div>
 
-                {/* รายการโต๊ะที่สั่งเมนูนี้ */}
                 <div className="space-y-4">
                   {menu.orders.map((order, i) => (
                     <div
@@ -336,9 +423,9 @@ function Kitchen() {
                       </div>
 
                       <div>
-                        {/* สถานะแต่ละโต๊ะ */}
+                  
                         <span className="text-sm font-medium text-gray-700">
-                          {order.dish_status === 1
+                        {order.dish_status === 1
                             ? "รอคิว"
                             : order.dish_status === 2
                               ? "กำลังทำ"
@@ -354,6 +441,7 @@ function Kitchen() {
         ) : (
           <p className="text-gray-500 text-center mt-8">ยังไม่มีคำสั่ง</p>
         )}
+        */}
       </div>
     </div>
   );
