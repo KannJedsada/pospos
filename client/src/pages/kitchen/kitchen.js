@@ -229,7 +229,7 @@ function Kitchen() {
 
                           <p className="text-gray-600 mb-2">
                             <span className="font-semibold">จำนวนทั้งหมด:</span>{" "}
-                            {totalMenuQty} {menu.menu_type !== 5 ? "จาน" : "แก้ว"}
+                            {menu.qty} {menu.menu_type !== 5 ? "จาน" : "แก้ว"}
                           </p>
 
                           {/* ตรวจสอบว่า orders เป็นอาร์เรย์ก่อนใช้ map */}
