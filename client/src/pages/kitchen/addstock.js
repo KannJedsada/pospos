@@ -21,60 +21,60 @@ function Addstock() {
     fetchUnits();
   }, []);
 
-  useEffect(() => {
-    const updatePrices = async () => {
-      const updatedStockDetail = [...data.stock_detail];
-      let hasChanges = false;
+  // useEffect(() => {
+  //   const updatePrices = async () => {
+  //     const updatedStockDetail = [...data.stock_detail];
+  //     let hasChanges = false;
 
-      for (let index = 0; index < updatedStockDetail.length; index++) {
-        const detail = updatedStockDetail[index];
+  //     for (let index = 0; index < updatedStockDetail.length; index++) {
+  //       const detail = updatedStockDetail[index];
 
-        if (detail.material_id && detail.qty) {
-          // เรียก API เพื่อตรวจสอบวัสดุผสม
-          const materialDataArray = await checkTrue(detail.material_id);
+  //       if (detail.material_id && detail.qty) {
+  //         // เรียก API เพื่อตรวจสอบวัสดุผสม
+  //         const materialDataArray = await checkTrue(detail.material_id);
 
-          let totalPrice = 0;
+  //         let totalPrice = 0;
 
-          if (materialDataArray && materialDataArray.length > 0) {
-            // ถ้ามีวัสดุผสม ตรวจสอบว่ามีการกรอกราคาเองหรือไม่
-            if (detail.manual_price !== undefined && detail.manual_price !== null) {
-              totalPrice = detail.manual_price;  // ใช้ราคาที่กรอกเอง
-            } else {
-              // ถ้าไม่มีการกรอกราคาเอง ให้คำนวณจากวัสดุผสม
-              for (let materialData of materialDataArray) {
-                if (materialData?.price !== undefined) {
-                  totalPrice += materialData.price * materialData.quantity_used * detail.qty;
-                }
-              }
-            }
-          } else {
-            // ถ้าไม่มีวัสดุผสม ให้ใช้ราคาที่กรอกเองหรือตั้งค่าเริ่มต้นเป็น 0
-            totalPrice = detail.manual_price !== undefined && detail.manual_price !== null
-              ? detail.manual_price * detail.qty
-              : detail.price || 0;
-          }
+  //         if (materialDataArray && materialDataArray.length > 0) {
+  //           // ถ้ามีวัสดุผสม ตรวจสอบว่ามีการกรอกราคาเองหรือไม่
+  //           if (detail.manual_price !== undefined && detail.manual_price !== null) {
+  //             totalPrice = detail.manual_price;  // ใช้ราคาที่กรอกเอง
+  //           } else {
+  //             // ถ้าไม่มีการกรอกราคาเอง ให้คำนวณจากวัสดุผสม
+  //             for (let materialData of materialDataArray) {
+  //               if (materialData?.price !== undefined) {
+  //                 totalPrice += materialData.price * materialData.quantity_used * detail.qty;
+  //               }
+  //             }
+  //           }
+  //         } else {
+  //           // ถ้าไม่มีวัสดุผสม ให้ใช้ราคาที่กรอกเองหรือตั้งค่าเริ่มต้นเป็น 0
+  //           totalPrice = detail.manual_price !== undefined && detail.manual_price !== null
+  //             ? detail.manual_price * detail.qty
+  //             : detail.price || 0;
+  //         }
 
-          // อัปเดตราคาเฉพาะเมื่อมีการเปลี่ยนแปลง
-          if (detail.price !== totalPrice) {
-            updatedStockDetail[index].price = totalPrice;
-            hasChanges = true;
-          }
-        }
-      }
+  //         // อัปเดตราคาเฉพาะเมื่อมีการเปลี่ยนแปลง
+  //         if (detail.price !== totalPrice) {
+  //           updatedStockDetail[index].price = totalPrice;
+  //           hasChanges = true;
+  //         }
+  //       }
+  //     }
 
-      // อัปเดต state เมื่อมีการเปลี่ยนแปลง
-      if (hasChanges) {
-        setData((prevState) => ({
-          ...prevState,
-          stock_detail: updatedStockDetail,
-        }));
-      }
-    };
+  //     // อัปเดต state เมื่อมีการเปลี่ยนแปลง
+  //     if (hasChanges) {
+  //       setData((prevState) => ({
+  //         ...prevState,
+  //         stock_detail: updatedStockDetail,
+  //       }));
+  //     }
+  //   };
 
-    if (data.stock_detail && data.stock_detail.length > 0) {
-      updatePrices();
-    }
-  }, [JSON.stringify(data.stock_detail)]);
+  //   if (data.stock_detail && data.stock_detail.length > 0) {
+  //     updatePrices();
+  //   }
+  // }, [JSON.stringify(data.stock_detail)]);
 
 
   const fetchMaterials = async () => {
