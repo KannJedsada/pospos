@@ -23,53 +23,59 @@ function Addstock() {
 
   useEffect(() => {
     const updatePrices = async () => {
-      const updatedstock_detail = [...data.stock_detail];
+      const updatedStockDetail = [...data.stock_detail];
+      let hasChanges = false;
 
-      let hasChanges = false; // Track if any changes are made
+      for (let index = 0; index < updatedStockDetail.length; index++) {
+        const detail = updatedStockDetail[index];
 
-      for (let index = 0; index < updatedstock_detail.length; index++) {
-        const detail = updatedstock_detail[index];
-
-        // Check if material_id and qty are provided
         if (detail.material_id && detail.qty) {
+          // เรียก API เพื่อตรวจสอบวัสดุผสม
           const materialDataArray = await checkTrue(detail.material_id);
 
           let totalPrice = 0;
 
           if (materialDataArray && materialDataArray.length > 0) {
-            // ถ้ามีวัสดุผสม (วัสดุใน materialDataArray)
-            for (let i = 0; i < materialDataArray.length; i++) {
-              const materialData = materialDataArray[i];
-              if (materialData && materialData.price !== undefined) {
-                const priceForCurrentMaterial =
-                  materialData.price * materialData.quantity_used * detail.qty;
-                totalPrice += priceForCurrentMaterial;
+            // ถ้ามีวัสดุผสม ตรวจสอบว่ามีการกรอกราคาเองหรือไม่
+            if (detail.manual_price !== undefined && detail.manual_price !== null) {
+              totalPrice = detail.manual_price;  // ใช้ราคาที่กรอกเอง
+            } else {
+              // ถ้าไม่มีการกรอกราคาเอง ให้คำนวณจากวัสดุผสม
+              for (let materialData of materialDataArray) {
+                if (materialData?.price !== undefined) {
+                  totalPrice += materialData.price * materialData.quantity_used * detail.qty;
+                }
               }
             }
           } else {
-            // ถ้าไม่มีวัสดุผสม ให้ใช้ราคาที่กรอกตามปกติ
-            totalPrice = detail.price || 0;
+            // ถ้าไม่มีวัสดุผสม ให้ใช้ราคาที่กรอกเองหรือตั้งค่าเริ่มต้นเป็น 0
+            totalPrice = detail.manual_price !== undefined && detail.manual_price !== null
+              ? detail.manual_price * detail.qty
+              : detail.price || 0;
           }
 
-          // Only update if there's a change in price
-          if (updatedstock_detail[index].price !== totalPrice) {
-            updatedstock_detail[index].price = totalPrice;
-            hasChanges = true; // Set to true if a change is made
+          // อัปเดตราคาเฉพาะเมื่อมีการเปลี่ยนแปลง
+          if (detail.price !== totalPrice) {
+            updatedStockDetail[index].price = totalPrice;
+            hasChanges = true;
           }
         }
       }
 
-      // Only set the state if there are changes
+      // อัปเดต state เมื่อมีการเปลี่ยนแปลง
       if (hasChanges) {
         setData((prevState) => ({
           ...prevState,
-          stock_detail: updatedstock_detail,
+          stock_detail: updatedStockDetail,
         }));
       }
     };
 
-    updatePrices();
-  }, [data.stock_detail]);
+    if (data.stock_detail && data.stock_detail.length > 0) {
+      updatePrices();
+    }
+  }, [JSON.stringify(data.stock_detail)]);
+
 
   const fetchMaterials = async () => {
     try {
