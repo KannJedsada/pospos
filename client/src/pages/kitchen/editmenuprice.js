@@ -61,7 +61,7 @@ function Editmenuprice() {
     } catch (error) {
       console.error("Error Insert data", error);
       Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
-    }finally{
+    } finally {
       setIsLoading(false);
       navigate("/menus");
     }
@@ -189,14 +189,18 @@ function Editmenuprice() {
                       const calculatedPrice =
                         profitPercentage && cost.totalcost
                           ? (
-                              Math.ceil(
-                                cost.totalcost /( profitPercentage / 100)
-                              ) 
-                            ).toFixed(2)
+                            Math.ceil(
+                              cost.totalcost / (profitPercentage / 100)
+                            )
+                          ).toFixed(2)
                           : "";
+
+                      const roundToNearest0or5 = (price) => {
+                        return Math.round(price / 5) * 5;
+                      };
                       setData((prevData) => ({
                         ...prevData,
-                        price: calculatedPrice,
+                        price: roundToNearest0or5(calculatedPrice),
                       }));
                     }}
                     value={cost.profit || ""}
@@ -292,8 +296,8 @@ function Editmenuprice() {
                           <td className="px-4 py-2 border-b h-full">
                             {price.date_end
                               ? new Date(price.date_end).toLocaleDateString(
-                                  "th-TH"
-                                )
+                                "th-TH"
+                              )
                               : "ไม่มีข้อมูล"}
                           </td>
                           <td className="px-4 py-2 border-b h-full">
@@ -329,11 +333,10 @@ function Editmenuprice() {
                     <button
                       key={page}
                       onClick={() => paginate(page)}
-                      className={`px-4 py-2 rounded-lg ${
-                        currentPage === page
-                          ? "bg-blue-700 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
+                      className={`px-4 py-2 rounded-lg ${currentPage === page
+                        ? "bg-blue-700 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
                     >
                       {page}
                     </button>
