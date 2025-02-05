@@ -14,13 +14,11 @@ function Addstock() {
 
   const [units, setUnits] = useState([]);
   const [materials, setMaterials] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchMaterials();
     fetchUnits();
-    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -95,16 +93,16 @@ function Addstock() {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const categoryRes = await axios.get("/api/stock/category", {
-        headers: { Authorization: `Bearer ${authData.token}` },
-      });
-      setCategories(categoryRes.data.data);
-    } catch (error) {
-      console.error("Error fetching categories", error);
-    }
-  };
+  // const fetchCategories = async () => {
+  //   try {
+  //     const categoryRes = await axios.get("/api/stock/category", {
+  //       headers: { Authorization: `Bearer ${authData.token}` },
+  //     });
+  //     setCategories(categoryRes.data.data);
+  //   } catch (error) {
+  //     console.error("Error fetching categories", error);
+  //   }
+  // };
 
   const checkTrue = async (id) => {
     try {
@@ -140,7 +138,7 @@ function Addstock() {
       ...data,
       stock_detail: [
         ...data.stock_detail,
-        { material_id: "", qty: "", unit_id: "", price: "", category_id: "" },
+        { material_id: "", qty: "", unit_id: "", price: "", },
       ],
     });
   };
@@ -262,20 +260,6 @@ function Addstock() {
                   placeholder="ราคา"
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <select
-                  name="category_id"
-                  value={material.category_id || ""}
-                  onChange={(e) => handleMaterialChange(index, e)}
-                  disabled={isLoading}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/6 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">หมวดหมู่</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.category_name}
-                    </option>
-                  ))}
-                </select>
                 <button
                   type="button"
                   onClick={() => removeMaterial(index)}
