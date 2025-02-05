@@ -200,10 +200,8 @@ function Editmaterial() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(data);
     const updateData = { ...data };
     try {
-      console.log(updateData);
       setIsLoading(true);
       await axios.put(`/api/material/edit/${id}`, updateData, {
         headers: {
