@@ -138,7 +138,7 @@ FROM materials;`);
 
         for (let comp of composite.rows) {
           const { material_id: comp_mat_id, quantity_used: comp_qty, unit_id } = comp;
-          const unitResult = await pool.query('SELECT unit FROM materials WHERE id = $1', [materialId]);
+          const unitResult = await pool.query('SELECT unit FROM materials WHERE id = $1', [comp_mat_id]);
           const unit = unitResult.rows[0]?.unit;
           const converUnit = await pool.query(`SELECT * FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`, [unit_id, unit]);
           console.log(converUnit.rows[0]);
