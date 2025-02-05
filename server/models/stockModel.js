@@ -140,8 +140,13 @@ FROM materials;`);
           const { material_id: comp_mat_id, quantity_used: comp_qty, unit_id } = comp;
           const unitResult = await pool.query('SELECT unit FROM materials WHERE id = $1', [comp_mat_id]);
           const unit = unitResult.rows[0]?.unit;
-          const converUnit = await pool.query(`SELECT * FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`, [unit_id, unit]);
-          console.log(converUnit.rows[0]);
+          const converUnitRes = await pool.query(`SELECT conversion_rate FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`, [unit_id, unit]);
+          const converUnit = converUnitRes.rows[0]?.conversion_rate;
+          if (converUnit !== null) {
+            console.log(converUnit);
+          }else {
+            console.log("test");
+          }
           // const qty_comp = comp_qty * qty;
 
           // ลบจำนวนวัสดุประกอบออกจากสต็อก
