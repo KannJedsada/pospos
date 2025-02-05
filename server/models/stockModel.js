@@ -142,7 +142,7 @@ FROM materials;`);
           const unit = unitResult.rows[0]?.unit;
           const converUnitRes = await pool.query(`SELECT conversion_rate FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`, [unit_id, unit]);
           const converUnit = converUnitRes.rows[0]?.conversion_rate;
-          if (converUnit !== null) {
+          if (converUnit) {
             console.log(converUnit);
           }else {
             console.log("test");
