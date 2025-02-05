@@ -177,14 +177,12 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
   static async edit_menu(id, data) {
     const { name, img, category, ingredients } = data;
 
-    // Update menu details
     const menuRes = await pool.query(
       `UPDATE menus SET menu_name = $1, menu_img = $2, menu_category = $3 WHERE menu_id = $4 RETURNING *`,
       [name, img, category, id]
     );
 
     if (ingredients && ingredients.length > 0) {
-      // Retrieve existing ingredients
       const existingIngredientsRes = await pool.query(
         `SELECT material_id FROM menu_ingredients WHERE menu_id = $1`,
         [id]
@@ -198,12 +196,10 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         ingredients.map((ingredient) => ingredient.material_id)
       );
 
-      // Identify removed ingredients
       const removedIngredients = existingIngredients.filter(
         (materialId) => !newIngredientIds.has(materialId)
       );
 
-      // Remove ingredients that no longer exist in the updated list
       if (removedIngredients.length > 0) {
         await pool.query(
           `DELETE FROM menu_ingredients WHERE menu_id = $1 AND material_id = ANY($2::int[])`,
@@ -211,7 +207,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         );
       }
 
-      // Update or insert new ingredients
       for (const ingredient of ingredients) {
         const { material_id, quantity_used, unit_id } = ingredient;
 
@@ -224,7 +219,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         );
       }
     } else {
-      // Remove all ingredients if no new ingredients are provided
       await pool.query(`DELETE FROM menu_ingredients WHERE menu_id = $1`, [id]);
     }
 
@@ -306,7 +300,7 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         cost = menu.quantity_used * parseFloat(menu.price);
       }
 
-      totalcost += cost; // สะสมค่าต้นทุนรวม
+      totalcost += cost; 
     }
 
     const menuName = menus[0].menu_name;
