@@ -200,7 +200,7 @@ function Editmenuprice() {
                       };
                       setData((prevData) => ({
                         ...prevData,
-                        price: roundToNearest0or5(calculatedPrice),
+                        price:roundToNearest0or5(calculatedPrice),
                       }));
                     }}
                     value={cost.profit || ""}
@@ -334,8 +334,8 @@ function Editmenuprice() {
                       key={page}
                       onClick={() => paginate(page)}
                       className={`px-4 py-2 rounded-lg ${currentPage === page
-                        ? "bg-blue-700 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          ? "bg-blue-700 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                         }`}
                     >
                       {page}
