@@ -190,7 +190,7 @@ function Editmenuprice() {
                         profitPercentage && cost.totalcost
                           ? (
                               Math.ceil(
-                                (cost.totalcost ) / profitPercentage / 100
+                                cost.totalcost /( profitPercentage / 100)
                               ) * 5
                             ).toFixed(2)
                           : "";
