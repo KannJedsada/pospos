@@ -86,7 +86,7 @@ class Material {
 
   static async edit_material(id, data) {
     const { m_name, m_img, unit, sub_materials, category, composite } = data; // Ensure composite is included here
-    console.log(data);
+    console.log(composite);
     const resMaterial = await pool.query(
       `UPDATE materials
         SET 

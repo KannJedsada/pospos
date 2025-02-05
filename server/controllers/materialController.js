@@ -58,7 +58,7 @@ const add_material = async (req, res) => {
 const edit_materials = async (req, res) => {
   try {
     const id = req.params.id;
-    const { m_name, unit, sub_materials, category } = req.body;
+    const { m_name, unit, sub_materials, category, composite } = req.body;
     const newImgUrl = req.file ? req.file.path : null; // ใช้ URL รูปภาพใหม่ถ้ามีการอัปโหลด
 
     // ดึงข้อมูล material ปัจจุบันจากฐานข้อมูล
@@ -97,6 +97,7 @@ const edit_materials = async (req, res) => {
       m_img,
       sub_materials,
       category,
+      composite
     });
 
     // ตอบกลับ client พร้อมข้อมูล material ที่อัปเดตแล้ว
