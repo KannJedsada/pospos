@@ -17,13 +17,20 @@ class Tables {
 
   static async get_tables() {
     const res = await pool.query(`
-        SELECT tables.id, tables.t_name, tables.status_id, table_status.status_name 
-        FROM tables 
-        INNER JOIN table_status 
-        ON tables.status_id = table_status.id
-        ORDER BY
-          REGEXP_REPLACE(tables.t_name, '[^0-9]', '', 'g')::INTEGER, 
-          tables.t_name
+        SELECT 
+  tables.id, 
+  tables.t_name, 
+  tables.status_id, 
+  table_status.status_name 
+FROM 
+  tables 
+INNER JOIN 
+  table_status 
+ON 
+  tables.status_id = table_status.id
+ORDER BY
+  COALESCE(NULLIF(REGEXP_REPLACE(tables.t_name, '[^0-9]', '', 'g'), '')::INTEGER, 0), 
+  tables.t_name;
     `);
     return res.rows;
   }
@@ -55,33 +62,33 @@ class Tables {
 
   static async edit_table(id, data) {
     const { t_name, status_id } = data;
-  
+
     // ตรวจสอบว่า ID มีอยู่จริงหรือไม่
     const checkIdQuery = `SELECT * FROM tables WHERE id = $1`;
     const idExists = await pool.query(checkIdQuery, [id]);
     if (idExists.rows.length === 0) {
       throw new Error("Table ID not found.");
     }
-  
+
     // ตรวจสอบชื่อซ้ำ (ยกเว้น ID ที่กำลังแก้ไข)
     const checkTableQuery = `SELECT * FROM tables WHERE t_name = $1 AND id != $2`;
     const existingTable = await pool.query(checkTableQuery, [t_name, id]);
     if (existingTable.rows.length > 0) {
       throw new Error("Table name already exists.");
     }
-  
+
     // อัปเดตข้อมูลในตาราง
     const updateQuery = `UPDATE tables SET t_name = $1, status_id = $2 WHERE id = $3 RETURNING *`;
     const res = await pool.query(updateQuery, [t_name, status_id, id]);
-  
+
     if (res.rowCount === 0) {
       throw new Error("Table not found or failed to update.");
     }
-  
+
     return res.rows[0];
   }
-  
-  
+
+
   static async change_status(id, data) {
     const { status_id } = data;
     const res = await pool.query(
