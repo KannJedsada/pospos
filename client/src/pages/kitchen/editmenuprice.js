@@ -191,7 +191,7 @@ function Editmenuprice() {
                           ? (
                               Math.ceil(
                                 cost.totalcost /( profitPercentage / 100)
-                              ) * 5
+                              ) 
                             ).toFixed(2)
                           : "";
                       setData((prevData) => ({
