@@ -203,15 +203,14 @@ function Editmaterial() {
 
     const updateData = { ...data };
     try {
-
-      console.log(updateData);
+      // console.log(updateData);
       setIsLoading(true);
-      // await axios.put(`/api/material/edit/${id}`, updateData, {
-      //   headers: {
-      //     Authorization: `Bearer ${authData.token}`,
-      //     "Content-Type": "multipart/form-data",
-      //   },
-      // });
+      await axios.put(`/api/material/edit/${id}`, updateData, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       Swal.fire("Success", "แก้ไขสำเส็จ", "success");
 

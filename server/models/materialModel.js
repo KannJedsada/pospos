@@ -86,7 +86,7 @@ class Material {
 
   static async edit_material(id, data) {
     const { m_name, m_img, unit, sub_materials, category, composite } = data; // Ensure composite is included here
-
+    console.log(data);
     const resMaterial = await pool.query(
       `UPDATE materials
         SET 
@@ -97,7 +97,7 @@ class Material {
           is_composite = COALESCE($5, is_composite)
         WHERE id = $6
         RETURNING *`,
-      [m_name, m_img, unit, category, composite, id] // Ensure composite is passed here
+      [m_name, m_img, unit, category, composite, id] 
     );
 
     const updatedMaterial = resMaterial.rows[0];
