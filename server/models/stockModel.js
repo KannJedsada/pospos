@@ -140,32 +140,36 @@ FROM materials;`);
           const { material_id: comp_mat_id, quantity_used: comp_qty, unit_id } = comp;
           const unitResult = await pool.query('SELECT unit FROM materials WHERE id = $1', [comp_mat_id]);
           const unit = unitResult.rows[0]?.unit;
-          const converUnitRes = await pool.query(`SELECT conversion_rate FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`, [unit_id, unit]);
+          const converUnitRes = await pool.query(
+            `SELECT conversion_rate FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`, 
+            [unit_id, unit]
+          );
           const converUnit = converUnitRes.rows[0]?.conversion_rate;
+          
+          let qty_comp;
           if (converUnit) {
-            console.log(converUnit);
-          }else {
-            console.log("test");
-          }
-          // const qty_comp = comp_qty * qty;
+            qty_comp = comp_qty * qty * converUnit;
+          } else {
+            qty_comp = comp_qty * qty;
+          }          
 
           // ลบจำนวนวัสดุประกอบออกจากสต็อก
-          // await pool.query(
-          //   `UPDATE stocks SET qty = qty - $1 WHERE material_id = $2`,
-          //   [qty_comp, comp_mat_id]
-          // );
+          await pool.query(
+            `UPDATE stocks SET qty = qty - $1 WHERE material_id = $2`,
+            [qty_comp, comp_mat_id]
+          );
         }
 
-        // await pool.query(
-        //   `UPDATE stocks SET qty = qty + $1 WHERE material_id = $2`,
-        //   [qty, material_id]
-        // );
+        await pool.query(
+          `UPDATE stocks SET qty = qty + $1 WHERE material_id = $2`,
+          [qty, material_id]
+        );
 
-        // const material_price = price / qty;
-        // await pool.query(
-        //   `INSERT INTO material_prices(material_id, price, effective_date) VALUES($1, $2, NOW()) RETURNING *`,
-        //   [material_id, material_price]
-        // );
+        const material_price = price / qty;
+        await pool.query(
+          `INSERT INTO material_prices(material_id, price, effective_date) VALUES($1, $2, NOW()) RETURNING *`,
+          [material_id, material_price]
+        );
       } else {
         total_qty += Number(qty);
         total_price += Number(price);
