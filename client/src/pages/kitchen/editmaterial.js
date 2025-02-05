@@ -200,7 +200,7 @@ function Editmaterial() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(daat);
+    console.log(data);
     const updateData = { ...data };
     try {
       console.log(updateData);
