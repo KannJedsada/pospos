@@ -282,7 +282,6 @@ function Stocks() {
           </div>
         )}
 
-        {currentPage > 1 && (
           <div className="flex justify-center items-center mt-6">
             {/* ปุ่มย้อนกลับ */}
             <button

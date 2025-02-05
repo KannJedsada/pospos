@@ -63,7 +63,7 @@ function MaterialPage() {
         confirmButtonColor: "#f44336",
         reverseButtons: true,
       });
-      
+
       if (result.isConfirmed) {
         setIsLoading(true);
         await axios.delete(`/api/material/delete/${id}`, {
@@ -85,7 +85,7 @@ function MaterialPage() {
     } catch (error) {
       console.error("Error deleting material:", error);
       Swal.fire("Error", "Failed to delete material", "error");
-    }finally{
+    } finally {
       setIsLoading(false);
     }
   };
@@ -294,54 +294,51 @@ function MaterialPage() {
         )}
 
         {/* Pagination */}
-{currentPage > 1 && (
-    <div className="flex justify-center items-center mt-6">
-          {/* ปุ่มย้อนกลับ */}
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <ChevronLeft />
-          </button>
+          <div className="flex justify-center items-center mt-6">
+            {/* ปุ่มย้อนกลับ */}
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <ChevronLeft />
+            </button>
 
-          {/* ปุ่มเลขหน้า */}
-          <div className="mx-4 flex space-x-1">
-            {generatePaginationButtons(currentPage, totalPages, isMobile).map(
-              (page, index) =>
-                page === "..." ? (
-                  <span key={index} className="px-4 py-2 text-gray-500">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={page.key}
-                    onClick={() => paginate(page.value)}
-                    className={`px-4 py-2 rounded-lg ${
-                      currentPage === page.value
-                        ? "bg-blue-700 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    }`}
-                    disabled={page.value === "..."}
-                  >
-                    {page.value}
-                  </button>
-                )
-            )}
+            {/* ปุ่มเลขหน้า */}
+            <div className="mx-4 flex space-x-1">
+              {generatePaginationButtons(currentPage, totalPages, isMobile).map(
+                (page, index) =>
+                  page === "..." ? (
+                    <span key={index} className="px-4 py-2 text-gray-500">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={page.key}
+                      onClick={() => paginate(page.value)}
+                      className={`px-4 py-2 rounded-lg ${currentPage === page.value
+                          ? "bg-blue-700 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                      disabled={page.value === "..."}
+                    >
+                      {page.value}
+                    </button>
+                  )
+              )}
+            </div>
+
+            {/* ปุ่มไปข้างหน้า */}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <ChevronRight />
+            </button>
           </div>
-
-          {/* ปุ่มไปข้างหน้า */}
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-)}
       </div>
     </div>
   );
