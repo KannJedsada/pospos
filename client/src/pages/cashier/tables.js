@@ -19,7 +19,6 @@ function Tables() {
     try {
       setIsLoading(true);
       const res = await axios.get(`/api/table/tables`);
-      console.log(res.data.data);
       setTables(res.data.data);
     } catch (error) {
       console.error("Error fetching tables:", error);
