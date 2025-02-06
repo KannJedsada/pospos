@@ -147,33 +147,54 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
   }
 
   static async add_menu(data) {
-    const { name, img, category, ingredients, menutype } = data;
-    // Insert the new menu
-    console.log(data);
-    const menuRes = await pool.query(
-      `INSERT INTO menus(menu_name, menu_img, menu_category, menu_status, menu_type) 
-       VALUES($1, $2, $3, $4, $5) RETURNING *`,
-      [name, img, category, 1, menutype]
-    );
+    try {
+      const { name, img, category, ingredients, menutype } = data;
 
-    const menu = menuRes.rows[0];
-
-    // Insert the related ingedients into menu_ingredients
-    if (ingredients && ingredients.length > 0) {
-      for (let material of ingredients) {
-        const { material_id, quantity_used, unit_id } = material;
-        await pool.query(
-          `INSERT INTO menu_ingredients(menu_id, material_id, quantity_used, unit_id)
-           VALUES($1, $2, $3, $4)
-           ON CONFLICT (menu_id, material_id) 
-           DO UPDATE SET quantity_used = EXCLUDED.quantity_used, unit_id = EXCLUDED.unit_id`,
-          [menu.menu_id, material_id, quantity_used, unit_id]
-        );
+      if (!name || !category || !menutype) {
+        throw new Error("Missing required fields: name, category, or menutype");
       }
-    }
 
-    return { menu };
+      console.log("Received Data:", data);
+
+      // Insert new menu
+      const menuRes = await pool.query(
+        `INSERT INTO menus(menu_name, menu_img, menu_category, menu_status, menu_type) 
+             VALUES($1, $2, $3, $4, $5) RETURNING *`,
+        [name, img || null, category, 1, menutype]
+      );
+
+      const menu = menuRes.rows[0];
+
+      console.log("Inserted Menu:", menu);
+
+      // Insert ingredients
+      if (Array.isArray(ingredients) && ingredients.length > 0) {
+        for (let material of ingredients) {
+          const { material_id, quantity_used, unit_id } = material;
+
+          if (!material_id || !quantity_used || !unit_id) {
+            console.warn("Skipping invalid ingredient:", material);
+            continue;
+          }
+
+          await pool.query(
+            `INSERT INTO menu_ingredients(menu_id, material_id, quantity_used, unit_id)
+                     VALUES($1, $2, $3, $4)
+                     ON CONFLICT (menu_id, material_id) 
+                     DO UPDATE SET quantity_used = EXCLUDED.quantity_used, unit_id = EXCLUDED.unit_id`,
+            [menu.menu_id, material_id, quantity_used, unit_id]
+          );
+        }
+      }
+
+      return { success: true, menu };
+
+    } catch (error) {
+      console.error("Error in add_menu:", error.message);
+      return { success: false, error: error.message };
+    }
   }
+
 
   static async edit_menu(id, data) {
     const { name, img, category, ingredients } = data;
@@ -281,11 +302,11 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       [menu_id]
     );
 
-    
+
     let totalcost = 0;
     const menus = menures.rows;
     console.log(menus)
-    
+
     for (const menu of menus) {
       let cost = 0;
 
@@ -305,7 +326,7 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
 
       console.log(cost);
 
-      totalcost += cost; 
+      totalcost += cost;
     }
     const menuName = menus[0].menu_name;
     return { menuName, totalcost };
