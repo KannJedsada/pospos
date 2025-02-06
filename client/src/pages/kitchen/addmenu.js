@@ -118,6 +118,7 @@ function Addmenu() {
     e.preventDefault();
 
     console.log(data);
+    console.log(selectedFile);
     if (!selectedFile) {
       Swal.fire("Error", "กรุณาใส่รูปภาพ", "error");
       return;

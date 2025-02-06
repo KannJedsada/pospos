@@ -122,15 +122,15 @@ const add_status = async (req, res) => {
 
 const add_menu = async (req, res) => {
   try {
-    console.log("📥 Received Data:", req.body);
-    console.log("📷 Uploaded Image:", req.file);
+    console.log("Received Data:", req.body);
+    console.log("Uploaded Image:", req.file);
 
     const { name, category, ingredients, menutype } = req.body;
     const img = req.file ? req.file.path : null; // Cloudinary URL
 
     // Validation
     if (!name || !category || !ingredients || !img) {
-      console.error("❌ Missing fields:", {
+      console.error("Missing fields:", {
         name,
         category,
         ingredients,

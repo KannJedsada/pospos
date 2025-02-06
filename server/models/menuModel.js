@@ -167,7 +167,7 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
 
       const menu = menuRes.rows[0];
 
-      console.log("✅ Inserted Menu:", menu);
+      console.log("Inserted Menu:", menu);
 
       // Insert ingredients
       if (Array.isArray(ingredients) && ingredients.length > 0) {
@@ -175,7 +175,7 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
           const { material_id, quantity_used, unit_id } = material;
 
           if (!material_id || !quantity_used || !unit_id) {
-            console.warn("⚠️ Skipping invalid ingredient:", material);
+            console.warn("Skipping invalid ingredient:", material);
             continue;
           }
 
@@ -192,7 +192,7 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       return { success: true, menu };
 
     } catch (error) {
-      console.error("🚨 Error in add_menu:", error.message);
+      console.error("Error in add_menu:", error.message);
       return { success: false, error: error.message };
     }
   }
