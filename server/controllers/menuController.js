@@ -124,7 +124,7 @@ const add_menu = async (req, res) => {
   try {
     const { name, category, ingredients, menutype } = req.body;
     const img = req.file ? req.file.path : null; // Get uploaded file name
-
+    console.log(req.body);
     // Validation
     if (!name || !category || !ingredients || !img) {
       console.error("Missing fields:", {
