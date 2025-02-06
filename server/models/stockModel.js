@@ -102,26 +102,24 @@ FROM materials;`);
       throw new Error("stock_detail must be a non-empty array");
     }
 
-    // สร้างข้อมูลใน stock_at
     const stock_at_res = await pool.query(
       `INSERT INTO stock_at(timestamps, total_qty, total_price) 
          VALUES(NOW(), 0, 0) 
          RETURNING id`
     );
+
     const stock_at_id = stock_at_res.rows[0].id;
     const check_materialmenu = new Set();
-
+    const insufficient_items = [];
     let total_qty = 0;
     let total_price = 0;
-
-    // วนลูปสำหรับแต่ละรายการใน stock_detail
     const added_details = [];
     const mat_price = [];
+
     for (let i = 0; i < stock_detail.length; i++) {
       const detail = stock_detail[i];
       const { material_id, qty, unit_id, price, category_id } = detail;
 
-      // ตรวจสอบว่าวัสดุนี้เป็นวัสดุผสมหรือไม่
       const check_composition = await pool.query(
         `SELECT * FROM materials WHERE id = $1`,
         [material_id]
@@ -130,46 +128,63 @@ FROM materials;`);
       if (check_composition.rows[0].is_composite === true) {
         total_qty += Number(qty);
         total_price += Number(price);
-        // ถ้าเป็นวัสดุผสม ให้ดึงข้อมูลจาก material_composition
+
         const composite = await pool.query(
           `SELECT * FROM material_composition WHERE composite_material_id = $1`,
           [material_id]
         );
 
-        const insufficient_items = [];
+        let canProduce = true;
+        let rollbackList = [];
+
         for (let comp of composite.rows) {
           const { material_id: comp_mat_id, quantity_used: comp_qty, unit_id } = comp;
           const unitResult = await pool.query('SELECT unit FROM materials WHERE id = $1', [comp_mat_id]);
           const unit = unitResult.rows[0]?.unit;
+
           const converUnitRes = await pool.query(
             `SELECT conversion_rate FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`,
             [unit_id, unit]
           );
-          const converUnit = converUnitRes.rows[0]?.conversion_rate;
 
+          const converUnit = converUnitRes.rows[0]?.conversion_rate;
           let qty_comp = converUnit ? comp_qty * qty * converUnit : comp_qty * qty;
 
-          // ตรวจสอบจำนวนสต็อกปัจจุบัน
           const stockRes = await pool.query(
             `SELECT qty FROM stocks WHERE material_id = $1`,
             [comp_mat_id]
           );
 
-          const compMatName = await pool.query(`SELECT m_name FROM materials WHERE id = $1`, [comp_mat_id])
+          const compMatName = await pool.query(`SELECT m_name FROM materials WHERE id = $1`, [comp_mat_id]);
 
-          const current_qty = stockRes.rows[0]?.qty;
+          const current_qty = stockRes.rows[0]?.qty || 0;
           if (current_qty < qty_comp) {
-            insufficient_items.push(check_composition.rows[0]?.m_name, compMatName.rows[0]?.m_name, current_qty, qty_comp);
-            continue;
+            insufficient_items.push({
+              compositeMaterial: check_composition.rows[0]?.m_name,
+              componentMaterial: compMatName.rows[0]?.m_name,
+              current_qty,
+              required_qty: qty_comp
+            });
+            canProduce = false;
+            break; // หยุดการทำงานของลูป เพราะวัตถุดิบไม่พอ
           }
 
-          // ลบจำนวนวัสดุประกอบออกจากสต็อก
           await pool.query(
             `UPDATE stocks SET qty = qty - $1 WHERE material_id = $2`,
             [qty_comp, comp_mat_id]
           );
+          rollbackList.push({ comp_mat_id, qty_comp }); // เก็บข้อมูลเพื่อ rollback หากจำเป็น
+        }
 
-          return insufficient_items;
+        if (!canProduce) {
+          // คืนค่าวัตถุดิบที่ถูกตัดไปแล้ว
+          for (let rollback of rollbackList) {
+            await pool.query(
+              `UPDATE stocks SET qty = qty + $1 WHERE material_id = $2`,
+              [rollback.qty_comp, rollback.comp_mat_id]
+            );
+          }
+          continue; // ข้ามการเพิ่มสต็อกวัสดุผสม
         }
 
         await pool.query(
@@ -186,14 +201,12 @@ FROM materials;`);
         total_qty += Number(qty);
         total_price += Number(price);
 
-        // // อัปเดตจำนวนในตาราง stocks สำหรับวัสดุธรรมดา
         await pool.query(
           `UPDATE stocks SET qty = qty + $1 WHERE material_id = $2`,
           [qty, material_id]
         );
 
         const material_price = price / qty;
-        // // เพิ่มราคาวัตถุดิบต่อหน่วย
         const m_price = await pool.query(
           `INSERT INTO material_prices(material_id, price, effective_date)
                  VALUES($1, $2, NOW()) RETURNING price`,
@@ -202,15 +215,13 @@ FROM materials;`);
         mat_price.push(m_price.rows[0]);
       }
 
-      // เพิ่มข้อมูลใน stock_at_detail
       const detail_stock = await pool.query(
         `INSERT INTO stock_at_detail(stock_at_id, material_id, qty, unit_id, price, category_id)
-           VALUES($1, $2, $3, $4, $5, $6) RETURNING *`,
+             VALUES($1, $2, $3, $4, $5, $6) RETURNING *`,
         [stock_at_id, material_id, qty, unit_id, price, category_id]
       );
       added_details.push(detail_stock.rows[0]);
 
-      // ตรวจสอบเมนูที่เกี่ยวข้องกับวัสดุนี้
       const material_unit_res = await pool.query(
         `SELECT unit FROM materials WHERE id = $1`,
         [material_id]
@@ -218,8 +229,8 @@ FROM materials;`);
 
       const convert_unit_res = await pool.query(
         `SELECT *
-         FROM unit_conversions 
-         WHERE from_unit_id = $1 AND to_unit_id = $2`,
+             FROM unit_conversions 
+             WHERE from_unit_id = $1 AND to_unit_id = $2`,
         [material_id, material_unit_res.rows[0].unit]
       );
 
@@ -236,27 +247,29 @@ FROM materials;`);
         [material_id, converted_quantity_used]
       );
 
-      // เก็บ menu_id ที่ไม่ซ้ำกันใน Set
       menu_ingredient.rows.forEach((ingredient) => {
         check_materialmenu.add(ingredient.menu_id);
       });
     }
 
-    // อัปเดตสถานะเมนูที่เกี่ยวข้องใน check_materialmenu
-    check_materialmenu.forEach(async (menu_id) => {
+    for (const menu_id of check_materialmenu) {
       await pool.query(`UPDATE menus SET menu_status = 1 WHERE menu_id = $1`, [
         menu_id,
       ]);
-    });
+    }
 
-    // อัปเดตราคาและจำนวนรวมใน stock_at
     await pool.query(
       `UPDATE stock_at SET total_qty = $1, total_price = $2 WHERE id = $3`,
       [total_qty, total_price, stock_at_id]
     );
 
+    if (insufficient_items.length > 0) {
+      return { error: "INSUFFICIENT_STOCK", insufficient_items };
+    }
+
     return { added_details, mat_price, total_price, total_qty };
   }
+
 
   static async edit_min(id, data) {
     const { min_qty } = data;
