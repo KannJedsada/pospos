@@ -117,6 +117,7 @@ function Addmenu() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log(data);
     if (!selectedFile) {
       Swal.fire("Error", "กรุณาใส่รูปภาพ", "error");
       return;
