@@ -149,6 +149,7 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
   static async add_menu(data) {
     const { name, img, category, ingredients, menutype } = data;
     // Insert the new menu
+    console.log(data);
     const menuRes = await pool.query(
       `INSERT INTO menus(menu_name, menu_img, menu_category, menu_status, menu_type) 
        VALUES($1, $2, $3, $4, $5) RETURNING *`,
@@ -301,6 +302,8 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       } else {
         cost = menu.quantity_used * parseFloat(menu.price);
       }
+
+      console.log(cost);
 
       totalcost += cost; 
     }
