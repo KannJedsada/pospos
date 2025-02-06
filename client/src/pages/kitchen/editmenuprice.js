@@ -233,12 +233,12 @@ function Editmenuprice() {
                   <input
                     type="number"
                     id="sellingPrice"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 
+            [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     value={data.price || ""}
                     onChange={(e) => {
                       const sellingPrice = parseFloat(e.target.value) || 0;
 
-                      // อัปเดต state
                       setData((prevData) => ({
                         ...prevData,
                         price: sellingPrice,
