@@ -124,11 +124,6 @@ const add_menu = async (req, res) => {
   try {
     const { name, category, ingredients, menutype } = req.body;
     const img = req.file ? req.file.path : null; 
-
-    console.log(name);
-    console.log(category);
-    console.log(ingredients);
-
     // Validation
     if (!name || !category || !ingredients || !img) {
       console.error("Missing fields:", {
@@ -164,16 +159,13 @@ const edit_menu = async (req, res) => {
     const id = req.params.id;
     const { menu_name, menu_category, ingredients } = req.body;
     const img = req.file ? req.file.path : null;
-    console.log()
 
     // Fetch existing menu
     const menuToEdit = await menu.get_menu_id(id);
     if (!menuToEdit) {
       return res.status(404).json({ message: "Menu not found" });
     }
-    console.log(menuToEdit);
     const menuImg = menuToEdit;
-    console.log(menuImg);
     // If no new image is uploaded, keep the old one
     const updatedImg = img || menuImg.menu_img;
 
@@ -198,12 +190,10 @@ const edit_menu = async (req, res) => {
 
     if (img && menuImg.menu_img) {
       const publicId = menuImg.menu_img.split('/').slice(-3).join('/').split('.')[0];
-      console.log("Public ID for deletion:", publicId);
 
       try {
         // ลบรูปภาพเก่าจาก Cloudinary
         const result = await cloudinary.uploader.destroy(publicId);
-        console.log("Old image deleted from Cloudinary successfully:", result);
       } catch (err) {
         console.error("Error deleting image from Cloudinary:", err.message);
         return res.status(500).json({ message: "Error deleting image from Cloudinary" });
@@ -241,7 +231,6 @@ const delete_menu = async (req, res) => {
       const publicId = menuImg.menu_img.split('/').slice(-3).join('/').split('.')[0]; // ดึง public_id จาก URL
       try {
         await cloudinary.uploader.destroy(publicId); // ลบรูปภาพ
-        console.log("Image deleted from Cloudinary successfully");
       } catch (err) {
         console.error("Error deleting image from Cloudinary:", err.message);
         return res.status(500).json({ message: "Error deleting image from Cloudinary" });

@@ -154,10 +154,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         throw new Error("Missing required fields: name, category, or menutype");
       }
 
-      console.log("Menu Name:", name);
-      console.log("Ingredients:", ingredients);
-      console.log("Image URL:", img);
-
       // Insert new menu
       const menuRes = await pool.query(
         `INSERT INTO menus(menu_name, menu_img, menu_category, menu_status, menu_type) 
@@ -166,8 +162,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       );
 
       const menu = menuRes.rows[0];
-
-      console.log("Inserted Menu:", menu);
 
       // Insert ingredients
       if (Array.isArray(ingredients) && ingredients.length > 0) {
@@ -273,7 +267,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
   }
 
   static async edit_menu_type(id, data) {
-    console.log(id, data);
     const { typename } = data;
     const res = await pool.query(
       `UPDATE menu_type SET typename = $1 WHERE id = $2 `,
@@ -308,7 +301,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
 
     let totalcost = 0;
     const menus = menures.rows;
-    console.log(menus)
 
     for (const menu of menus) {
       let cost = 0;
@@ -318,16 +310,12 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         [menu.unit_id, menu.unit]
       );
 
-      console.log(unit_conversion.rows[0]);
-
       if (unit_conversion.rows.length > 0) {
         const converrate = unit_conversion.rows[0].conversion_rate;
         cost = menu.quantity_used * converrate * parseFloat(menu.price);
       } else {
         cost = menu.quantity_used * parseFloat(menu.price);
       }
-
-      console.log(cost);
 
       totalcost += cost;
     }
