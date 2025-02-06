@@ -293,6 +293,8 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         [menu.unit_id, menu.unit]
       );
 
+      console.log(unit_conversion.rows[0]);
+
       if (unit_conversion.rows.length > 0) {
         const converrate = unit_conversion.rows[0].conversion_rate;
         cost = menu.quantity_used * converrate * parseFloat(menu.price);

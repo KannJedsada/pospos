@@ -37,7 +37,6 @@ const Manager = () => {
       setCountWd(countRes?.data?.data?.countWd?.countworkdate || "");
       setCountEmp(countRes?.data?.data?.countEmp?.countempworkdate || "");
       const checkempRes = await axios.get(`/api/ws/check-empworkdate`);
-
       setCheckemp(checkempRes.data.data);
       const menuRecommendRes = await axios.get(`/api/menu/menu-recom`);
       setMenuRecom(menuRecommendRes.data.data);
