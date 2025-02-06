@@ -126,8 +126,6 @@ FROM materials;`);
       );
 
       if (check_composition.rows[0].is_composite === true) {
-        total_qty += Number(qty);
-        total_price += Number(price);
 
         const composite = await pool.query(
           `SELECT * FROM material_composition WHERE composite_material_id = $1`,
@@ -185,6 +183,11 @@ FROM materials;`);
             );
           }
           continue; // ข้ามการเพิ่มสต็อกวัสดุผสม
+        }
+
+        if (insufficient_items.length === 0) {
+          total_qty += Number(qty);
+          total_price += Number(price);
         }
 
         await pool.query(
@@ -269,7 +272,6 @@ FROM materials;`);
 
     return { added_details, mat_price, total_price, total_qty };
   }
-
 
   static async edit_min(id, data) {
     const { min_qty } = data;
