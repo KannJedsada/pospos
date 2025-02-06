@@ -169,7 +169,7 @@ function Editmenuprice() {
                   </h1>
                 </div>
 
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <label
                     htmlFor="profitPercentage"
                     className="block mb-2 text-lg font-medium text-gray-800"
@@ -221,7 +221,39 @@ function Editmenuprice() {
                     ราคาขาย:{" "}
                     {data.price ? `${data.price} บาท` : "ยังไม่ได้ระบุข้อมูล"}
                   </h2>
+                </div> */}
+
+                <div className="mb-6">
+                  <label
+                    htmlFor="sellingPrice"
+                    className="block mb-2 text-lg font-medium text-gray-800"
+                  >
+                    ระบุราคาขาย
+                  </label>
+                  <input
+                    type="number"
+                    id="sellingPrice"
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={data.price || ""}
+                    onChange={(e) => {
+                      const sellingPrice = parseFloat(e.target.value) || 0;
+
+                      // อัปเดต state
+                      setData((prevData) => ({
+                        ...prevData,
+                        price: sellingPrice,
+                      }));
+                    }}
+                    placeholder="กรอกราคาขาย"
+                  />
                 </div>
+
+                <div className="mb-6">
+                  <h2 className="text-xl font-medium text-gray-800">
+                    ราคาขาย: {data.price ? `${data.price} บาท` : "ยังไม่ได้ระบุข้อมูล"}
+                  </h2>
+                </div>
+
 
                 <div className="mb-6">
                   <label
@@ -334,8 +366,8 @@ function Editmenuprice() {
                       key={page}
                       onClick={() => paginate(page)}
                       className={`px-4 py-2 rounded-lg ${currentPage === page
-                          ? "bg-blue-700 text-white"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        ? "bg-blue-700 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                         }`}
                     >
                       {page}
