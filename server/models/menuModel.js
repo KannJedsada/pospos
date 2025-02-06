@@ -151,22 +151,23 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       const { name, img, category, ingredients, menutype } = data;
 
       if (!name || !category || !menutype) {
-        throw new Error("Missing required fields: name, category, or menutype");
+        throw new Error("❌ Missing required fields: name, category, or menutype");
       }
 
-      console.log(name);
-      console.log(ingredients);
+      console.log("📥 Menu Name:", name);
+      console.log("📥 Ingredients:", ingredients);
+      console.log("📷 Image URL:", img);
 
       // Insert new menu
       const menuRes = await pool.query(
         `INSERT INTO menus(menu_name, menu_img, menu_category, menu_status, menu_type) 
-             VALUES($1, $2, $3, $4, $5) RETURNING *`,
+         VALUES($1, $2, $3, $4, $5) RETURNING *`,
         [name, img || null, category, 1, menutype]
       );
 
       const menu = menuRes.rows[0];
 
-      console.log("Inserted Menu:", menu);
+      console.log("✅ Inserted Menu:", menu);
 
       // Insert ingredients
       if (Array.isArray(ingredients) && ingredients.length > 0) {
@@ -174,15 +175,15 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
           const { material_id, quantity_used, unit_id } = material;
 
           if (!material_id || !quantity_used || !unit_id) {
-            console.warn("Skipping invalid ingredient:", material);
+            console.warn("⚠️ Skipping invalid ingredient:", material);
             continue;
           }
 
           await pool.query(
             `INSERT INTO menu_ingredients(menu_id, material_id, quantity_used, unit_id)
-                     VALUES($1, $2, $3, $4)
-                     ON CONFLICT (menu_id, material_id) 
-                     DO UPDATE SET quantity_used = EXCLUDED.quantity_used, unit_id = EXCLUDED.unit_id`,
+             VALUES($1, $2, $3, $4)
+             ON CONFLICT (menu_id, material_id) 
+             DO UPDATE SET quantity_used = EXCLUDED.quantity_used, unit_id = EXCLUDED.unit_id`,
             [menu.menu_id, material_id, quantity_used, unit_id]
           );
         }
@@ -191,10 +192,11 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       return { success: true, menu };
 
     } catch (error) {
-      console.error("Error in add_menu:", error.message);
+      console.error("🚨 Error in add_menu:", error.message);
       return { success: false, error: error.message };
     }
   }
+
 
 
   static async edit_menu(id, data) {

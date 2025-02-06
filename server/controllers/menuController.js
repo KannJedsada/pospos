@@ -122,11 +122,15 @@ const add_status = async (req, res) => {
 
 const add_menu = async (req, res) => {
   try {
+    console.log("📥 Received Data:", req.body);
+    console.log("📷 Uploaded Image:", req.file);
+
     const { name, category, ingredients, menutype } = req.body;
-    const img = req.file ? req.file.path : null; // Get uploaded file name
+    const img = req.file ? req.file.path : null; // Cloudinary URL
+
     // Validation
     if (!name || !category || !ingredients || !img) {
-      console.error("Missing fields:", {
+      console.error("❌ Missing fields:", {
         name,
         category,
         ingredients,
@@ -144,12 +148,15 @@ const add_menu = async (req, res) => {
       img,
       menutype,
     });
+
     res.status(200).json({ data: new_menu });
+
   } catch (error) {
-    console.error("Error adding menu:", error);
+    console.error("🚨 Error adding menu:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 const edit_menu = async (req, res) => {
   try {
