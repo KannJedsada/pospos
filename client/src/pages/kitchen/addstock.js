@@ -177,12 +177,12 @@ function Addstock() {
 
       if (insufficient_items.length > 0) {
         // จัดกลุ่มรายการที่สต็อกไม่พอ
-        const groupedItems = insufficient_items.reduce((acc, item, index) => {
-          const [mainMaterial, compMaterial, currentQty, requiredQty] = item;
-
+        const groupedItems = insufficient_items.reduce((acc, item) => {
+          const { compositeMaterial: mainMaterial, componentMaterial: compMaterial, current_qty: currentQty, required_qty: requiredQty } = item;
+        
           // ค้นหาวัสดุในกลุ่มที่มีอยู่แล้ว
           const existingItem = acc.find((i) => i.compMaterial === compMaterial);
-
+        
           if (existingItem) {
             existingItem.missingQty += requiredQty - currentQty;
           } else {
@@ -194,10 +194,10 @@ function Addstock() {
               missingQty: requiredQty - currentQty,
             });
           }
-
+        
           return acc;
         }, []);
-
+        
         // สร้าง HTML สำหรับแจ้งเตือน
         const htmlContent = groupedItems
           .map(
@@ -233,7 +233,6 @@ function Addstock() {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-blue-50">
