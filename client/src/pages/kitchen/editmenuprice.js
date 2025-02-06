@@ -233,7 +233,7 @@ function Editmenuprice() {
                   <input
                     type="number"
                     id="sellingPrice"
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={data.price || ""}
                     onChange={(e) => {
                       const sellingPrice = parseFloat(e.target.value) || 0;
@@ -248,12 +248,11 @@ function Editmenuprice() {
                   />
                 </div>
 
-                <div className="mb-6">
+                {/* <div className="mb-6">
                   <h2 className="text-xl font-medium text-gray-800">
                     ราคาขาย: {data.price ? `${data.price} บาท` : "ยังไม่ได้ระบุข้อมูล"}
                   </h2>
-                </div>
-
+                </div> */}
 
                 <div className="mb-6">
                   <label
