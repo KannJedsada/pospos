@@ -117,8 +117,6 @@ function Addmenu() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log(data);
-    console.log(selectedFile);
     if (!selectedFile) {
       Swal.fire("Error", "กรุณาใส่รูปภาพ", "error");
       return;
@@ -137,9 +135,9 @@ function Addmenu() {
       formData.append("category", data.category);
       formData.append("ingredients", JSON.stringify(data.ingredients));
       formData.append("menutype", data.menutype);
-      // for (let [key, value] of formData.entries()) {
-      //   console.log(`${key}: ${value}`);
-      // }
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+      }
       const response = await axios.post("/api/menu/addmenu", formData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,

@@ -122,11 +122,12 @@ const add_status = async (req, res) => {
 
 const add_menu = async (req, res) => {
   try {
-    console.log("Received Data:", req.body);
-    console.log("Uploaded Image:", req.file);
-
     const { name, category, ingredients, menutype } = req.body;
-    const img = req.file ? req.file.path : null; // Cloudinary URL
+    const img = req.file ? req.file.path : null; 
+
+    console.log(name);
+    console.log(category);
+    console.log(ingredients);
 
     // Validation
     if (!name || !category || !ingredients || !img) {
@@ -141,18 +142,18 @@ const add_menu = async (req, res) => {
     }
 
     // Process and save the menu item
-    const new_menu = await menu.add_menu({
-      name,
-      category,
-      ingredients: JSON.parse(ingredients),
-      img,
-      menutype,
-    });
+    // const new_menu = await menu.add_menu({
+    //   name,
+    //   category,
+    //   ingredients: JSON.parse(ingredients),
+    //   img,
+    //   menutype,
+    // });
 
-    res.status(200).json({ data: new_menu });
+    // res.status(200).json({ data: new_menu });
 
   } catch (error) {
-    console.error("🚨 Error adding menu:", error);
+    console.error("Error adding menu:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

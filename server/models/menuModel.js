@@ -151,12 +151,12 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       const { name, img, category, ingredients, menutype } = data;
 
       if (!name || !category || !menutype) {
-        throw new Error("❌ Missing required fields: name, category, or menutype");
+        throw new Error("Missing required fields: name, category, or menutype");
       }
 
-      console.log("📥 Menu Name:", name);
-      console.log("📥 Ingredients:", ingredients);
-      console.log("📷 Image URL:", img);
+      console.log("Menu Name:", name);
+      console.log("Ingredients:", ingredients);
+      console.log("Image URL:", img);
 
       // Insert new menu
       const menuRes = await pool.query(
