@@ -154,7 +154,8 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
         throw new Error("Missing required fields: name, category, or menutype");
       }
 
-      console.log("Received Data:", data);
+      console.log(name);
+      console.log(ingredients);
 
       // Insert new menu
       const menuRes = await pool.query(
