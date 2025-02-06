@@ -166,7 +166,7 @@ FROM materials;`);
               required_qty: qty_comp
             });
             canProduce = false;
-            break; // หยุดการทำงานของลูป เพราะวัตถุดิบไม่พอ
+            continue; // หยุดการทำงานของลูป เพราะวัตถุดิบไม่พอ
           }
 
           await pool.query(
