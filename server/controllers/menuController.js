@@ -142,15 +142,15 @@ const add_menu = async (req, res) => {
     }
 
     // Process and save the menu item
-    // const new_menu = await menu.add_menu({
-    //   name,
-    //   category,
-    //   ingredients: JSON.parse(ingredients),
-    //   img,
-    //   menutype,
-    // });
+    const new_menu = await menu.add_menu({
+      name,
+      category,
+      ingredients: JSON.parse(ingredients),
+      img,
+      menutype,
+    });
 
-    // res.status(200).json({ data: new_menu });
+    res.status(200).json({ data: new_menu });
 
   } catch (error) {
     console.error("Error adding menu:", error);
