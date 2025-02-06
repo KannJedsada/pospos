@@ -168,6 +168,8 @@ FROM materials;`);
             `UPDATE stocks SET qty = qty - $1 WHERE material_id = $2`,
             [qty_comp, comp_mat_id]
           );
+
+          return insufficient_items;
         }
 
         await pool.query(
@@ -253,7 +255,7 @@ FROM materials;`);
       [total_qty, total_price, stock_at_id]
     );
 
-    return { added_details, mat_price, total_price, total_qty, insufficient_items };
+    return { added_details, mat_price, total_price, total_qty };
   }
 
   static async edit_min(id, data) {
