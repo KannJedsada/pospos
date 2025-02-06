@@ -136,22 +136,32 @@ FROM materials;`);
           [material_id]
         );
 
+        const insufficient_items = [];
         for (let comp of composite.rows) {
           const { material_id: comp_mat_id, quantity_used: comp_qty, unit_id } = comp;
           const unitResult = await pool.query('SELECT unit FROM materials WHERE id = $1', [comp_mat_id]);
           const unit = unitResult.rows[0]?.unit;
           const converUnitRes = await pool.query(
-            `SELECT conversion_rate FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`, 
+            `SELECT conversion_rate FROM unit_conversions WHERE from_unit_id = $1 AND to_unit_id = $2`,
             [unit_id, unit]
           );
           const converUnit = converUnitRes.rows[0]?.conversion_rate;
-          
-          let qty_comp;
-          if (converUnit) {
-            qty_comp = comp_qty * qty * converUnit;
-          } else {
-            qty_comp = comp_qty * qty;
-          }          
+
+          let qty_comp = converUnit ? comp_qty * qty * converUnit : comp_qty * qty;
+
+          // ตรวจสอบจำนวนสต็อกปัจจุบัน
+          const stockRes = await pool.query(
+            `SELECT qty FROM stocks WHERE material_id = $1`,
+            [comp_mat_id]
+          );
+
+          const compMatName = await pool.query(`SELECT m_name FROM materials WHERE id = $1`, [comp_mat_id])
+
+          const current_qty = stockRes.rows[0]?.qty;
+          if (current_qty < qty_comp) {
+            insufficient_items.push(check_composition.rows[0]?.m_name, compMatName.rows[0]?.m_name, current_qty, qty_comp);
+            continue;
+          }
 
           // ลบจำนวนวัสดุประกอบออกจากสต็อก
           await pool.query(
@@ -243,7 +253,7 @@ FROM materials;`);
       [total_qty, total_price, stock_at_id]
     );
 
-    return { added_details, mat_price, total_price, total_qty };
+    return { added_details, mat_price, total_price, total_qty, insufficient_items };
   }
 
   static async edit_min(id, data) {

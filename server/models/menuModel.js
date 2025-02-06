@@ -302,7 +302,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
 
       totalcost += cost; 
     }
-console.log(totalcost)
     const menuName = menus[0].menu_name;
     return { menuName, totalcost };
   }

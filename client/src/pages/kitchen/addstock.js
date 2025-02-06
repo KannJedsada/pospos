@@ -173,6 +173,50 @@ function Addstock() {
         },
       });
 
+      const { insufficient_items = [] } = response.data.data;
+
+      if (insufficient_items.length > 0) {
+        // จัดกลุ่มรายการที่สต็อกไม่พอ
+        const groupedItems = insufficient_items.reduce((acc, item, index) => {
+          const [mainMaterial, compMaterial, currentQty, requiredQty] = item;
+
+          // ค้นหาวัสดุในกลุ่มที่มีอยู่แล้ว
+          const existingItem = acc.find((i) => i.compMaterial === compMaterial);
+
+          if (existingItem) {
+            existingItem.missingQty += requiredQty - currentQty;
+          } else {
+            acc.push({
+              mainMaterial,
+              compMaterial,
+              currentQty,
+              requiredQty,
+              missingQty: requiredQty - currentQty,
+            });
+          }
+
+          return acc;
+        }, []);
+
+        // สร้าง HTML สำหรับแจ้งเตือน
+        const htmlContent = groupedItems
+          .map(
+            (item) =>
+              `<b>${item.compMaterial}</b> (ใช้ใน <b>${item.mainMaterial}</b>)<br>
+              มีในสต็อก: <b>${item.currentQty}</b> | ต้องการ: <b>${item.requiredQty}</b> | ขาด: <b>${item.missingQty}</b><br><br>`
+          )
+          .join("");
+
+        Swal.fire({
+          title: "⚠️ สต็อกไม่เพียงพอ",
+          html: htmlContent,
+          icon: "warning",
+        });
+
+        return; // หยุดการทำงานเพื่อให้แก้ไขปัญหาสต็อกก่อน
+      }
+
+      // ถ้าสต็อกเพียงพอ ดำเนินการต่อ
       if (response.status === 200) {
         Swal.fire("Success", "เพิ่มสต๊อกสำเร็จ", "success");
         setData({
@@ -189,6 +233,7 @@ function Addstock() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-blue-50">
