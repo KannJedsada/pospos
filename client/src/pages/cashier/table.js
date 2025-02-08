@@ -354,14 +354,16 @@ function Table() {
   const total_price = groupedOrders.reduce((sum, order) => {
     return sum + order.price;
   }, 0);
-
+  
   useEffect(() => {
     const fetchAllData = async () => {
       try {
+        const startTime = performance.now(); // ⏱ เริ่มจับเวลา
 
-        if (tableId === null) {
+        if (tableId === undefined) {
           setIsLoading(true);
         }
+
         // ดึงข้อมูล QR Code
         const qrResponse = await axios.post("/api/qr/get_by_url", {
           url: currentUrl,
@@ -375,7 +377,7 @@ function Table() {
           setIsQRCodeVisible(qrData.qr_status);
           setTableId(qrData.table_id);
 
-          // ดึงข้อมูลโต๊ะและคำสั่งซื้อพร้อมกัน
+          // โหลดข้อมูลโต๊ะและคำสั่งซื้อเฉพาะถ้ามี table_id
           if (qrData.table_id) {
             await Promise.all([
               fetchTable(qrData.table_id),
@@ -389,6 +391,10 @@ function Table() {
 
         await fetchMenus();
         await fetchMenuRecommended();
+
+        const endTime = performance.now(); // 🛑 หยุดจับเวลา
+        console.log(`⏳ โหลดข้อมูลเสร็จใน ${((endTime - startTime) / 1000).toFixed(2)} วินาที`);
+
       } catch (error) {
         console.error("Error loading initial data:", error);
       } finally {
@@ -396,19 +402,25 @@ function Table() {
       }
     };
 
-    fetchAllData(); // เรียกใช้งานเมื่อ component ถูก mount
+    // โหลดข้อมูลเฉพาะเมื่อ tableId ยังไม่ถูกตั้งค่า
+    if (tableId === undefined) {
+      fetchAllData();
+    }
 
-    const handleOrderUpdate = () => {
-      fetchAllData(); // โหลดข้อมูลใหม่เมื่อมีเหตุการณ์ orderUpdated
+    // ฟัง event orderUpdated เฉพาะของ tableId นี้
+    const handleOrderUpdate = (updatedTableId) => {
+      if (updatedTableId === tableId) {
+        fetchAllData(); // โหลดข้อมูลใหม่เฉพาะของโต๊ะนี้
+      }
     };
 
-    socket.on("orderUpdated", handleOrderUpdate); // ฟังเหตุการณ์ orderUpdated
+    socket.on("orderUpdated", handleOrderUpdate);
 
-    // ล้าง Event Listener เมื่อ Component ถูก Unmount
     return () => {
       socket.off("orderUpdated", handleOrderUpdate);
     };
-  }, [currentUrl, socket]); // เพิ่ม socket เป็น dependency
+  }, [currentUrl, socket, tableId]);
+
 
   useEffect(() => {
     fetchMenus();
