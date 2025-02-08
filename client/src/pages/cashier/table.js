@@ -358,8 +358,10 @@ function Table() {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        setIsLoading(true);
 
+        if (tableId === null) {
+          setIsLoading(true);
+        }
         // ดึงข้อมูล QR Code
         const qrResponse = await axios.post("/api/qr/get_by_url", {
           url: currentUrl,
@@ -367,6 +369,9 @@ function Table() {
         const qrData = qrResponse.data.data;
 
         if (qrData) {
+          if (tableId === qrData.table_id) {
+            setIsLoading(true);
+          }
           setIsQRCodeVisible(qrData.qr_status);
           setTableId(qrData.table_id);
 
@@ -505,8 +510,8 @@ function Table() {
                         }}
                         disabled={selectedOrder.qty <= 0}
                         className={`m-4 px-1 py-1 ${selectedOrder.qty <= 0
-                            ? "bg-gray-300 text-gray-500 rounded"
-                            : "bg-red-500 text-white rounded hover:bg-red-600"
+                          ? "bg-gray-300 text-gray-500 rounded"
+                          : "bg-red-500 text-white rounded hover:bg-red-600"
                           } `}
                       >
                         -
@@ -523,8 +528,8 @@ function Table() {
                           selectedOrder.qty >= selectedOrder.order_ids.length
                         }
                         className={`m-4 px-1 py-1 ${selectedOrder.qty >= selectedOrder.order_ids.length
-                            ? "bg-gray-300 text-gray-500 rounded"
-                            : "bg-blue-500 text-white rounded hover:bg-blue-600"
+                          ? "bg-gray-300 text-gray-500 rounded"
+                          : "bg-blue-500 text-white rounded hover:bg-blue-600"
                           } `}
                       >
                         +
@@ -568,8 +573,8 @@ function Table() {
               <button
                 onClick={() => setSelectedCategory("recom")}
                 className={`px-3 py-1 rounded min-w-max ${selectedCategory === "recom"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
                   }`}
               >
                 ที่แนะนำ
@@ -577,8 +582,8 @@ function Table() {
               <button
                 onClick={() => setSelectedCategory("all")}
                 className={`px-3 py-1 rounded min-w-max ${selectedCategory === "all"
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700"
                   }`}
               >
                 ทั้งหมด
@@ -592,8 +597,8 @@ function Table() {
                     fetchNameCat(cat.id);
                   }}
                   className={`px-3 py-1 rounded min-w-max ${selectedCategory === cat.id
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-200 text-gray-700"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
                     }`}
                 >
                   {cat.category_name}
@@ -618,8 +623,8 @@ function Table() {
                     <div
                       key={menu.menu_id}
                       className={`flex flex-col items-center mb-4 p-2 rounded shadow cursor-pointer w-full ${menu.menu_status === 1
-                          ? "bg-white hover:bg-gray-200"
-                          : "bg-gray-300 cursor-not-allowed"
+                        ? "bg-white hover:bg-gray-200"
+                        : "bg-gray-300 cursor-not-allowed"
                         }`}
                       onClick={() => {
                         if (menu.menu_status === 1) {
