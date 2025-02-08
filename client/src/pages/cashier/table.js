@@ -18,7 +18,7 @@ function Table() {
   const [table, setTable] = useState([]);
   const [orders, setOrders] = useState([]);
   const [carts, setCarts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [menuCate, setMenuCate] = useState([]);
   const [category, setCategory] = useState([]);
@@ -126,7 +126,9 @@ function Table() {
       price: item.price,
     }));
 
-    setIsLoading(true);
+    if (orderDetails.table_id === tableId) {
+      setIsLoading(true);
+    }
 
     try {
       // ส่งคำสั่งซื้อไปยัง API
@@ -502,11 +504,10 @@ function Table() {
                           }
                         }}
                         disabled={selectedOrder.qty <= 0}
-                        className={`m-4 px-1 py-1 ${
-                          selectedOrder.qty <= 0
+                        className={`m-4 px-1 py-1 ${selectedOrder.qty <= 0
                             ? "bg-gray-300 text-gray-500 rounded"
                             : "bg-red-500 text-white rounded hover:bg-red-600"
-                        } `}
+                          } `}
                       >
                         -
                       </button>
@@ -521,11 +522,10 @@ function Table() {
                         disabled={
                           selectedOrder.qty >= selectedOrder.order_ids.length
                         }
-                        className={`m-4 px-1 py-1 ${
-                          selectedOrder.qty >= selectedOrder.order_ids.length
+                        className={`m-4 px-1 py-1 ${selectedOrder.qty >= selectedOrder.order_ids.length
                             ? "bg-gray-300 text-gray-500 rounded"
                             : "bg-blue-500 text-white rounded hover:bg-blue-600"
-                        } `}
+                          } `}
                       >
                         +
                       </button>
@@ -567,21 +567,19 @@ function Table() {
             <div className="flex space-x-4 border-b pb-2 overflow-x-auto scrollbar-hide">
               <button
                 onClick={() => setSelectedCategory("recom")}
-                className={`px-3 py-1 rounded min-w-max ${
-                  selectedCategory === "recom"
+                className={`px-3 py-1 rounded min-w-max ${selectedCategory === "recom"
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 text-gray-700"
-                }`}
+                  }`}
               >
                 ที่แนะนำ
               </button>
               <button
                 onClick={() => setSelectedCategory("all")}
-                className={`px-3 py-1 rounded min-w-max ${
-                  selectedCategory === "all"
+                className={`px-3 py-1 rounded min-w-max ${selectedCategory === "all"
                     ? "bg-blue-500 text-white"
                     : "bg-gray-200 text-gray-700"
-                }`}
+                  }`}
               >
                 ทั้งหมด
               </button>
@@ -593,11 +591,10 @@ function Table() {
                     fetchMenuCate(cat.id);
                     fetchNameCat(cat.id);
                   }}
-                  className={`px-3 py-1 rounded min-w-max ${
-                    selectedCategory === cat.id
+                  className={`px-3 py-1 rounded min-w-max ${selectedCategory === cat.id
                       ? "bg-blue-500 text-white"
                       : "bg-gray-200 text-gray-700"
-                  }`}
+                    }`}
                 >
                   {cat.category_name}
                 </button>
@@ -610,8 +607,8 @@ function Table() {
                   {selectedCategory === "all"
                     ? "เมนูทั้งหมด"
                     : selectedCategory === "recom"
-                    ? "เมนูแนะนำ"
-                    : `หมวดหมู่ : ${nameCat.category_name}`}
+                      ? "เมนูแนะนำ"
+                      : `หมวดหมู่ : ${nameCat.category_name}`}
                 </h3>
               </div>
 
@@ -620,11 +617,10 @@ function Table() {
                   {filteredMenus.map((menu) => (
                     <div
                       key={menu.menu_id}
-                      className={`flex flex-col items-center mb-4 p-2 rounded shadow cursor-pointer w-full ${
-                        menu.menu_status === 1
+                      className={`flex flex-col items-center mb-4 p-2 rounded shadow cursor-pointer w-full ${menu.menu_status === 1
                           ? "bg-white hover:bg-gray-200"
                           : "bg-gray-300 cursor-not-allowed"
-                      }`}
+                        }`}
                       onClick={() => {
                         if (menu.menu_status === 1) {
                           handleAddToCart(tableId, menu);
