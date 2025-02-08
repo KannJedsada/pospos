@@ -302,8 +302,8 @@ function Menus() {
                 </tr>
               </thead>
               <tbody className="text-gray-700">
-                {filteredMenus.length > 0 ? (
-                  filteredMenus.map((menu, index) => (
+                {currentMaterials.length > 0 ? (
+                  currentMaterials.map((menu, index) => (
                     <tr
                       key={menu.menu_id}
                       className="transition-all duration-300 bg-white hover:bg-blue-50"
