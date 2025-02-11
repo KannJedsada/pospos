@@ -456,6 +456,7 @@ const Manager = () => {
       : {};
 
   const groupedArray1 = Object.values(groupedDataCurrMonthBar);
+  console.log(groupedArray1);
   const groupedArray = Object.values(groupedDataCurrdate);
   const groupedCurrmonth = Object.values(groupedDataCurrMonth);
 
@@ -548,7 +549,6 @@ const Manager = () => {
             const itemDate = new Date(item.date).toLocaleDateString("th-TH");
             return itemDate === formattedDate;
           });
-          console.log(dataItem);
           return dataItem ? dataItem.total_cost_per_menu : 0;
         }),
         backgroundColor: "rgba(75, 192, 192, 0.6)",
