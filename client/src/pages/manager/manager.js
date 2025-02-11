@@ -541,13 +541,14 @@ const Manager = () => {
         fill: true,
       },
       {
-        label: "ต้นทุนรายเดือน (บาท)",
+        label: "ต้นทุนรายวัน (บาท)",
         data: allDatesInMonth.map((date) => {
           const formattedDate = new Date(date).toLocaleDateString("th-TH");
           const dataItem = groupedArray1.find((item) => {
             const itemDate = new Date(item.date).toLocaleDateString("th-TH");
             return itemDate === formattedDate;
           });
+          console.log(dataItem);
           return dataItem ? dataItem.total_cost_per_menu : 0;
         }),
         backgroundColor: "rgba(75, 192, 192, 0.6)",
@@ -563,8 +564,8 @@ const Manager = () => {
 
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // ยกเลิกการรักษาสัดส่วน
-    aspectRatio: 2, // สัดส่วนกว้าง : สูง (สามารถปรับได้ตามความต้องการ)
+    maintainAspectRatio: false, 
+    aspectRatio: 2, 
     scales: {
       x: {
         ticks: {
