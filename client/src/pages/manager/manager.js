@@ -507,7 +507,8 @@ const Manager = () => {
   };
 
   // ข้อมูลกราฟสำหรับรายเดือน
-  const daysInMonth = new Date(2025, 0, 0).getDate(); // จำนวนวันในเดือนมกราคม 2025 (31 วัน)
+  const daysInMonth = new Date(formData.currmonth).getDate();
+  console.log(daysInMonth);
   const allDatesInMonth = Array.from({ length: daysInMonth }, (_, index) => {
     const day = index + 1;
     return `2025-01-${day.toString().padStart(2, "0")}`; // สร้างวันที่ในรูปแบบ YYYY-MM-DD
