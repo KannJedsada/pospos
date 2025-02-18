@@ -632,13 +632,18 @@ const Manager = () => {
     month: "long",
   });
 
-  const clear = () => {
+  const clear = async () => {
     setFormData({
       currdate: "",
       currmonth: "",
     });
     setSelectedDate(null);
     setSelectedMonth(null);
+    const costprofit = await axios.get(`/api/receipt/get-cost-profit`);
+    setCostprofitcurrdate(costprofit?.data?.data?.costprofitcurrdate);
+    setCostprofitcurrmonth(costprofit?.data?.data?.costprofitcurrmonth);
+    setRevenuecurrdate(costprofit?.data?.data?.revenuecurrdate);
+    setRevenuecurrmonth(costprofit?.data?.data?.revenuecurrmonth);
     // fetchData();
   };
 
