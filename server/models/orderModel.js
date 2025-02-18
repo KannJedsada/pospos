@@ -158,6 +158,37 @@ class Order {
 
   // static async add_order(data) {
   //   const { order_detail } = data;
+  //   const order_res_id = await this.createOrder();
+  //   let total_qty = 0, total_price = 0;
+  //   const added_order = [], insufficient_items = [];
+
+  //   for (const detail of order_detail) {
+  //     const { cart_id, menu_id, qty, table_id, price } = detail;
+  //     if (!(await this.checkAndUpdateStock(menu_id, qty, insufficient_items))) {
+  //       continue;
+  //     }
+
+  //     const detail_order = await pool.query(
+  //       `INSERT INTO order_detail(order_id, menu_id, qty, table_id, price)
+  //        VALUES($1, $2, $3, $4, $5) RETURNING *`,
+  //       [order_res_id, menu_id, qty, table_id, price]
+  //     );
+
+  //     total_qty += Number(qty);
+  //     total_price += Number(price);
+  //     added_order.push(detail_order.rows[0]);
+
+  //     await pool.query(`UPDATE carts SET cart_status = 2 WHERE id = $1`, [cart_id]);
+  //   }
+
+  //   await pool.query(`UPDATE orders SET total_qty = $1, total_price = $2 WHERE id = $3`,
+  //     [total_qty, total_price, order_res_id]);
+
+  //   return { order_res_id, added_order, insufficient_items };
+  // }
+
+  // static async add_order(data) {
+  //   const { order_detail } = data;
 
   //   // สร้างคำสั่งซื้อใหม่
   //   const orders_res = await pool.query(

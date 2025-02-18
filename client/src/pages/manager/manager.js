@@ -508,8 +508,8 @@ const Manager = () => {
 
   // ข้อมูลกราฟสำหรับรายเดือน
   // หาปีและเดือนจากค่า formData.currmonth
-  const year = new Date(formData.currmonth).getFullYear();
-  const month = new Date(formData.currmonth).getMonth() + 1; // ต้องบวก 1 เพราะ JavaScript นับเดือนจาก 0
+  const year = new Date(formData.currmonth || new Date()).getFullYear();
+  const month = new Date(formData.currmonth || new Date()).getMonth() + 1;  
 
   // หาจำนวนวันในเดือน
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -639,7 +639,7 @@ const Manager = () => {
     });
     setSelectedDate(null);
     setSelectedMonth(null);
-    fetchData();
+    // fetchData();
   };
 
   return (
