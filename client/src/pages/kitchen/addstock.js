@@ -278,7 +278,7 @@ function Addstock() {
                     </option>
                   ))} */}
                   {materials
-                    .filter((mat) => stock_detail.some((stock) => stock.material_id !== mat.id))
+                    .filter((mat) => material.some((stock) => stock.material_id !== mat.id))
                     .map((mat) => (
                       <option key={mat.id} value={mat.id}>
                         {mat.m_name}
