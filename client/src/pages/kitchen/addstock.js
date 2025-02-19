@@ -179,10 +179,10 @@ function Addstock() {
         // จัดกลุ่มรายการที่สต็อกไม่พอ
         const groupedItems = insufficient_items.reduce((acc, item) => {
           const { compositeMaterial: mainMaterial, componentMaterial: compMaterial, current_qty: currentQty, required_qty: requiredQty } = item;
-        
+
           // ค้นหาวัสดุในกลุ่มที่มีอยู่แล้ว
           const existingItem = acc.find((i) => i.compMaterial === compMaterial);
-        
+
           if (existingItem) {
             existingItem.missingQty += requiredQty - currentQty;
           } else {
@@ -194,10 +194,10 @@ function Addstock() {
               missingQty: requiredQty - currentQty,
             });
           }
-        
+
           return acc;
         }, []);
-        
+
         // สร้าง HTML สำหรับแจ้งเตือน
         const htmlContent = groupedItems
           .map(
@@ -272,11 +272,18 @@ function Addstock() {
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
-                  {materials.map((mat) => (
+                  {/* {materials.map((mat) => (
                     <option key={mat.id} value={mat.id}>
                       {mat.m_name}
                     </option>
-                  ))}
+                  ))} */}
+                  {materials
+                    .filter((mat) => stock_detail.some((stock) => stock.material_id !== mat.id))
+                    .map((mat) => (
+                      <option key={mat.id} value={mat.id}>
+                        {mat.m_name}
+                      </option>
+                    ))}
                 </select>
                 <input
                   type="text"
