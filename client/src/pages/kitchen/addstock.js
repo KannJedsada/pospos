@@ -287,14 +287,13 @@ function Addstock() {
                 >
                   <option value="">เลือกวัตถุดิบ</option>
                   {materials
-                    .filter((mat) => data.stock_detail.some((stock) => stock.material_id !== mat.id)) // ✅ กรองด้วย stock_data
+                    .filter((mat) => !data.stock_detail.some((stock) => stock.material_id === mat.id)) // ✅ แสดงเฉพาะวัตถุดิบที่ไม่มีใน stock_detail
                     .map((mat) => (
                       <option key={mat.id} value={mat.id}>
                         {mat.m_name}
                       </option>
                     ))}
                 </select>
-
                 <input
                   type="text"
                   name="qty"
