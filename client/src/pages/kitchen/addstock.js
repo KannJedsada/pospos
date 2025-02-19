@@ -264,6 +264,20 @@ function Addstock() {
                 key={index}
                 className="flex flex-wrap items-center gap-3 mb-4 border border-gray-200 rounded-lg p-4 bg-gray-50"
               >
+                {/* <select
+                  name="material_id"
+                  value={material.material_id || ""}
+                  onChange={(e) => handleMaterialChange(index, e)}
+                  disabled={isLoading}
+                  className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">เลือกวัตถุดิบ</option>
+                  {materials.map((mat) => (
+                    <option key={mat.id} value={mat.id}>
+                      {mat.m_name}
+                    </option>
+                  ))}
+                </select> */}
                 <select
                   name="material_id"
                   value={material.material_id || ""}
@@ -272,19 +286,15 @@ function Addstock() {
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
-                  {/* {materials.map((mat) => (
-                    <option key={mat.id} value={mat.id}>
-                      {mat.m_name}
-                    </option>
-                  ))} */}
                   {materials
-                    .filter((mat) => material.some((stock) => stock.material_id === mat.id))
+                    .filter((mat) => data.stock_detail.some((stock) => stock.material_id === mat.id)) // ✅ กรองด้วย stock_data
                     .map((mat) => (
                       <option key={mat.id} value={mat.id}>
                         {mat.m_name}
                       </option>
                     ))}
                 </select>
+
                 <input
                   type="text"
                   name="qty"
