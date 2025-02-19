@@ -147,6 +147,7 @@ function Addstock() {
         { material_id: "", qty: "", unit_id: "", price: "", },
       ],
     });
+    console.log(data.stock_detail)
   };
 
   const removeMaterial = (index) => {
