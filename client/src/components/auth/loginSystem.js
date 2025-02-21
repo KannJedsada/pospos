@@ -54,6 +54,12 @@ const LoginSystem = () => {
             text: "ไม่สามารถกำหนดสิทธิ์การเข้าถึงได้",
           });
         }
+      }else{
+        Swal.fire({
+          icon: "warning",
+          title: "ข้อผิดพลาด",
+          text: "ไม่มีสิทธิ์ในการเข้าถึงได้",
+        });
       }
 
     } catch (error) {

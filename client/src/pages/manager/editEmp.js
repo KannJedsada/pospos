@@ -108,10 +108,9 @@ const Editemp = () => {
     }
   };
 
-  useEffect(()=> {
+  useEffect(() => {
     fetchEmployeeData();
-  },[]);
-
+  }, []);
 
   // Fetch provinces once on component mount
   useEffect(() => {
@@ -289,7 +288,6 @@ const Editemp = () => {
     }
   }, [id_card, authData.token, provinces]);
 
-
   // fetch position
   useEffect(() => {
     const fetchPos = async () => {
@@ -300,8 +298,8 @@ const Editemp = () => {
           empAccess.access === 1 || empAccess.access === 0
             ? allPositions
             : allPositions.filter(
-              (position) => position.dept_id !== 1 && position.dept_id !== 2
-            );
+                (position) => position.dept_id !== 1 && position.dept_id !== 2
+              );
         setPosition(filteredPositions);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -448,8 +446,9 @@ const Editemp = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="ชื่อจริง"
-                    className={`w-full px-3 py-2 border ${errors.f_name ? "border-red-500" : "border-gray-300"
-                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                    className={`w-full px-3 py-2 border ${
+                      errors.f_name ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                     required
                   />
                   {errors.f_name && (
@@ -468,8 +467,9 @@ const Editemp = () => {
                     onBlur={handleBlur}
                     onChange={handleChange}
                     placeholder="นามสกุล"
-                    className={`w-full px-3 py-2 border ${errors.l_name ? "border-red-500" : "border-gray-300"
-                      } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
+                    className={`w-full px-3 py-2 border ${
+                      errors.l_name ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300`}
                     required
                   />
                   {errors.l_name && (
@@ -491,8 +491,9 @@ const Editemp = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="example@email.com"
-                    className={`w-full px-4 py-2 border ${errors.mail ? "border-red-500" : "border-gray-300"
-                      } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
+                    className={`w-full px-4 py-2 border ${
+                      errors.mail ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
                     required
                   />
                   {errors.mail && (
@@ -511,8 +512,9 @@ const Editemp = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="เบอร์โทรศัทพ์"
-                    className={`w-full px-4 py-2 border ${errors.phone ? "border-red-500" : "border-gray-300"
-                      } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
+                    className={`w-full px-4 py-2 border ${
+                      errors.phone ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none`}
                     required
                   />
                   {errors.phone && (
@@ -525,7 +527,7 @@ const Editemp = () => {
                 {/* House number */}
                 <div className="w-1/2">
                   <label className="block text-sm font-bold  mb-2">
-                    บ้านเลขที่
+                    บ้านเลขที่*
                   </label>
                   <input
                     type="text"

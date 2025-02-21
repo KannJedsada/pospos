@@ -345,6 +345,50 @@ const get_recommend = async (req, res) => {
   }
 };
 
+const check_menucategory = async (req, res) => {
+  const name = req.params.name
+  try {
+    const category = await menu.check_menucategory(name);
+    res.status(200).json({ data: category });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+const check_menutype = async (req, res) => {
+  const name = req.params.name
+  try {
+    const menutype = await menu.check_menutype(name);
+    res.status(200).json({ data: menutype });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+const check_category = async (req, res) => {
+  const name = req.params.name
+  try {
+    const category = await menu.check_category(name);
+    res.status(200).json({ data: category });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+const check_menuname = async (req, res) => {
+  const name = req.params.name;
+  try {
+    const menuname = await menu.check_menuname(name);
+    res.status(200).json({ data: menuname });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 module.exports = {
   get_menucategory,
   get_price,
@@ -368,5 +412,9 @@ module.exports = {
   edit_menu_cat,
   delete_menu_cat,
   get_recommend,
-  get_menu_cus
+  get_menu_cus,
+  check_menucategory,
+  check_menutype,
+  check_category,
+  check_menuname,
 };

@@ -377,86 +377,85 @@ const Manager = () => {
   const groupedDataCurrdate =
     costprofitcurrdate && costprofitcurrdate.length > 0
       ? costprofitcurrdate.reduce((acc, item) => {
-        const existingMenu = acc[item.menu_name];
+          const existingMenu = acc[item.menu_name];
 
-        if (existingMenu) {
-          existingMenu.total_cost_per_menu += Number(
-            item.total_cost_per_menu
-          );
-          existingMenu.total_price_per_menu += Number(
-            item.total_price_per_menu
-          );
-          existingMenu.profit += Number(item.profit);
-          existingMenu.net_total += Number(item.net_total);
-        } else {
-          acc[item.menu_name] = {
-            menu_name: item.menu_name,
-            total_cost_per_menu: Number(item.total_cost_per_menu),
-            total_price_per_menu: Number(item.total_price_per_menu),
-            net_total: Number(item.net_total),
-            profit: Number(item.profit),
-          };
-        }
+          if (existingMenu) {
+            existingMenu.total_cost_per_menu += Number(
+              item.total_cost_per_menu
+            );
+            existingMenu.total_price_per_menu += Number(
+              item.total_price_per_menu
+            );
+            existingMenu.profit += Number(item.profit);
+            existingMenu.net_total += Number(item.net_total);
+          } else {
+            acc[item.menu_name] = {
+              menu_name: item.menu_name,
+              total_cost_per_menu: Number(item.total_cost_per_menu),
+              total_price_per_menu: Number(item.total_price_per_menu),
+              net_total: Number(item.net_total),
+              profit: Number(item.profit),
+            };
+          }
 
-        return acc;
-      }, {})
+          return acc;
+        }, {})
       : {};
 
   const groupedDataCurrMonth =
     costprofitcurrmonth && costprofitcurrmonth.length > 0
       ? costprofitcurrmonth.reduce((acc, item) => {
-        const existingMenu = acc[item.menu_name];
+          const existingMenu = acc[item.menu_name];
 
-        if (existingMenu) {
-          existingMenu.total_cost_per_menu += Number(
-            item.total_cost_per_menu
-          );
-          existingMenu.total_price_per_menu += Number(
-            item.total_price_per_menu
-          );
-          existingMenu.profit += Number(item.profit);
-          existingMenu.net_total += Number(item.net_total);
-        } else {
-          acc[item.menu_name] = {
-            menu_name: item.menu_name,
-            total_cost_per_menu: Number(item.total_cost_per_menu),
-            total_price_per_menu: Number(item.total_price_per_menu),
-            profit: Number(item.profit),
-            net_total: Number(item.net_total),
-          };
-        }
+          if (existingMenu) {
+            existingMenu.total_cost_per_menu += Number(
+              item.total_cost_per_menu
+            );
+            existingMenu.total_price_per_menu += Number(
+              item.total_price_per_menu
+            );
+            existingMenu.profit += Number(item.profit);
+            existingMenu.net_total += Number(item.net_total);
+          } else {
+            acc[item.menu_name] = {
+              menu_name: item.menu_name,
+              total_cost_per_menu: Number(item.total_cost_per_menu),
+              total_price_per_menu: Number(item.total_price_per_menu),
+              profit: Number(item.profit),
+              net_total: Number(item.net_total),
+            };
+          }
 
-        return acc;
-      }, {})
+          return acc;
+        }, {})
       : {};
 
   const groupedDataCurrMonthBar =
     costprofitcurrmonth && costprofitcurrmonth.length > 0
       ? costprofitcurrmonth.reduce((acc, item) => {
-        // ใช้คีย์ผสมระหว่างวันที่
-        const key = item.date;
+          // ใช้คีย์ผสมระหว่างวันที่
+          const key = item.date;
 
-        if (acc[key]) {
-          acc[key].total_cost_per_menu += Number(item.total_cost_per_menu);
-          acc[key].total_price_per_menu += Number(item.total_price_per_menu);
-          acc[key].profit += Number(item.profit);
-          acc[key].net_total += Number(item.net_total);
-        } else {
-          acc[key] = {
-            date: item.date,
-            total_cost_per_menu: Number(item.total_cost_per_menu),
-            total_price_per_menu: Number(item.total_price_per_menu),
-            profit: Number(item.profit),
-            net_total: Number(item.net_total),
-          };
-        }
+          if (acc[key]) {
+            acc[key].total_cost_per_menu += Number(item.total_cost_per_menu);
+            acc[key].total_price_per_menu += Number(item.total_price_per_menu);
+            acc[key].profit += Number(item.profit);
+            acc[key].net_total += Number(item.net_total);
+          } else {
+            acc[key] = {
+              date: item.date,
+              total_cost_per_menu: Number(item.total_cost_per_menu),
+              total_price_per_menu: Number(item.total_price_per_menu),
+              profit: Number(item.profit),
+              net_total: Number(item.net_total),
+            };
+          }
 
-        return acc;
-      }, {})
+          return acc;
+        }, {})
       : {};
 
   const groupedArray1 = Object.values(groupedDataCurrMonthBar);
-  console.log(groupedArray1);
   const groupedArray = Object.values(groupedDataCurrdate);
   const groupedCurrmonth = Object.values(groupedDataCurrMonth);
 
@@ -509,11 +508,10 @@ const Manager = () => {
   // ข้อมูลกราฟสำหรับรายเดือน
   // หาปีและเดือนจากค่า formData.currmonth
   const year = new Date(formData.currmonth || new Date()).getFullYear();
-  const month = new Date(formData.currmonth || new Date()).getMonth() + 1;  
+  const month = new Date(formData.currmonth || new Date()).getMonth() + 1;
 
   // หาจำนวนวันในเดือน
   const daysInMonth = new Date(year, month, 0).getDate();
-  console.log("Days in Month:", daysInMonth);
 
   // สร้าง array ของวันที่ทั้งหมดในเดือนนั้น (YYYY-MM-DD)
   const allDatesInMonth = Array.from({ length: daysInMonth }, (_, index) => {
@@ -522,7 +520,6 @@ const Manager = () => {
       .toString()
       .padStart(2, "0")}`;
   });
-  console.log("All Dates in Month:", allDatesInMonth);
 
   // สร้างข้อมูลสำหรับกราฟ
   const monthlyData = {
@@ -586,7 +583,6 @@ const Manager = () => {
   };
 
   // Debug ข้อมูลที่สร้างขึ้น
-  console.log("Monthly Data:", monthlyData);
 
   const options = {
     responsive: true,
@@ -699,8 +695,9 @@ const Manager = () => {
                           return (
                             <tr
                               key={index}
-                              className={`hover:bg-blue-100 transition-colors duration-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                                }`}
+                              className={`hover:bg-blue-100 transition-colors duration-200 ${
+                                index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                              }`}
                             >
                               <td className="border px-4 py-2">
                                 {emp.f_name} {emp.l_name}
@@ -709,10 +706,11 @@ const Manager = () => {
                                 {empCheckInTime ? (
                                   emp.check_out === null ? (
                                     <span
-                                      className={`${empCheckInTime > empStartTime
+                                      className={`${
+                                        empCheckInTime > empStartTime
                                           ? "bg-red-500 text-white" // กรณีมาสาย
                                           : "bg-green-500 text-white" // กรณีตรงเวลา
-                                        } px-2 py-1 rounded`}
+                                      } px-2 py-1 rounded`}
                                     >
                                       {empCheckInTime > empStartTime
                                         ? `สาย`
@@ -766,8 +764,9 @@ const Manager = () => {
                       {menuRecom.map((menu, index) => (
                         <tr
                           key={index}
-                          className={`hover:bg-blue-100 transition-colors duration-200 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                            }`}
+                          className={`hover:bg-blue-100 transition-colors duration-200 ${
+                            index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                          }`}
                         >
                           <td className="border px-4 py-2 text-center">
                             {index + 1}
@@ -806,10 +805,11 @@ const Manager = () => {
                       {stockLess.map((stock, index) => (
                         <tr
                           key={index}
-                          className={`transition-colors duration-200 ${stock.qty < stock.min_qty
+                          className={`transition-colors duration-200 ${
+                            stock.qty <= 0
                               ? "bg-red-500 text-white border hover:bg-red-600"
                               : "bg-white hover:bg-blue-50"
-                            }`}
+                          }`}
                         >
                           <td className="border px-4 py-2 text-center">
                             {index + 1}
@@ -917,13 +917,13 @@ const Manager = () => {
                       ต้นทุนและกำไร วันที่{" "}
                       {formData?.currdate
                         ? new Date(formData.currdate).toLocaleDateString(
-                          "th-TH",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )
+                            "th-TH",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )
                         : currentDate}
                     </p>
                   </h3>
@@ -938,10 +938,11 @@ const Manager = () => {
                   <p className="text-gray-600">
                     กำไร:{" "}
                     <span
-                      className={`font-bold ${totalscurrdate?.profit < 0
+                      className={`font-bold ${
+                        totalscurrdate?.profit < 0
                           ? "text-red-600"
                           : "text-gray-800"
-                        }`}
+                      }`}
                     >
                       {totalscurrdate?.profit
                         ? Number(totalscurrdate.profit).toFixed(3)
@@ -957,13 +958,13 @@ const Manager = () => {
                       ยอดขาย วันที่{" "}
                       {formData?.currdate
                         ? new Date(formData.currdate).toLocaleDateString(
-                          "th-TH",
-                          {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          }
-                        )
+                            "th-TH",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            }
+                          )
                         : currentDate}
                     </p>
                   </h3>
@@ -999,9 +1000,9 @@ const Manager = () => {
                     ต้นทุนและกำไร เดือน
                     {formData?.currmonth
                       ? new Date(formData.currmonth).toLocaleDateString(
-                        "th-TH",
-                        { month: "long" }
-                      )
+                          "th-TH",
+                          { month: "long" }
+                        )
                       : currentMonth}
                   </h3>
 
@@ -1016,10 +1017,11 @@ const Manager = () => {
                   <p className="text-gray-600">
                     กำไร:{" "}
                     <span
-                      className={`font-bold ${totalscurrmonth?.profit < 0
+                      className={`font-bold ${
+                        totalscurrmonth?.profit < 0
                           ? "text-red-600"
                           : "text-gray-800"
-                        }`}
+                      }`}
                     >
                       {totalscurrmonth?.profit
                         ? Number(totalscurrmonth.profit).toFixed(3)
@@ -1034,9 +1036,9 @@ const Manager = () => {
                     ยอดขายเดือน
                     {formData?.currmonth
                       ? new Date(formData.currmonth).toLocaleDateString(
-                        "th-TH",
-                        { month: "long" }
-                      )
+                          "th-TH",
+                          { month: "long" }
+                        )
                       : currentMonth}
                   </h3>
                   <p className="text-gray-600">

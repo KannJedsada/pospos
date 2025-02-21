@@ -69,7 +69,9 @@ class Menu {
   }
 
   static async get_menu_id(id) {
-    const res = await pool.query(`SELECT * FROM menus WHERE menu_id = $1`, [id]);
+    const res = await pool.query(`SELECT * FROM menus WHERE menu_id = $1`, [
+      id,
+    ]);
     return res.rows[0];
   }
 
@@ -184,14 +186,11 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       }
 
       return { success: true, menu };
-
     } catch (error) {
       console.error("Error in add_menu:", error.message);
       return { success: false, error: error.message };
     }
   }
-
-
 
   static async edit_menu(id, data) {
     const { name, img, category, ingredients } = data;
@@ -298,7 +297,6 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
       [menu_id]
     );
 
-
     let totalcost = 0;
     const menus = menures.rows;
 
@@ -391,6 +389,42 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
     );
     return res.rows;
   }
+
+  static async check_menucategory(name) {
+    const res = await pool.query(
+      `SELECT category_name FROM menu_categories WHERE category_name = $1`,
+      [name]
+    );
+    return res.rows[0];
+  }
+
+  static async check_menutype(name) {
+    const res = await pool.query(
+      `SELECT typename FROM menu_type WHERE typename = $1`,
+      [name]
+    );
+    return res.rows[0];
+  }
+
+  static async check_category(name) {
+    const res = await pool.query(
+      `SELECT category_name FROM categories WHERE category_name = $1`,
+      [name]
+    );
+    return res.rows[0];
+  }
+
+  static async check_menuname(name) {
+    const res = await pool.query(
+      `SELECT * FROM menus WHERE menu_name = $1`,
+      [name]
+    );
+    return res.rows[0];
+  }
+
+  // static async count_menu() {
+  //   const res = await pool.query(`SELECT COUNT(*) FROM menus`);
+  // }
 }
 
 module.exports = Menu;

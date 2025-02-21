@@ -533,8 +533,9 @@ const EmpManagement = () => {
               <div>
                 <label className="text-gray-500 font-medium">ที่อยู่:</label>
                 <p className="text-lg text-gray-700 font-semibold">
-                  {emp.house_number} {emp.road || ""} {emp.province}{" "}
-                  {emp.district} {emp.subdistrict} {emp.zipcode}
+                  {'บ้านเลขที่ ' + emp.house_number} {""} {emp.road ? `ถ.${emp.road}` : ""} {" "}
+                  {`ต.`+emp.subdistrict} {`อ.` + emp.district} {" "} 
+                  {`จ.` + emp.province} {" "}{emp.zipcode}
                 </p>
               </div>
 

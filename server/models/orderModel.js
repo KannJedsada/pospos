@@ -25,11 +25,12 @@ class Order {
 
   static async get_order_detail(table_id) {
     const res = await pool.query(
-      `SELECT od.*, m.*, d.status_name
+      `SELECT od.*, m.*, d.status_name, mc.category_name
       FROM order_detail od
       INNER JOIN orders o ON od.order_id = o.id
       INNER JOIN menus m ON od.menu_id = m.menu_id
       INNER JOIN dish_status d ON d.id = od.dish_status
+      INNER JOIN menu_categories mc ON mc.id = m.menu_category
       WHERE od.table_id = $1 AND o.payment_status_id = 1`,
       [table_id]
     );

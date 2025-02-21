@@ -22,9 +22,9 @@ const Addworkdate = () => {
         },
       });
       const filterDept = res.data.data.filter(
-        (emp) => emp.dept_id !== 1 && emp.dept_id !== 2
+        (emp) => emp.access !== 0 && emp.access !== 1
       );
-      // console.log(filterDept);
+      console.log(res.data.data);
       setData(filterDept);
     } catch (error) {
       console.error("Failed to fetch employees:", error);
@@ -84,11 +84,15 @@ const Addworkdate = () => {
       setSelectedEmployees([]);
     } catch (error) {
       console.error("Failed to submit work dates:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to assign work dates.",
-      });
+      if (error.response && error.response.data.message === "Workdate already assigned") {
+        Swal.fire("ข้อผิดพลาด", "พนักงานได้ลงเวลาทำงานสำหรับวันนี้แล้ว", "error");
+      }else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "พนักงานได้ลงเวลาทำงานสำหรับวันนี้แล้ว",
+        });
+      }
     }finally{
       setIsLoading(false);
     }

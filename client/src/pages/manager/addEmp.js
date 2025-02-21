@@ -473,7 +473,7 @@ const Addemp = () => {
               {/* House number */}
               <div className="w-full md:w-1/2">
                 <label className="block text-sm font-bold mb-2">
-                  บ้านเลขที่
+                  บ้านเลขที่*
                 </label>
                 <input
                   type="text"

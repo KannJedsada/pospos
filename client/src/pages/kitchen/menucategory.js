@@ -125,8 +125,56 @@ function Menucategory() {
     }));
   };
 
+  // ฟังก์ชันตรวจสอบชื่อซ้ำ
+  const checkDuplicateName = async (name, modalType) => {
+    if (!name) return false; // ถ้าไม่มีชื่อ ให้ข้ามการตรวจสอบ
+
+    let endpoint = "";
+
+    if (modalType === "menucategory") {
+      endpoint = `/api/menu/check-menucategory/${name}`;
+    } else if (modalType === "menutype") {
+      endpoint = `/api/menu/check-menutype/${name}`;
+    } else if (modalType === "category") {
+      endpoint = `/api/menu/check-category/${name}`;
+    }
+
+    try {
+      const response = await axios.get(endpoint);
+      return response.data.data ? true : false; // ถ้าพบชื่อในฐานข้อมูล ให้คืนค่า true
+    } catch (error) {
+      console.error("Error checking duplicate name:", error);
+      return false;
+    }
+  };
+
   const handleSubmit = async () => {
     try {
+      // ตรวจสอบว่าผู้ใช้กรอกข้อมูลหรือไม่
+      if (!formData.category_name && !formData.typename) {
+        Swal.fire({
+          icon: "warning",
+          title: "กรุณากรอกข้อมูล",
+          text: "กรุณากรอกชื่อ",
+        });
+        return;
+      }
+
+      // ตรวจสอบชื่อซ้ำ
+      const isDuplicate = await checkDuplicateName(
+        formData.category_name || formData.typename,
+        modalType
+      );
+      if (isDuplicate) {
+        Swal.fire({
+          icon: "error",
+          title: "ชื่อซ้ำ",
+          text: "ไม่สามารถใช้ชื่อนี้ได้ เนื่องจากมีอยู่ในระบบแล้ว",
+        });
+        return;
+      }
+
+      // อัปเดตข้อมูลถ้ามี `currentEditData`
       if (currentEditData) {
         if (modalType === "menucategory") {
           await axios.put(`/api/menu/edit-cat/${currentEditData.id}`, formData);
@@ -148,6 +196,7 @@ function Menucategory() {
           timer: 1000,
         });
       } else {
+        // เพิ่มข้อมูลใหม่
         if (modalType === "menucategory") {
           await axios.post(`/api/menu/addcategory`, formData);
         } else if (modalType === "menutype") {
@@ -162,6 +211,8 @@ function Menucategory() {
           timer: 1000,
         });
       }
+
+      // โหลดข้อมูลใหม่หลังจากอัปเดต
       fetchData();
       closeModal();
     } catch (error) {
@@ -172,6 +223,54 @@ function Menucategory() {
       });
     }
   };
+
+  // const handleSubmit = async () => {
+  //   try {
+  //     if (currentEditData) {
+  //       if (modalType === "menucategory") {
+  //         await axios.put(`/api/menu/edit-cat/${currentEditData.id}`, formData);
+  //       } else if (modalType === "menutype") {
+  //         await axios.put(
+  //           `/api/menu/edit-menutype/${currentEditData.id}`,
+  //           formData
+  //         );
+  //       } else if (modalType === "category") {
+  //         await axios.put(
+  //           `/api/stock/edit_category/${currentEditData.id}`,
+  //           formData
+  //         );
+  //       }
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "แก้ไขสำเร็จ",
+  //         showConfirmButton: false,
+  //         timer: 1000,
+  //       });
+  //     } else {
+  //       if (modalType === "menucategory") {
+  //         await axios.post(`/api/menu/addcategory`, formData);
+  //       } else if (modalType === "menutype") {
+  //         await axios.post(`/api/menu/add-menutype`, formData);
+  //       } else if (modalType === "category") {
+  //         await axios.post(`/api/stock/add_category`, formData);
+  //       }
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "เพิ่มสำเร็จ",
+  //         showConfirmButton: false,
+  //         timer: 1000,
+  //       });
+  //     }
+  //     fetchData();
+  //     closeModal();
+  //   } catch (error) {
+  //     console.error(error);
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "เกิดข้อผิดพลาด",
+  //     });
+  //   }
+  // };
 
   useEffect(() => {
     fetchData();

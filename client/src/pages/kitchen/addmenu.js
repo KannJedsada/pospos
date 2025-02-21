@@ -40,7 +40,12 @@ function Addmenu() {
       const unitRes = await axios.get("/api/unit", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
-      setUnits(unitRes.data.data);
+
+      // กรองหน่วยที่ไม่ต้องการ (ไม่เอากิโลกรัมและลิตร)
+      const filteredUnits = unitRes.data.data.filter(
+        (unit) => unit.u_name !== "กิโลกรัม" && unit.u_name !== "ลิตร"
+      );
+      setUnits(filteredUnits);
     } catch (error) {
       console.error("Error fetching units:", error);
     }
@@ -89,11 +94,28 @@ function Addmenu() {
   // Handle materials and sub-material changes
   const handleMaterialChange = (index, e) => {
     const updatedIngredients = [...data.ingredients];
+    const value =
+      e.target.name === "material_id" ? Number(e.target.value) : e.target.value;
+
     updatedIngredients[index] = {
       ...updatedIngredients[index],
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     };
     setData({ ...data, ingredients: updatedIngredients });
+  };
+
+  // ฟังก์ชันกรองวัตถุดิบที่ยังไม่ถูกเลือก สำหรับแต่ละ dropdown
+  const getFilteredMaterials = (currentIndex) => {
+    // เก็บรายการ material_id ที่ถูกเลือกไปแล้ว (ยกเว้นตัวที่กำลังแก้ไข)
+    const selectedMaterialIds = data.ingredients
+      .filter((_, idx) => idx !== currentIndex)
+      .map((item) => Number(item.material_id))
+      .filter((id) => id); // กรองค่าว่างออก
+
+    // คืนค่าวัตถุดิบที่ยังไม่ถูกเลือก
+    return materials.filter(
+      (material) => !selectedMaterialIds.includes(Number(material.id))
+    );
   };
 
   // Add new material
@@ -113,7 +135,24 @@ function Addmenu() {
     setData({ ...data, ingredients: updatedMaterials });
   };
 
-  // Submit form
+  const checkDuplicateNameAndMenuType = async (name, menutype) => {
+    try {
+      // ตรวจสอบชื่อเมนูซ้ำ
+      const nameResponse = await axios.get(`/api/menu/check-menuname/${name}`);
+      if (nameResponse.data.data) {
+        const existingMenuType = nameResponse.data.data.menu_type;
+        if (existingMenuType === parseInt(menutype)) {
+          return { error: "ชื่อและประเภทนี้มีอยู่แล้วในระบบ" }; // ชื่อและ menutype ซ้ำ
+        }
+      }
+
+      return { error: null }; // ไม่มีชื่อซ้ำหรือตรวจสอบแล้วว่าเป็นประเภทที่แตกต่างกัน
+    } catch (error) {
+      console.error("Error checking for duplicates:", error);
+      return { error: "เกิดข้อผิดพลาดในการตรวจสอบข้อมูล" };
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -127,32 +166,46 @@ function Addmenu() {
       return;
     }
 
+    const invalidQuantity = data.ingredients.some(
+      (ingredient) =>
+        ingredient.quantity_used < 1 || ingredient.quantity_used > 1000
+    );
+
+    if (invalidQuantity) {
+      Swal.fire("Error", "ปริมาณต้องอยู่ระหว่าง 1 ถึง 1000 หน่วย", "error");
+      return;
+    }
+    // ตรวจสอบชื่อและ menutype ซ้ำก่อนที่จะทำการ submit
+    const { error } = await checkDuplicateNameAndMenuType(
+      data.name,
+      data.menutype
+    );
+    if (error) {
+      Swal.fire("Error", error, "error");
+      return;
+    }
+
     try {
       setIsLoading(true);
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("img", selectedFile);
       formData.append("category", data.category);
+      formData.append("menutype", data.menutype); // ใช้ menutype แทน category
       formData.append("ingredients", JSON.stringify(data.ingredients));
-      formData.append("menutype", data.menutype);
-      // for (let [key, value] of formData.entries()) {
-      //   console.log(`${key}: ${value}`);
-      // }
       const response = await axios.post("/api/menu/addmenu", formData, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
           "Content-Type": "multipart/form-data",
         },
       });
-
       if (response.status === 200) {
         Swal.fire("Success", "เพิ่มเมนูสำเร็จ", "success");
         setData({
           name: "",
           img: "",
-          category: "",
-          ingredients: [],
           menutype: "",
+          ingredients: [],
         });
         setPreviewImage("");
         setSelectedFile(null);
@@ -275,18 +328,19 @@ function Addmenu() {
               >
                 <select
                   name="material_id"
-                  value={material.material_id}
+                  value={data.ingredients[index]?.material_id || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
                   disabled={isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
-                  {materials.map((mat) => (
+                  {getFilteredMaterials(index).map((mat) => (
                     <option key={mat.id} value={mat.id}>
                       {mat.m_name}
                     </option>
                   ))}
                 </select>
+
                 <input
                   type="text"
                   name="quantity_used"
@@ -333,10 +387,11 @@ function Addmenu() {
           {/* Submit Button */}
           <button
             type="submit"
-            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
+            className={`px-6 py-2 text-white rounded-lg shadow-md ${
+              isLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-700 hover:bg-blue-600"
-              }`}
+            }`}
             disabled={isLoading}
           >
             {isLoading ? (

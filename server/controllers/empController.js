@@ -168,7 +168,7 @@ const count_absent = async (req, res) => {
 const permission = async (req, res) => {
   try {
     const id_card = req.params.id;
-    const newAccess = req.body.newAccess;
+    const newAccess = req.body.newAccess || null;
     const result = await emp.permission(id_card, newAccess); 
     res.status(200).json({ data: result });
   } catch (error) {

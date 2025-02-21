@@ -76,7 +76,6 @@ function Addstock() {
   //   }
   // }, [JSON.stringify(data.stock_detail)]);
 
-
   const fetchMaterials = async () => {
     try {
       const materialRes = await axios.get("/api/material", {
@@ -93,22 +92,17 @@ function Addstock() {
       const unitRes = await axios.get("/api/unit", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
-      setUnits(unitRes.data.data);
+      const filteredUnits = unitRes.data.data.filter(
+        (unit) =>
+          unit.u_name === "กิโลกรัม" ||
+          unit.u_name === "ลิตร" ||
+          unit.u_name === "แผง"
+      );
+      setUnits(filteredUnits);
     } catch (error) {
       console.error("Error fetching units:", error);
     }
   };
-
-  // const fetchCategories = async () => {
-  //   try {
-  //     const categoryRes = await axios.get("/api/stock/category", {
-  //       headers: { Authorization: `Bearer ${authData.token}` },
-  //     });
-  //     setCategories(categoryRes.data.data);
-  //   } catch (error) {
-  //     console.error("Error fetching categories", error);
-  //   }
-  // };
 
   const checkTrue = async (id) => {
     try {
@@ -139,15 +133,27 @@ function Addstock() {
     }
   };
 
+  const getFilteredMaterials = (currentIndex) => {
+    // เก็บรายการ material_id ที่ถูกเลือกไปแล้ว (ยกเว้นตัวที่กำลังแก้ไข)
+    const selectedMaterialIds = data.stock_detail
+      .filter((_, idx) => idx !== currentIndex)
+      .map((item) => Number(item.material_id))
+      .filter((id) => id); // กรองค่าว่างออก
+
+    // คืนค่าวัตถุดิบที่ยังไม่ถูกเลือก
+    return materials.filter(
+      (material) => !selectedMaterialIds.includes(Number(material.id))
+    );
+  };
+
   const addMaterial = () => {
     setData({
       ...data,
       stock_detail: [
         ...data.stock_detail,
-        { material_id: "", qty: "", unit_id: "", price: "", },
+        { material_id: "", qty: "", unit_id: "", price: "" },
       ],
     });
-    console.log(data.stock_detail)
   };
 
   const removeMaterial = (index) => {
@@ -165,6 +171,11 @@ function Addstock() {
       return;
     }
 
+    if (data.stock_detail.some((item) => item.qty > 1000 || item.qty <= 0)) {
+      Swal.fire("Error", "ปริมาณสินค้าไม่สามารถมากกว่า 1000", "error");
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await axios.post("/api/stock/new_stock", data, {
@@ -179,7 +190,12 @@ function Addstock() {
       if (insufficient_items.length > 0) {
         // จัดกลุ่มรายการที่สต็อกไม่พอ
         const groupedItems = insufficient_items.reduce((acc, item) => {
-          const { compositeMaterial: mainMaterial, componentMaterial: compMaterial, current_qty: currentQty, required_qty: requiredQty } = item;
+          const {
+            compositeMaterial: mainMaterial,
+            componentMaterial: compMaterial,
+            current_qty: currentQty,
+            required_qty: requiredQty,
+          } = item;
 
           // ค้นหาวัสดุในกลุ่มที่มีอยู่แล้ว
           const existingItem = acc.find((i) => i.compMaterial === compMaterial);
@@ -281,20 +297,19 @@ function Addstock() {
                 </select> */}
                 <select
                   name="material_id"
-                  value={material.material_id || ""}
+                  value={data.stock_detail[index]?.material_id || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
                   disabled={isLoading}
-                  className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
-                  {materials
-                    .filter((mat) => !data.stock_detail.some((stock) => stock.material_id === mat.id)) // ✅ แสดงเฉพาะวัตถุดิบที่ไม่มีใน stock_detail
-                    .map((mat) => (
-                      <option key={mat.id} value={mat.id}>
-                        {mat.m_name}
-                      </option>
-                    ))}
+                  {getFilteredMaterials(index).map((mat) => (
+                    <option key={mat.id} value={mat.id}>
+                      {mat.m_name}
+                    </option>
+                  ))}
                 </select>
+
                 <input
                   type="text"
                   name="qty"
@@ -350,10 +365,11 @@ function Addstock() {
           {/* Submit Button */}
           <button
             type="submit"
-            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-700 hover:bg-blue-600"
-              }`}
+            className={`px-6 py-2 text-white rounded-lg shadow-md ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-700 hover:bg-blue-600"
+            }`}
             disabled={isLoading}
           >
             {isLoading ? (

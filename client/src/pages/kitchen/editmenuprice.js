@@ -45,25 +45,46 @@ function Editmenuprice() {
 
   const handleAddNewPrice = async (e) => {
     e.preventDefault();
-    try {
-      setIsLoading(true)
-      await axios.post(`/api/menu/new-price/${id}`, data, {
-        headers: {
-          Authorization: `Bearer ${authData.token}`,
-        },
-      });
-      Swal.fire({
-        icon: "success",
-        title: "แก้ไขสำเร็จ",
-        showConfirmButton: false,
-        timer: 1000,
-      });
-    } catch (error) {
-      console.error("Error Insert data", error);
-      Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
-    } finally {
-      setIsLoading(false);
-      navigate("/menus");
+
+    if (cost < data.price) {
+      Swal.fire("Error", "ราคาขายต้องน้อยกว่าราคาต้นทุน", "error");
+      return;
+    }
+
+    // แสดงป๊อปอัปยืนยันก่อนบันทึกข้อมูล
+    const result = await Swal.fire({
+      title: "ยืนยันการบันทึก?",
+      text: "คุณต้องการบันทึกการเปลี่ยนแปลงหรือไม่",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    // ถ้าผู้ใช้กดยืนยัน ให้ทำการบันทึกข้อมูล
+    if (result.isConfirmed) {
+      try {
+        setIsLoading(true);
+        await axios.post(`/api/menu/new-price/${id}`, data, {
+          headers: {
+            Authorization: `Bearer ${authData.token}`,
+          },
+        });
+
+        Swal.fire({
+          icon: "success",
+          title: "แก้ไขสำเร็จ",
+          showConfirmButton: false,
+          timer: 1000,
+        });
+
+        navigate("/menus");
+      } catch (error) {
+        console.error("Error Insert data", error);
+        Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -327,8 +348,8 @@ function Editmenuprice() {
                           <td className="px-4 py-2 border-b h-full">
                             {price.date_end
                               ? new Date(price.date_end).toLocaleDateString(
-                                "th-TH"
-                              )
+                                  "th-TH"
+                                )
                               : "ไม่มีข้อมูล"}
                           </td>
                           <td className="px-4 py-2 border-b h-full">
@@ -364,10 +385,11 @@ function Editmenuprice() {
                     <button
                       key={page}
                       onClick={() => paginate(page)}
-                      className={`px-4 py-2 rounded-lg ${currentPage === page
-                        ? "bg-blue-700 text-white"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        }`}
+                      className={`px-4 py-2 rounded-lg ${
+                        currentPage === page
+                          ? "bg-blue-700 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
                     >
                       {page}
                     </button>

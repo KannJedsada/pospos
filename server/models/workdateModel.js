@@ -47,9 +47,7 @@ class Workdate {
     );
 
     if (existingWorkdate.rows.length > 0) {
-      throw new Error(
-        `Workdate already assigned for this employee ${existingWorkdate.rows[0].f_name} ${existingWorkdate.rows[0].l_name}`
-      );
+      throw new Error(`Workdate already assigned`);
     }
     const res = await pool.query(
       `INSERT INTO work_schedules(id_card, work_date) VALUES($1, $2) RETURNING *`,
@@ -109,11 +107,31 @@ class Workdate {
 
   static async check_emp_workdate() {
     const res = await pool.query(
-      `SELECT emp.f_name, emp.l_name, ws.*, ts.check_in,ts.check_out, p.p_name, p.start_time FROM employees emp
-      INNER JOIN work_schedules ws ON emp.id_card = ws.id_card
-      LEFT JOIN timestamps ts ON ws.work_date = ts.work_date AND ts.id_card = emp.id_card
-      INNER JOIN positions p ON emp.p_id = p.id
-      WHERE ws.work_date = CURRENT_DATE`
+      // `SELECT emp.f_name, emp.l_name, ws.*, ts.check_in,ts.check_out, p.p_name, p.start_time FROM employees emp
+      // LEFT JOIN work_schedules ws ON emp.id_card = ws.id_card
+      // RIGHT JOIN timestamps ts ON ws.work_date = ts.work_date AND ts.id_card = emp.id_card
+      // INNER JOIN positions p ON emp.p_id = p.id
+      // WHERE ws.work_date = CURRENT_DATE`
+      `
+      SELECT 
+    emp.f_name, 
+    emp.l_name, 
+    ws.work_date,
+    ts.check_in,
+    ts.check_out, 
+    p.p_name, 
+    p.start_time
+FROM employees emp
+LEFT JOIN work_schedules ws 
+    ON emp.id_card = ws.id_card 
+    AND ws.work_date = CURRENT_DATE
+RIGHT JOIN timestamps ts 
+    ON emp.id_card = ts.id_card 
+    AND (ws.work_date IS NULL OR ws.work_date = ts.work_date) 
+INNER JOIN positions p 
+    ON emp.p_id = p.id
+WHERE ts.work_date = CURRENT_DATE;
+      `
     );
     return res.rows;
   }

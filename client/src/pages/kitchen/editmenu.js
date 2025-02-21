@@ -44,7 +44,13 @@ function Editmenu() {
       const unitRes = await axios.get("/api/unit", {
         headers: { Authorization: `Bearer ${authData.token}` },
       });
-      setUnits(unitRes.data.data);
+
+      // กรองหน่วยที่ไม่ต้องการ (ไม่เอากิโลกรัมและลิตร)
+      const filteredUnits = unitRes.data.data.filter(
+        (unit) => unit.u_name !== "กิโลกรัม" && unit.u_name !== "ลิตร"
+      );
+
+      setUnits(filteredUnits);
     } catch (error) {
       console.error("Error fetching units:", error);
     }
@@ -77,11 +83,11 @@ function Editmenu() {
         menu_category: item.menu_category,
         ingredients: item.ingredients
           ? item.ingredients.map((ing) => ({
-            material_id: ing.material_id,
-            material_name: ing.material_name,
-            quantity_used: ing.quantity_used,
-            unit_id: ing.unit_id,
-          }))
+              material_id: ing.material_id,
+              material_name: ing.material_name,
+              quantity_used: ing.quantity_used,
+              unit_id: ing.unit_id,
+            }))
           : [],
         menutype: item.menu_type,
       };
@@ -127,8 +133,27 @@ function Editmenu() {
 
   const handleMaterialChange = (index, e) => {
     const updatedIngredients = [...data.ingredients];
-    updatedIngredients[index][e.target.name] = e.target.value;
+    const value =
+      e.target.name === "material_id" ? Number(e.target.value) : e.target.value;
+
+    updatedIngredients[index] = {
+      ...updatedIngredients[index],
+      [e.target.name]: value,
+    };
     setData({ ...data, ingredients: updatedIngredients });
+  };
+
+  const getFilteredMaterials = (currentIndex) => {
+    // เก็บรายการ material_id ที่ถูกเลือกไปแล้ว (ยกเว้นตัวที่กำลังแก้ไข)
+    const selectedMaterialIds = data.ingredients
+      .filter((_, idx) => idx !== currentIndex)
+      .map((item) => Number(item.material_id))
+      .filter((id) => id); // กรองค่าว่างออก
+
+    // คืนค่าวัตถุดิบที่ยังไม่ถูกเลือก
+    return materials.filter(
+      (material) => !selectedMaterialIds.includes(Number(material.id))
+    );
   };
 
   const addMaterial = () => {
@@ -149,6 +174,16 @@ function Editmenu() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const invalidQuantity = data.ingredients.some(
+      (ingredient) =>
+        ingredient.quantity_used < 1 || ingredient.quantity_used > 1000
+    );
+
+    if (invalidQuantity) {
+      Swal.fire("Error", "ปริมาณต้องอยู่ระหว่าง 1 ถึง 1000 หน่วย", "error");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("menu_name", data.menu_name);
@@ -292,18 +327,19 @@ function Editmenu() {
               >
                 <select
                   name="material_id"
-                  value={material.material_id}
+                  value={data.ingredients[index]?.material_id || ""}
                   onChange={(e) => handleMaterialChange(index, e)}
                   disabled={isLoading}
                   className="px-4 py-2 border border-gray-300 rounded-md w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">เลือกวัตถุดิบ</option>
-                  {materials.map((mat) => (
+                  {getFilteredMaterials(index).map((mat) => (
                     <option key={mat.id} value={mat.id}>
                       {mat.m_name}
                     </option>
                   ))}
                 </select>
+
                 <input
                   type="text"
                   name="quantity_used"
@@ -350,10 +386,11 @@ function Editmenu() {
           {/* Submit Button */}
           <button
             type="submit"
-            className={`px-6 py-2 text-white rounded-lg shadow-md ${isLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-700 hover:bg-blue-600"
-              }`}
+            className={`px-6 py-2 text-white rounded-lg shadow-md ${
+              isLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-700 hover:bg-blue-600"
+            }`}
             disabled={isLoading}
           >
             {isLoading ? (

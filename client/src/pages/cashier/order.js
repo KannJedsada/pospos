@@ -75,6 +75,7 @@ function Order() {
   const fetchOrderDetail = async (table_id) => {
     try {
       const res = await axios.get(`/api/order/orderdetail/${table_id}`);
+      console.log(res.data.data);
       setOrderDetail(res.data.data);
     } catch (error) {
       console.error("Error fetching Data:", error);
@@ -639,12 +640,13 @@ function Order() {
                           >
                             <div className="overflow-hidden max-w-xs">
                               <p className="text-gray-800 font-medium overflow-ellipsis overflow-hidden whitespace-nowrap">
-                                {order.menu_name} {order.qty}{" "}
-                                {order.menu_category !== 6 &&
-                                order.menu_category !== 7
-                                  ? "จาน"
-                                  : "ถ้วย"}
+                                {order.menu_name} x {order.qty}{" "}
+                                {order.category_name.includes("แกง") ||
+                                order.category_name.includes("ต้ม")
+                                  ? "ถ้วย"
+                                  : "จาน"}
                               </p>
+
                               <span>
                                 {order.qty} x{" "}
                                 {(order.price / order.qty).toFixed(2)} บาท

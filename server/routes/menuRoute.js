@@ -4,13 +4,13 @@ const menuController = require("../controllers/menuController");
 const authenticateToken = require("../middlewares/authMiddleware");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary"); 
+const cloudinary = require("../config/cloudinary");
 
 // ตั้งค่า Storage ของ Cloudinary
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "upload/menu", 
+    folder: "upload/menu",
     allowed_formats: ["jpeg", "png", "jpg", "gif"],
   },
 });
@@ -31,7 +31,10 @@ router.get("/menucateone/:id", menuController.get_menu_bycategoryone);
 router.get("/menutype", menuController.get_menu_type);
 router.get("/getcost/:id", menuController.get_cost_menu);
 router.get("/menu-recom", menuController.get_recommend);
-
+router.get("/check-menucategory/:name", menuController.check_menucategory);
+router.get("/check-menutype/:name", menuController.check_menutype);
+router.get("/check-category/:name", menuController.check_category);
+router.get("/check-menuname/:name", menuController.check_menuname);
 // เพิ่ม
 router.post("/addstatus", menuController.add_status);
 router.post("/addcategory", menuController.add_category);

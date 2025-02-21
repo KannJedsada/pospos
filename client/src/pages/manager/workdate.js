@@ -20,9 +20,11 @@ function Workdate() {
           Authorization: `Bearer ${authData.token}`,
         },
       });
-      const filterDept = res.data.data.filter(
-        (emp) => emp.dept_id !== 1 && emp.dept_id !== 2
-      );
+      // const filterDept = res.data.data.filter(
+      //   (emp) => emp.dept_id !== 1 && emp.dept_id !== 2
+      // );
+      const filterDept = res.data.data;
+      console.log(filterDept);
 
       // Process data to group employees by work_date
       const groupedData = filterDept.reduce((acc, emp) => {
@@ -31,6 +33,7 @@ function Workdate() {
         acc[date].push(emp);
         return acc;
       }, {});
+      console.log(groupedData);
 
       setWorkdate(groupedData);
       setEmp(filterDept);
