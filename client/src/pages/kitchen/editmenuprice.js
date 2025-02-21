@@ -46,41 +46,23 @@ function Editmenuprice() {
     e.preventDefault();
     console.log(cost);
     console.log(data.price);
+
+    // ถ้า price < totalcost ให้แสดง Swal ยืนยันก่อนบันทึก
     if (data.price < cost.totalcost) {
-      Swal.fire({
+      const result = await Swal.fire({
         title: "ยืนยันการบันทึก?",
-        text: "คุณต้องการบันทึกการเปลี่ยนแปลงหรือไม่",
+        text: "ราคาน้อยกว่าต้นทุน คุณต้องการบันทึกหรือไม่?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonText: "ยืนยัน",
         cancelButtonText: "ยกเลิก",
       });
 
-      try {
-        setIsLoading(true);
-        await axios.post(`/api/menu/new-price/${id}`, data, {
-          headers: {
-            Authorization: `Bearer ${authData.token}`,
-          },
-        });
-
-        Swal.fire({
-          icon: "success",
-          title: "แก้ไขสำเร็จ",
-          showConfirmButton: false,
-          timer: 1000,
-        });
-
-        navigate("/menus");
-      } catch (error) {
-        console.error("Error Insert data", error);
-        Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
+      // ถ้าผู้ใช้กดยกเลิก ให้ return ออกไปเลย
+      if (!result.isConfirmed) return;
     }
 
+    // บันทึกข้อมูล
     try {
       setIsLoading(true);
       await axios.post(`/api/menu/new-price/${id}`, data, {
