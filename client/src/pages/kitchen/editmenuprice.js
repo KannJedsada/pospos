@@ -24,7 +24,6 @@ function Editmenuprice() {
 
   const fetchData = async () => {
     try {
-      console.log(id);
       setIsLoading(true);
       const menuPriceRes = await axios.get(`/api/menu/menuprice/${id}`);
       setMenuPrices(menuPriceRes.data.data);
@@ -45,8 +44,7 @@ function Editmenuprice() {
 
   const handleAddNewPrice = async (e) => {
     e.preventDefault();
-
-    if (cost < data.price) {
+    if (data.price < cost) {
       Swal.fire({
         title: "ยืนยันการบันทึก?",
         text: "คุณต้องการบันทึกการเปลี่ยนแปลงหรือไม่",
