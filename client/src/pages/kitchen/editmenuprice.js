@@ -44,63 +44,65 @@ function Editmenuprice() {
 
   const handleAddNewPrice = async (e) => {
     e.preventDefault();
-    if (data.price < cost) {
-      Swal.fire({
-        title: "ยืนยันการบันทึก?",
-        text: "คุณต้องการบันทึกการเปลี่ยนแปลงหรือไม่",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "ยืนยัน",
-        cancelButtonText: "ยกเลิก",
-      });
+    console.log("cost", cost)
+    console.log("price", data.price);
+    // if (data.price < cost) {
+    //   Swal.fire({
+    //     title: "ยืนยันการบันทึก?",
+    //     text: "คุณต้องการบันทึกการเปลี่ยนแปลงหรือไม่",
+    //     icon: "warning",
+    //     showCancelButton: true,
+    //     confirmButtonText: "ยืนยัน",
+    //     cancelButtonText: "ยกเลิก",
+    //   });
 
-      try {
-        setIsLoading(true);
-        await axios.post(`/api/menu/new-price/${id}`, data, {
-          headers: {
-            Authorization: `Bearer ${authData.token}`,
-          },
-        });
+    //   try {
+    //     setIsLoading(true);
+    //     await axios.post(`/api/menu/new-price/${id}`, data, {
+    //       headers: {
+    //         Authorization: `Bearer ${authData.token}`,
+    //       },
+    //     });
 
-        Swal.fire({
-          icon: "success",
-          title: "แก้ไขสำเร็จ",
-          showConfirmButton: false,
-          timer: 1000,
-        });
+    //     Swal.fire({
+    //       icon: "success",
+    //       title: "แก้ไขสำเร็จ",
+    //       showConfirmButton: false,
+    //       timer: 1000,
+    //     });
 
-        navigate("/menus");
-      } catch (error) {
-        console.error("Error Insert data", error);
-        Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
-      } finally {
-        setIsLoading(false);
-      }
-      return;
-    }
+    //     navigate("/menus");
+    //   } catch (error) {
+    //     console.error("Error Insert data", error);
+    //     Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    //   return;
+    // }
 
-    try {
-      setIsLoading(true);
-      await axios.post(`/api/menu/new-price/${id}`, data, {
-        headers: {
-          Authorization: `Bearer ${authData.token}`,
-        },
-      });
+    // try {
+    //   setIsLoading(true);
+    //   await axios.post(`/api/menu/new-price/${id}`, data, {
+    //     headers: {
+    //       Authorization: `Bearer ${authData.token}`,
+    //     },
+    //   });
 
-      Swal.fire({
-        icon: "success",
-        title: "แก้ไขสำเร็จ",
-        showConfirmButton: false,
-        timer: 1000,
-      });
+    //   Swal.fire({
+    //     icon: "success",
+    //     title: "แก้ไขสำเร็จ",
+    //     showConfirmButton: false,
+    //     timer: 1000,
+    //   });
 
-      navigate("/menus");
-    } catch (error) {
-      console.error("Error Insert data", error);
-      Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
-    } finally {
-      setIsLoading(false);
-    }
+    //   navigate("/menus");
+    // } catch (error) {
+    //   console.error("Error Insert data", error);
+    //   Swal.fire("Error", "เกิดข้อผิดพลาดในการบันทึก", "error");
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   const minDate = new Date();
