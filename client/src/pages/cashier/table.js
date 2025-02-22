@@ -710,7 +710,7 @@ function Table() {
                         <span>{menu.menu_name}</span>
                         <span>{menu.price} บาท</span>
                       </div>
-                      <div className="text-sm text-gray-700">
+                      <div className="text-sm text-gray-700 text-start">
                         เสิร์ฟได้: {menu.servings_available} จาน
                       </div>
                     </div>

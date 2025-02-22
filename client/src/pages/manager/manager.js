@@ -528,8 +528,6 @@ const Manager = () => {
         "th-TH",
         {
           day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
         }
       );
       return formattedDate;
@@ -1077,7 +1075,15 @@ const Manager = () => {
                 {/* กราฟแสดงยอดขายรายเดือน */}
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mt-6 md:mt-0">
-                    ยอดขายรายเดือน
+                    ยอดขายรายเดือน{" "}
+                    {formData?.currmonth
+                      ? new Date(formData.currmonth).toLocaleDateString(
+                          "th-TH",
+                          { month: "long",
+                            year: "numeric",
+                           }
+                        )
+                      : currentMonth}
                   </h3>
                   <BarChart data={monthlyData} options={options} />
                 </div>
