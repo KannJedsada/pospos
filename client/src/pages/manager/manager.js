@@ -527,7 +527,7 @@ const Manager = () => {
       const formattedDate = "วันที่ " + new Date(`${date}T00:00:00Z`).toLocaleDateString(
         "th-TH",
         {
-          day: "1-digit",
+          day: "2-digit",
         }
       );
       return formattedDate;
