@@ -389,6 +389,16 @@ const check_menuname = async (req, res) => {
   }
 }
 
+const max_serve = async (req, res) => {
+  try {
+    const serve = await menu.max_serve();
+    res.status(200).json({ data: serve });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 module.exports = {
   get_menucategory,
   get_price,
@@ -417,4 +427,5 @@ module.exports = {
   check_menutype,
   check_category,
   check_menuname,
+  max_serve,
 };

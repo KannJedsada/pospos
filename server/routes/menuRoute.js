@@ -35,6 +35,7 @@ router.get("/check-menucategory/:name", menuController.check_menucategory);
 router.get("/check-menutype/:name", menuController.check_menutype);
 router.get("/check-category/:name", menuController.check_category);
 router.get("/check-menuname/:name", menuController.check_menuname);
+router.get("/max-serve", menuController.max_serve);
 // เพิ่ม
 router.post("/addstatus", menuController.add_status);
 router.post("/addcategory", menuController.add_category);

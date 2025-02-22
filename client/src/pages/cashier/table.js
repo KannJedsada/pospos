@@ -27,10 +27,14 @@ function Table() {
   const [filteredMenus, setFilteredMenus] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [maxServe, setMaxServe] = useState([]);
 
   const fetchMenus = async () => {
     try {
       const res = await axios.get("/api/menu/menu-cus");
+      const resMaxServe = await axios.get("/api/menu/max-serve");
+      console.log(resMaxServe.data.data);
+      setMaxServe(resMaxServe.data.data);
       setMenus(res.data.data);
     } catch (error) {
       console.error(error);

@@ -415,16 +415,76 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
   }
 
   static async check_menuname(name) {
-    const res = await pool.query(
-      `SELECT * FROM menus WHERE menu_name = $1`,
-      [name]
-    );
+    const res = await pool.query(`SELECT * FROM menus WHERE menu_name = $1`, [
+      name,
+    ]);
     return res.rows[0];
   }
 
-  // static async count_menu() {
-  //   const res = await pool.query(`SELECT COUNT(*) FROM menus`);
-  // }
+  static async max_serve() {
+    const res = await pool.query(
+      `WITH menu_ing AS (
+    SELECT
+        m.menu_id,
+        m.menu_name,
+        mi.material_id,
+        mi.quantity_used,
+        mi.unit_id
+    FROM
+        menus m
+        INNER JOIN menu_ingredients mi ON m.menu_id = mi.menu_id
+),
+stock AS (
+    SELECT
+        s.material_id,
+        s.qty
+    FROM
+        stocks s
+),
+unit_conver AS (
+    SELECT
+        *
+    FROM
+        unit_conversions
+),
+mat AS (
+    SELECT
+        *
+    FROM
+        materials
+),
+menu_servings AS (
+    SELECT
+        mi.menu_id,
+        mi.menu_name,
+        FLOOR(
+            COALESCE(
+                CAST(s.qty AS FLOAT) / (
+                    mi.quantity_used * COALESCE(uc.conversion_rate, 1)
+                ),
+                0
+            )
+        ) AS max_servings
+    FROM
+        menu_ing mi
+        INNER JOIN mat m ON mi.material_id = m.id
+        INNER JOIN stock s ON m.id = s.material_id
+        LEFT JOIN unit_conver uc ON mi.unit_id = uc.from_unit_id
+        AND m.unit = uc.to_unit_id
+)
+SELECT
+    menu_id,
+    menu_name,
+    MIN(max_servings) AS servings_available
+FROM
+    menu_servings
+GROUP BY
+    menu_id,
+    menu_name`
+    );
+    return res.rows;
+  }
+
 }
 
 module.exports = Menu;
