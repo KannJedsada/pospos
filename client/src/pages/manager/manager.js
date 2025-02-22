@@ -524,10 +524,10 @@ const Manager = () => {
   // สร้างข้อมูลสำหรับกราฟ
   const monthlyData = {
     labels: allDatesInMonth.map((date) => {
-      const formattedDate = "วันที่" + new Date(`${date}T00:00:00Z`).toLocaleDateString(
+      const formattedDate = "วันที่ " + new Date(`${date}T00:00:00Z`).toLocaleDateString(
         "th-TH",
         {
-          day: "2-digit",
+          day: "1-digit",
         }
       );
       return formattedDate;
