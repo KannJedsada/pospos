@@ -33,7 +33,7 @@ function Table() {
     try {
       const res = await axios.get("/api/menu/menu-cus");
       const resMaxServe = await axios.get("/api/menu/max-serve");
-      console.log(resMaxServe.data.data);
+      // console.log(resMaxServe.data.data);
       setMaxServe(resMaxServe.data.data);
       setMenus(res.data.data);
     } catch (error) {
@@ -358,6 +358,20 @@ function Table() {
   const total_price = groupedOrders.reduce((sum, order) => {
     return sum + order.price;
   }, 0);
+
+  const updatedMenus = filteredMenus.map((menu) => {
+    // ค้นหาข้อมูล servings_available ที่ตรงกับ menu_id
+    const matchingMenu = maxServe.find(
+      (item) => item.menu_id === menu.menu_id
+    );
+
+    return {
+      ...menu,
+      servings_available: matchingMenu ? matchingMenu.servings_available : 0,
+    };
+  });
+
+  console.log(updatedMenus);
 
   useEffect(() => {
     const fetchAllData = async () => {
