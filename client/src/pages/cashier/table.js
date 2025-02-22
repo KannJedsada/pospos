@@ -361,9 +361,7 @@ function Table() {
 
   const updatedMenus = filteredMenus.map((menu) => {
     // ค้นหาข้อมูล servings_available ที่ตรงกับ menu_id
-    const matchingMenu = maxServe.find(
-      (item) => item.menu_id === menu.menu_id
-    );
+    const matchingMenu = maxServe.find((item) => item.menu_id === menu.menu_id);
 
     return {
       ...menu,
@@ -656,7 +654,7 @@ function Table() {
                 </h3>
               </div>
 
-              {filteredMenus.length > 0 ? (
+              {/* {filteredMenus.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4">
                   {filteredMenus.map((menu) => (
                     <div
@@ -680,6 +678,40 @@ function Table() {
                       <div className="flex justify-between w-full">
                         <span>{menu.menu_name}</span>
                         <span>{menu.price} บาท</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">ไม่มีเมนูในหมวดหมู่นี้</p>
+              )} */}
+              {updatedMenus.length > 0 ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {updatedMenus.map((menu) => (
+                    <div
+                      key={menu.menu_id}
+                      className={`flex flex-col items-center mb-4 p-2 rounded shadow cursor-pointer w-full ${
+                        menu.menu_status === 1
+                          ? "bg-white hover:bg-gray-200"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                      onClick={() => {
+                        if (menu.menu_status === 1) {
+                          handleAddToCart(tableId, menu);
+                        }
+                      }}
+                    >
+                      <img
+                        src={`${menu.menu_img}`}
+                        alt={menu.menu_name || "Menu image"}
+                        className="w-40 h-40 object-cover"
+                      />
+                      <div className="flex justify-between w-full">
+                        <span>{menu.menu_name}</span>
+                        <span>{menu.price} บาท</span>
+                      </div>
+                      <div className="text-sm text-gray-700">
+                        เสิร์ฟได้: {menu.servings_available} จาน
                       </div>
                     </div>
                   ))}
