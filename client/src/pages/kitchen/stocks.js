@@ -30,7 +30,6 @@ function Stocks() {
       }
       // console.log(res.data.data);
       setStocks(res.data.data);
-      console.log(res.data.data);
       setFilteredStocks(res.data.data);
     } catch (error) {
       console.error("Error fetching stocks:", error);

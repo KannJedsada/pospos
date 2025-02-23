@@ -685,7 +685,7 @@ function Table() {
               ) : (
                 <p className="text-gray-500">ไม่มีเมนูในหมวดหมู่นี้</p>
               )} */}
-              {updatedMenus.length > 0 ? (
+              {/* {updatedMenus.length > 0 ? (
                 <div className="grid grid-cols-2 gap-4">
                   {updatedMenus.map((menu) => (
                     <div
@@ -696,7 +696,7 @@ function Table() {
                           : "bg-gray-300 cursor-not-allowed"
                       }`}
                       onClick={() => {
-                        if (menu.menu_status === 1) {
+                        if (menu.menu_status === 1 && menu.servings_available > groupedCarts.qty) { 
                           handleAddToCart(tableId, menu);
                         }
                       }}
@@ -715,6 +715,54 @@ function Table() {
                       </div>
                     </div>
                   ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">ไม่มีเมนูในหมวดหมู่นี้</p>
+              )} */}
+              {updatedMenus.length > 0 ? (
+                <div className="grid grid-cols-2 gap-4">
+                  {updatedMenus.map((menu) => {
+                    // Find the corresponding cart item for this menu
+                    const cartItem = groupedCarts.find(
+                      (cart) => cart.menu_id === menu.menu_id
+                    );
+                    const cartQuantity = cartItem ? cartItem.qty : 0;
+
+                    return (
+                      <div
+                        key={menu.menu_id}
+                        className={`flex flex-col items-center mb-4 p-2 rounded shadow cursor-pointer w-full ${
+                          menu.menu_status === 1 &&
+                          menu.servings_available > cartQuantity
+                            ? "bg-white hover:bg-gray-200"
+                            : "bg-gray-300 cursor-not-allowed"
+                        }`}
+                        onClick={() => {
+                          if (menu.menu_status === 1) {
+                            if (menu.servings_available <= cartQuantity) {
+                              // Show alert if quantity in cart exceeds available servings
+                              alert("ไม่สามารถสั่งได้มากกว่าจำนวนที่มีในสต็อก");
+                            } else {
+                              handleAddToCart(tableId, menu);
+                            }
+                          }
+                        }}
+                      >
+                        <img
+                          src={`${menu.menu_img}`}
+                          alt={menu.menu_name || "Menu image"}
+                          className="w-40 h-40 object-cover"
+                        />
+                        <div className="flex justify-between w-full">
+                          <span>{menu.menu_name}</span>
+                          <span>{menu.price} บาท</span>
+                        </div>
+                        <div className="text-sm text-gray-700 text-start">
+                          เสิร์ฟได้: {menu.servings_available} จาน
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-gray-500">ไม่มีเมนูในหมวดหมู่นี้</p>
