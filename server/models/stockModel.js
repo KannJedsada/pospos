@@ -36,25 +36,49 @@ class Stocks {
     return res.rows[0];
   }
 
+  // static async get_stocks() {
+  //   const res = await pool.query(
+  //     `SELECT s.*, m.m_name, u.u_name, c.category_name, mp.price
+  //      FROM stocks AS s
+  //      INNER JOIN materials AS m ON s.material_id = m.id
+  //      INNER JOIN units AS u ON u.id = m.unit
+  //      INNER JOIN categories AS c ON c.id = s.category_id
+  //      LEFT JOIN (
+  //        SELECT mp.material_id, mp.price
+  //        FROM material_prices AS mp
+  //        INNER JOIN (
+  //          SELECT material_id, MAX(effective_date) AS latest_price_date
+  //          FROM material_prices
+  //          GROUP BY material_id
+  //        ) AS latest_prices 
+  //        ON mp.material_id = latest_prices.material_id 
+  //        AND mp.effective_date = latest_prices.latest_price_date
+  //      ) AS mp ON mp.material_id = s.material_id`
+  //   );
+  //   return res.rows;
+  // }
+
   static async get_stocks() {
-    const res = await pool.query(
-      `SELECT s.*, m.m_name, u.u_name, c.category_name, mp.price
-       FROM stocks AS s
-       INNER JOIN materials AS m ON s.material_id = m.id
-       INNER JOIN units AS u ON u.id = m.unit
-       INNER JOIN categories AS c ON c.id = s.category_id
-       LEFT JOIN (
-         SELECT mp.material_id, mp.price
-         FROM material_prices AS mp
-         INNER JOIN (
-           SELECT material_id, MAX(effective_date) AS latest_price_date
-           FROM material_prices
-           GROUP BY material_id
-         ) AS latest_prices 
-         ON mp.material_id = latest_prices.material_id 
-         AND mp.effective_date = latest_prices.latest_price_date
-       ) AS mp ON mp.material_id = s.material_id`
-    );
+    const res = await pool.query(`
+      SELECT
+	s.material_id,
+	m.m_name,
+	u.u_name,
+	c.category_name,
+	ROUND((SUM(mp.price) / COUNT(*)), 2) AS average_price
+FROM
+	stocks AS s
+	INNER JOIN materials AS m ON s.material_id = m.id
+	INNER JOIN units AS u ON u.id = m.unit
+	INNER JOIN categories AS c ON c.id = s.category_id
+	INNER JOIN material_prices mp ON m.id = mp.material_id
+GROUP BY
+	s.material_id,
+	m.m_name,
+	u.u_name,
+	c.category_name
+ORDER BY
+	s.material_id`);
     return res.rows;
   }
 
@@ -126,7 +150,6 @@ FROM materials;`);
       );
 
       if (check_composition.rows[0].is_composite === true) {
-
         const composite = await pool.query(
           `SELECT * FROM material_composition WHERE composite_material_id = $1`,
           [material_id]
@@ -136,8 +159,15 @@ FROM materials;`);
         let rollbackList = [];
 
         for (let comp of composite.rows) {
-          const { material_id: comp_mat_id, quantity_used: comp_qty, unit_id } = comp;
-          const unitResult = await pool.query('SELECT unit FROM materials WHERE id = $1', [comp_mat_id]);
+          const {
+            material_id: comp_mat_id,
+            quantity_used: comp_qty,
+            unit_id,
+          } = comp;
+          const unitResult = await pool.query(
+            "SELECT unit FROM materials WHERE id = $1",
+            [comp_mat_id]
+          );
           const unit = unitResult.rows[0]?.unit;
 
           const converUnitRes = await pool.query(
@@ -146,14 +176,19 @@ FROM materials;`);
           );
 
           const converUnit = converUnitRes.rows[0]?.conversion_rate;
-          let qty_comp = converUnit ? comp_qty * qty * converUnit : comp_qty * qty;
+          let qty_comp = converUnit
+            ? comp_qty * qty * converUnit
+            : comp_qty * qty;
 
           const stockRes = await pool.query(
             `SELECT qty FROM stocks WHERE material_id = $1`,
             [comp_mat_id]
           );
 
-          const compMatName = await pool.query(`SELECT m_name FROM materials WHERE id = $1`, [comp_mat_id]);
+          const compMatName = await pool.query(
+            `SELECT m_name FROM materials WHERE id = $1`,
+            [comp_mat_id]
+          );
 
           const current_qty = stockRes.rows[0]?.qty || 0;
           if (current_qty < qty_comp) {
@@ -161,7 +196,7 @@ FROM materials;`);
               compositeMaterial: check_composition.rows[0]?.m_name,
               componentMaterial: compMatName.rows[0]?.m_name,
               current_qty,
-              required_qty: qty_comp
+              required_qty: qty_comp,
             });
             canProduce = false;
             continue; // หยุดการทำงานของลูป เพราะวัตถุดิบไม่พอ

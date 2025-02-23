@@ -21,7 +21,7 @@ function Stocks() {
 
   const fetchStock = async (cat_id = "") => {
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       let res;
       if (cat_id) {
         res = await axios.get(`/api/stock/stockbycat/${cat_id}`);
@@ -30,6 +30,7 @@ function Stocks() {
       }
       // console.log(res.data.data);
       setStocks(res.data.data);
+      console.log(res.data.data);
       setFilteredStocks(res.data.data);
     } catch (error) {
       console.error("Error fetching stocks:", error);
@@ -217,8 +218,8 @@ function Stocks() {
         {isLoading ? (
           <div className="flex justify-center items-center min-h-screen">
             <div className="spinner border-t-4 border-blue-700 rounded-full w-12 h-12 animate-spin"></div>
-          </div>) : (
-
+          </div>
+        ) : (
           <div className="overflow-y-auto rounded-lg shadow-lg">
             <table className="w-full bg-white">
               <thead>
@@ -240,12 +241,13 @@ function Stocks() {
                   currentStocks.map((stock, index) => (
                     <tr
                       key={stock.material_id}
-                      className={`transition-all duration-300 ${Number(stock.qty) === 0
-                        ? "bg-red-500 text-white hover:bg-red-600"
-                        : Number(stock.qty) - Number(stock.min_qty) <= 2
+                      className={`transition-all duration-300 ${
+                        Number(stock.qty) === 0
+                          ? "bg-red-500 text-white hover:bg-red-600"
+                          : Number(stock.qty) - Number(stock.min_qty) <= 2
                           ? "bg-orange-500 text-white hover:bg-orange-600"
                           : "bg-white hover:bg-blue-50"
-                        }`}
+                      }`}
                     >
                       <td className="px-4 py-3 border-b">
                         {indexOfFirstStock + index + 1}
@@ -272,7 +274,10 @@ function Stocks() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="8" className="px-4 py-4 text-gray-700 text-center">
+                    <td
+                      colSpan="8"
+                      className="px-4 py-4 text-gray-700 text-center"
+                    >
                       ไม่มีข้อมูล
                     </td>
                   </tr>
@@ -304,10 +309,11 @@ function Stocks() {
                   <button
                     key={page.key}
                     onClick={() => paginate(page.value)}
-                    className={`px-4 py-2 rounded-lg ${currentPage === page.value
-                      ? "bg-blue-700 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                      }`}
+                    className={`px-4 py-2 rounded-lg ${
+                      currentPage === page.value
+                        ? "bg-blue-700 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
                     disabled={page.value === "..."}
                   >
                     {page.value}
