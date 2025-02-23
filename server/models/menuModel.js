@@ -281,19 +281,31 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
 
   static async get_cost_menu(menu_id) {
     const menures = await pool.query(
-      `SELECT m.m_name, m.id, m.m_img, m.unit, mp.price, mi.quantity_used, mi.unit_id, menus.menu_name, menus.menu_id
-       FROM materials m
-       INNER JOIN (
-         SELECT material_id, price, effective_date
-         FROM (
-           SELECT *, ROW_NUMBER() OVER (PARTITION BY material_id ORDER BY effective_date DESC) AS rn
-           FROM material_prices
-         ) subquery
-         WHERE rn = 1
-       ) mp ON m.id = mp.material_id
-       INNER JOIN menu_ingredients mi ON m.id = mi.material_id
-       INNER JOIN menus ON menus.menu_id = mi.menu_id
-       WHERE menus.menu_id = $1`,
+      `SELECT 
+    m.m_name, 
+    m.id, 
+    m.m_img, 
+    m.unit, 
+    ROUND(AVG(mp.price), 2) AS average_price,  
+    mi.quantity_used, 
+    mi.unit_id, 
+    menus.menu_name, 
+    menus.menu_id
+FROM materials m
+INNER JOIN material_prices mp ON m.id = mp.material_id
+INNER JOIN menu_ingredients mi ON m.id = mi.material_id
+INNER JOIN menus ON menus.menu_id = mi.menu_id
+WHERE menus.menu_id = $1
+GROUP BY 
+    m.m_name, 
+    m.id, 
+    m.m_img, 
+    m.unit, 
+    mi.quantity_used, 
+    mi.unit_id, 
+    menus.menu_name, 
+    menus.menu_id
+ORDER BY m.id`,
       [menu_id]
     );
 
@@ -310,9 +322,9 @@ GROUP BY m.menu_id, m.menu_type, mp.price, mp.date_start;
 
       if (unit_conversion.rows.length > 0) {
         const converrate = unit_conversion.rows[0].conversion_rate;
-        cost = menu.quantity_used * converrate * parseFloat(menu.price);
+        cost = menu.quantity_used * converrate * parseFloat(menu.average_price);
       } else {
-        cost = menu.quantity_used * parseFloat(menu.price);
+        cost = menu.quantity_used * parseFloat(menu.average_price);
       }
 
       totalcost += cost;
@@ -484,7 +496,6 @@ GROUP BY
     );
     return res.rows;
   }
-
 }
 
 module.exports = Menu;
