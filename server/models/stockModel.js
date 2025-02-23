@@ -50,8 +50,8 @@ class Stocks {
   //          SELECT material_id, MAX(effective_date) AS latest_price_date
   //          FROM material_prices
   //          GROUP BY material_id
-  //        ) AS latest_prices 
-  //        ON mp.material_id = latest_prices.material_id 
+  //        ) AS latest_prices
+  //        ON mp.material_id = latest_prices.material_id
   //        AND mp.effective_date = latest_prices.latest_price_date
   //      ) AS mp ON mp.material_id = s.material_id`
   //   );
@@ -61,46 +61,65 @@ class Stocks {
   static async get_stocks() {
     const res = await pool.query(`
       SELECT
-	s.material_id,
-	m.m_name,
-	u.u_name,
-	c.category_name,
-	ROUND((SUM(mp.price) / COUNT(*)), 2) AS average_price
+	s.id,
+    s.material_id,
+    s.category_id,
+    s.qty,
+    s.min_qty,  
+    m.m_name,
+    u.u_name,
+    c.category_name,
+    ROUND((SUM(mp.price) / COUNT(*)), 2) AS average_price
 FROM
-	stocks AS s
-	INNER JOIN materials AS m ON s.material_id = m.id
-	INNER JOIN units AS u ON u.id = m.unit
-	INNER JOIN categories AS c ON c.id = s.category_id
-	INNER JOIN material_prices mp ON m.id = mp.material_id
+    stocks AS s
+    INNER JOIN materials AS m ON s.material_id = m.id
+    INNER JOIN units AS u ON u.id = m.unit
+    INNER JOIN categories AS c ON c.id = s.category_id
+    INNER JOIN material_prices mp ON m.id = mp.material_id
 GROUP BY
-	s.material_id,
-	m.m_name,
-	u.u_name,
-	c.category_name
+    s.id,
+    s.material_id,
+    s.category_id,
+    s.qty,
+    s.min_qty,  
+    m.m_name,
+    u.u_name,
+    c.category_name
 ORDER BY
-	s.material_id`);
+    s.material_id`);
     return res.rows;
   }
 
   static async get_stockby_cat(id) {
     const res = await pool.query(
-      `SELECT s.*, m.m_name, u.u_name, c.category_name, mp.price
-       FROM stocks AS s
-       INNER JOIN materials AS m ON s.material_id = m.id
-       INNER JOIN units AS u ON u.id = m.unit
-       INNER JOIN categories AS c ON c.id = s.category_id
-       LEFT JOIN (
-         SELECT mp.material_id, mp.price
-         FROM material_prices AS mp
-         INNER JOIN (
-           SELECT material_id, MAX(effective_date) AS latest_price_date
-           FROM material_prices
-           GROUP BY material_id
-         ) AS latest_prices 
-         ON mp.material_id = latest_prices.material_id 
-         AND mp.effective_date = latest_prices.latest_price_date
-       ) AS mp ON mp.material_id = s.material_id
-      WHERE category_id = $1`,
+      `SELECT
+	s.id,
+    s.material_id,
+    s.category_id,
+    s.qty,
+    s.min_qty,  
+    m.m_name,
+    u.u_name,
+    c.category_name,
+    ROUND((SUM(mp.price) / COUNT(*)), 2) AS average_price
+FROM
+    stocks AS s
+    INNER JOIN materials AS m ON s.material_id = m.id
+    INNER JOIN units AS u ON u.id = m.unit
+    INNER JOIN categories AS c ON c.id = s.category_id
+    INNER JOIN material_prices mp ON m.id = mp.material_id
+WHERE s.category_id = $1
+GROUP BY
+    s.id,
+    s.material_id,
+    s.category_id,
+    s.qty,
+    s.min_qty,  
+    m.m_name,
+    u.u_name,
+    c.category_name
+ORDER BY
+    s.material_id;`,
       [id]
     );
     return res.rows;
