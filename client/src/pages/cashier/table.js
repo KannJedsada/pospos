@@ -740,8 +740,14 @@ function Table() {
                         onClick={() => {
                           if (menu.menu_status === 1) {
                             if (menu.servings_available <= cartQuantity) {
-                              // Show alert if quantity in cart exceeds available servings
-                              alert("ไม่สามารถสั่งได้มากกว่าจำนวนที่มีในสต็อก");
+                              // Show SweetAlert if quantity in cart exceeds available servings
+                              Swal.fire({
+                                icon: "warning",
+                                title:
+                                  "ไม่สามารถสั่งได้มากกว่าจำนวนที่มีในสต็อก",
+                                text: `จำนวนที่คุณเลือกในตะกร้า (${cartQuantity}) มากกว่าจำนวนที่มีในสต็อก (${menu.servings_available} จาน)`,
+                                confirmButtonText: "ตกลง",
+                              });
                             } else {
                               handleAddToCart(tableId, menu);
                             }
